@@ -96,21 +96,22 @@ class Game {
     block.reveal();
     this.selectedBlocks.push(block);
 
-    if (this.selectedBlocks.length === 2) {
+    if (this.selectedBlocks.length === 3) {
       this.checkMatch();
     }
   }
 
   checkMatch() {
-    const [block1, block2] = this.selectedBlocks;
+    const [block1, block2, block3] = this.selectedBlocks;
 
-    if (block1.symbol === block2.symbol) {
+    if (block1.symbol === block2.symbol && block2.symbol === block3.symbol) {
       this.isProcessing = true;
       this.score += 10;
       document.getElementById("score-value").textContent = this.score;
       setTimeout(() => {
         block1.remove();
         block2.remove();
+        block3.remove();
         this.selectedBlocks = [];
         this.isProcessing = false;
       }, 500);
@@ -119,6 +120,7 @@ class Game {
       setTimeout(() => {
         block1.hide();
         block2.hide();
+        block3.hide();
         this.selectedBlocks = [];
         this.isProcessing = false;
       }, 500);

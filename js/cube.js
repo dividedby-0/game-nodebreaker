@@ -9,21 +9,18 @@ class Cube {
 
   generateSymbols() {
     // Generate 13 pairs of colors (26 total) plus 1 unique color
+    // Generate 9 triplets of colors (27 total for 3x3x3 cube)
     const colors = [
       0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff, 0xff8000,
-      0x8000ff, 0x00ff80, 0xff0080, 0x0080ff, 0x80ff00, 0x808080,
+      0x8000ff, 0x00ff80,
     ];
 
-    // Create array with exactly 27 elements (13 pairs + 1 unique repeated 1 more time)
-    const pairs = [
-      ...colors.slice(0, -1), // First 12 colors
-      ...colors.slice(0, -1), // Repeat first 12 colors
-      colors[colors.length - 1], // Add unique color
-      colors[colors.length - 1], // Repeat unique color
-      colors[0], // Add one more color to reach 27
-    ].sort(() => Math.random() - 0.5);
+    // Triple each color and shuffle
+    const triplets = [...colors, ...colors, ...colors].sort(
+      () => Math.random() - 0.5
+    );
 
-    return pairs;
+    return triplets;
   }
 
   initializeBlocks() {
