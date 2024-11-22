@@ -4,6 +4,7 @@ class Block {
     this.symbol = symbol;
     this.isRevealed = false;
     this.mesh = this.createMesh();
+    this.currentColor = 0x808080;
   }
 
   createMesh() {
@@ -16,7 +17,7 @@ class Block {
       .map(
         () =>
           new THREE.MeshBasicMaterial({
-            color: 0xffffff,
+            color: 0xd3d3d3,
             wireframe: false,
           })
       );
@@ -42,7 +43,48 @@ class Block {
 
   hide() {
     this.isRevealed = false;
-    this.updateAppearance();
+    // this.updateAppearance();
+    this.fadeOut();
+  }
+
+  fadeOut() {
+    const targetColor = 0xebebeb;
+    const startColor = this.symbol;
+    const duration = 500;
+    const startTime = Date.now();
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      const currentR = this.lerp(
+        (startColor >> 16) & 255,
+        (targetColor >> 16) & 255,
+        progress
+      );
+      const currentG = this.lerp(
+        (startColor >> 8) & 255,
+        (targetColor >> 8) & 255,
+        progress
+      );
+      const currentB = this.lerp(startColor & 255, targetColor & 255, progress);
+
+      const color = (currentR << 16) | (currentG << 8) | currentB;
+
+      this.mesh.material.forEach((material) => {
+        material.color.setHex(color);
+      });
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    animate();
+  }
+
+  lerp(start, end, progress) {
+    return Math.round(start + (end - start) * progress);
   }
 
   updateAppearance() {

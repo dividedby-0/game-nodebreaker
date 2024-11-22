@@ -16,7 +16,7 @@ class Game {
 
   setupScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xffeded);
+    this.scene.background = new THREE.Color(0xf4f4f4);
   }
 
   setupCamera() {
