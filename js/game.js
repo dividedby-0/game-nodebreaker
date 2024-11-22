@@ -6,6 +6,7 @@ class Game {
     this.setupScene();
     this.setupCamera();
     this.setupRenderer();
+    this.setupControls();
     this.setupCube();
     this.setupRaycaster();
     this.setupEventListeners();
@@ -24,8 +25,21 @@ class Game {
       0.1,
       1000
     );
-    this.camera.position.set(4, 4, 4);
+    this.camera.position.set(7, 7, 7); // initial view
     this.camera.lookAt(0, 0, 0);
+  }
+
+  setupControls() {
+    this.controls = new THREE.OrbitControls(
+      this.camera,
+      this.renderer.domElement
+    );
+    this.controls.enableDamping = true; // smooth rotation
+    this.controls.dampingFactor = 0.05;
+    this.controls.rotateSpeed = 0.5; // slower rotation
+    this.controls.enablePan = false; // Disable panning
+    this.controls.minDistance = 5; // Min zoom
+    this.controls.maxDistance = 15; // Max zoom
   }
 
   setupRenderer() {
@@ -60,6 +74,9 @@ class Game {
   }
 
   onMouseClick(event) {
+    // Ignore the click if it was part of a drag (for rotation)
+    if (this.controls.isDragging) return;
+
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     this.raycaster.setFromCamera(this.mouse, this.camera);
@@ -102,6 +119,7 @@ class Game {
 
   animate() {
     requestAnimationFrame(() => this.animate());
+    this.controls.update(); // Update controls in animation loop
     this.renderer.render(this.scene, this.camera);
   }
 }
