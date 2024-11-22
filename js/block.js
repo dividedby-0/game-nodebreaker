@@ -16,7 +16,7 @@ class Block {
       .map(
         () =>
           new THREE.MeshBasicMaterial({
-            color: 0xffffff, // White color instead of gray
+            color: 0xffffff,
             wireframe: false,
           })
       );

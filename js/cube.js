@@ -14,11 +14,13 @@ class Cube {
       0x8000ff, 0x00ff80, 0xff0080, 0x0080ff, 0x80ff00, 0x808080,
     ];
 
-    // Double each color (except the last one) and shuffle
+    // Create array with exactly 27 elements (13 pairs + 1 unique repeated 1 more time)
     const pairs = [
-      ...colors.slice(0, -1),
-      ...colors.slice(0, -1),
-      colors[colors.length - 1],
+      ...colors.slice(0, -1), // First 12 colors
+      ...colors.slice(0, -1), // Repeat first 12 colors
+      colors[colors.length - 1], // Add unique color
+      colors[colors.length - 1], // Repeat unique color
+      colors[0], // Add one more color to reach 27
     ].sort(() => Math.random() - 0.5);
 
     return pairs;

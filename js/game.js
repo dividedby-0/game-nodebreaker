@@ -26,7 +26,7 @@ class Game {
       0.1,
       1000
     );
-    this.camera.position.set(7, 7, 7); // initial view
+    this.camera.position.set(1, 1, 1); // initial view
     this.camera.lookAt(0, 0, 0);
   }
 
