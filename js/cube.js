@@ -2,7 +2,7 @@ class Cube {
   constructor() {
     this.blocks = [];
     this.size = 3; // 3x3x3 cube
-    this.spacing = 1.2; // Space between blocks
+    this.spacing = 1.01; // Space between blocks
     this.symbols = this.generateSymbols();
     this.initializeBlocks();
   }

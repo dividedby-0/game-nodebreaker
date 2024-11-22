@@ -11,6 +11,7 @@ class Game {
     this.setupRaycaster();
     this.setupEventListeners();
     this.animate();
+    this.isProcessing = false;
   }
 
   setupScene() {
@@ -38,8 +39,8 @@ class Game {
     this.controls.dampingFactor = 0.05;
     this.controls.rotateSpeed = 0.5; // slower rotation
     this.controls.enablePan = false; // Disable panning
-    this.controls.minDistance = 5; // Min zoom
-    this.controls.maxDistance = 15; // Max zoom
+    this.controls.minDistance = 7; // Min zoom
+    this.controls.maxDistance = 10; // Max zoom
   }
 
   setupRenderer() {
@@ -74,10 +75,7 @@ class Game {
   }
 
   onMouseClick(event) {
-    console.log(event);
-
-    // Ignore the click if it was part of a drag (for rotation)
-    if (this.controls.isDragging) return;
+    if (this.isProcessing) return;
 
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -107,16 +105,22 @@ class Game {
     const [block1, block2] = this.selectedBlocks;
 
     if (block1.symbol === block2.symbol) {
+      this.isProcessing = true;
       this.score += 10;
       document.getElementById("score-value").textContent = this.score;
-      block1.remove();
-      block2.remove();
-      this.selectedBlocks = [];
+      setTimeout(() => {
+        block1.remove();
+        block2.remove();
+        this.selectedBlocks = [];
+        this.isProcessing = false;
+      }, 500);
     } else {
+      this.isProcessing = true;
       setTimeout(() => {
         block1.hide();
         block2.hide();
         this.selectedBlocks = [];
+        this.isProcessing = false;
       }, 500);
     }
   }

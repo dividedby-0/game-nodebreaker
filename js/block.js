@@ -53,7 +53,6 @@ class Block {
   }
 
   remove() {
-    // Start removal animation
     this.animateRemoval();
   }
 
