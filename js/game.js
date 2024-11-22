@@ -15,7 +15,7 @@ class Game {
 
   setupScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x000000);
+    this.scene.background = new THREE.Color(0xffeded);
   }
 
   setupCamera() {
@@ -74,6 +74,8 @@ class Game {
   }
 
   onMouseClick(event) {
+    console.log(event);
+
     // Ignore the click if it was part of a drag (for rotation)
     if (this.controls.isDragging) return;
 
@@ -107,13 +109,15 @@ class Game {
     if (block1.symbol === block2.symbol) {
       this.score += 10;
       document.getElementById("score-value").textContent = this.score;
+      block1.remove();
+      block2.remove();
       this.selectedBlocks = [];
     } else {
       setTimeout(() => {
         block1.hide();
         block2.hide();
         this.selectedBlocks = [];
-      }, 1000);
+      }, 500);
     }
   }
 
