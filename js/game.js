@@ -68,6 +68,7 @@ class Game {
     );
   }
 
+  // Pointer actions
   onPointerDown(event) {
     this.isPointerDown = true;
     this.pointerMoved = false;
@@ -85,6 +86,13 @@ class Game {
     }
     this.isPointerDown = false;
     this.pointerMoved = false;
+  }
+
+  // Initial setup
+  isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
   }
 
   setupScene() {
@@ -117,19 +125,13 @@ class Game {
 
     // Mobile-specific control adjustments
     if (this.isMobileDevice()) {
-      this.controls.rotateSpeed = 0.8; // Even faster on mobile
-      this.controls.enableZoom = true; // Enable pinch-to-zoom
+      this.controls.rotateSpeed = 0.8;
+      this.controls.enableZoom = true; // pinch-to-zoom
       this.controls.touches = {
         ONE: THREE.TOUCH.ROTATE,
         TWO: THREE.TOUCH.DOLLY_PAN,
       };
     }
-  }
-
-  isMobileDevice() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
   }
 
   setupRenderer() {
@@ -153,25 +155,6 @@ class Game {
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
-
-  // onMouseClick(event) {
-  //   if (this.controls.isDragging) return;
-  //   if (this.isProcessing) return;
-
-  //   this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  //   this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  //   this.raycaster.setFromCamera(this.mouse, this.camera);
-  //   const intersects = this.raycaster.intersectObjects(this.scene.children);
-
-  //   if (intersects.length > 0) {
-  //     const clickedBlock = this.cube.blocks.find(
-  //       (block) => block.mesh === intersects[0].object
-  //     );
-  //     if (clickedBlock && !clickedBlock.isRevealed) {
-  //       this.handleBlockClick(clickedBlock);
-  //     }
-  //   }
-  // }
 
   handleClick(event) {
     if (this.isProcessing) return;
@@ -200,6 +183,7 @@ class Game {
     }
   }
 
+  // Touch events handling for mobile
   handleTouchStart(event) {
     this.touchStartTime = Date.now();
     this.touchStartPosition = {
@@ -220,19 +204,7 @@ class Game {
     }
   }
 
-  handleTouchEnd(event) {
-    const touchDuration = Date.now() - this.touchStartTime;
-
-    // Only trigger block selection if it was a quick tap and not a drag
-    if (touchDuration < 200 && !this.isDragging) {
-      const touch = event.changedTouches[0];
-      // const simulatedClick = new MouseEvent("click", {
-      //   clientX: touch.clientX,
-      //   clientY: touch.clientY,
-      // });
-      // this.onMouseClick(simulatedClick);
-    }
-
+  handleTouchEnd() {
     // Reset touch tracking
     this.touchStartPosition = null;
     this.isDragging = false;

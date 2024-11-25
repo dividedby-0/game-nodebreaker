@@ -43,7 +43,6 @@ class Block {
 
   hide() {
     this.isRevealed = false;
-    // this.updateAppearance();
     this.fadeOut();
   }
 
