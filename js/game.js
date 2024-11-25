@@ -174,6 +174,8 @@ class Game {
   // }
 
   handleClick(event) {
+    if (this.isProcessing) return;
+
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     this.raycaster.setFromCamera(this.mouse, this.camera);
