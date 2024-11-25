@@ -2,7 +2,8 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: #ffeded;
+  background-color: #000;
+  touch-action: none; /* Prevents default touch behaviors */
 }
 
 #game-container {
@@ -14,12 +15,26 @@ body {
   position: absolute;
   top: 20px;
   left: 20px;
-  color: black;
+  color: white;
   font-family: Arial, sans-serif;
-  font-size: 2em;
+  font-size: clamp(1rem, 4vw, 1.2rem); /* Responsive font size */
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 10px;
+  backdrop-filter: blur(5px);
 }
 
 #score,
 #timer {
   margin: 10px;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  #ui-container {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    text-align: center;
+  }
 }

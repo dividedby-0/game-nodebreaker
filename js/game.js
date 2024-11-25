@@ -14,6 +14,79 @@ class Game {
     this.isProcessing = false;
   }
 
+  setupEventListeners() {
+    this.isDragging = false;
+    this.dragStartTime = 0;
+    this.dragStartPosition = { x: 0, y: 0 };
+
+    // Window resize
+    window.addEventListener("resize", () => this.onWindowResize(), false);
+
+    // Mouse events
+    this.renderer.domElement.addEventListener(
+      "pointerdown",
+      (event) => this.onPointerDown(event),
+      false
+    );
+    this.renderer.domElement.addEventListener(
+      "pointerup",
+      (event) => this.onPointerUp(event),
+      false
+    );
+    this.renderer.domElement.addEventListener(
+      "pointermove",
+      (event) => this.onPointerMove(event),
+      false
+    );
+
+    // Touch events
+    this.renderer.domElement.addEventListener(
+      "touchstart",
+      (event) => {
+        event.preventDefault();
+        this.handleTouchStart(event);
+      },
+      false
+    );
+
+    this.renderer.domElement.addEventListener(
+      "touchend",
+      (event) => {
+        event.preventDefault();
+        this.handleTouchEnd(event);
+      },
+      false
+    );
+
+    this.renderer.domElement.addEventListener(
+      "touchmove",
+      (event) => {
+        event.preventDefault();
+        this.handleTouchMove(event);
+      },
+      false
+    );
+  }
+
+  onPointerDown(event) {
+    this.isPointerDown = true;
+    this.pointerMoved = false;
+  }
+
+  onPointerMove(event) {
+    if (this.isPointerDown) {
+      this.pointerMoved = true;
+    }
+  }
+
+  onPointerUp(event) {
+    if (!this.pointerMoved) {
+      this.handleClick(event);
+    }
+    this.isPointerDown = false;
+    this.pointerMoved = false;
+  }
+
   setupScene() {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xf4f4f4);
@@ -26,7 +99,7 @@ class Game {
       0.1,
       1000
     );
-    this.camera.position.set(1, 1, 1); // initial view
+    this.camera.position.set(4, 4, 4); // initial view
     this.camera.lookAt(0, 0, 0);
   }
 
@@ -35,12 +108,28 @@ class Game {
       this.camera,
       this.renderer.domElement
     );
-    this.controls.enableDamping = true; // smooth rotation
+    this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
-    this.controls.rotateSpeed = 0.5; // slower rotation
-    this.controls.enablePan = false; // Disable panning
-    this.controls.minDistance = 7; // Min zoom
-    this.controls.maxDistance = 10; // Max zoom
+    this.controls.rotateSpeed = 0.6;
+    this.controls.enablePan = false;
+    this.controls.minDistance = 5;
+    this.controls.maxDistance = 15;
+
+    // Mobile-specific control adjustments
+    if (this.isMobileDevice()) {
+      this.controls.rotateSpeed = 0.8; // Even faster on mobile
+      this.controls.enableZoom = true; // Enable pinch-to-zoom
+      this.controls.touches = {
+        ONE: THREE.TOUCH.ROTATE,
+        TWO: THREE.TOUCH.DOLLY_PAN,
+      };
+    }
+  }
+
+  isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
   }
 
   setupRenderer() {
@@ -59,24 +148,32 @@ class Game {
     this.mouse = new THREE.Vector2();
   }
 
-  setupEventListeners() {
-    window.addEventListener("resize", () => this.onWindowResize(), false);
-    this.renderer.domElement.addEventListener(
-      "click",
-      (event) => this.onMouseClick(event),
-      false
-    );
-  }
-
   onWindowResize() {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  onMouseClick(event) {
-    if (this.isProcessing) return;
+  // onMouseClick(event) {
+  //   if (this.controls.isDragging) return;
+  //   if (this.isProcessing) return;
 
+  //   this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  //   this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  //   this.raycaster.setFromCamera(this.mouse, this.camera);
+  //   const intersects = this.raycaster.intersectObjects(this.scene.children);
+
+  //   if (intersects.length > 0) {
+  //     const clickedBlock = this.cube.blocks.find(
+  //       (block) => block.mesh === intersects[0].object
+  //     );
+  //     if (clickedBlock && !clickedBlock.isRevealed) {
+  //       this.handleBlockClick(clickedBlock);
+  //     }
+  //   }
+  // }
+
+  handleClick(event) {
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     this.raycaster.setFromCamera(this.mouse, this.camera);
@@ -99,6 +196,44 @@ class Game {
     if (this.selectedBlocks.length === 3) {
       this.checkMatch();
     }
+  }
+
+  handleTouchStart(event) {
+    this.touchStartTime = Date.now();
+    this.touchStartPosition = {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
+  }
+
+  handleTouchMove(event) {
+    if (!this.touchStartPosition) return;
+
+    const deltaX = event.touches[0].clientX - this.touchStartPosition.x;
+    const deltaY = event.touches[0].clientY - this.touchStartPosition.y;
+
+    // If movement is significant, mark as dragging
+    if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+      this.isDragging = true;
+    }
+  }
+
+  handleTouchEnd(event) {
+    const touchDuration = Date.now() - this.touchStartTime;
+
+    // Only trigger block selection if it was a quick tap and not a drag
+    if (touchDuration < 200 && !this.isDragging) {
+      const touch = event.changedTouches[0];
+      // const simulatedClick = new MouseEvent("click", {
+      //   clientX: touch.clientX,
+      //   clientY: touch.clientY,
+      // });
+      // this.onMouseClick(simulatedClick);
+    }
+
+    // Reset touch tracking
+    this.touchStartPosition = null;
+    this.isDragging = false;
   }
 
   checkMatch() {
