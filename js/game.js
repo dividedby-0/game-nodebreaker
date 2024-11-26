@@ -12,6 +12,19 @@ class Game {
     this.setupEventListeners();
     this.animate();
     this.isProcessing = false;
+    this.scoreElement = new TerminalText("score", {});
+    this.timerElement = new TerminalText("timer", {});
+  }
+
+  async initializeUI() {
+    await this.scoreElement.typeText(
+      "Score: 0",
+      document.getElementById("score")
+    );
+    await this.timerElement.typeText(
+      "Time: 0",
+      document.getElementById("timer")
+    );
   }
 
   setupEventListeners() {
@@ -216,7 +229,10 @@ class Game {
     if (block1.symbol === block2.symbol && block2.symbol === block3.symbol) {
       this.isProcessing = true;
       this.score += 10;
-      document.getElementById("score-value").textContent = this.score;
+      this.scoreElement.typeText(
+        `Score: ${this.score}`,
+        document.getElementById("score")
+      );
       setTimeout(() => {
         block1.remove();
         block2.remove();
@@ -244,6 +260,7 @@ class Game {
 }
 
 // Start the game when the page loads
-window.addEventListener("load", () => {
-  new Game();
+window.addEventListener("load", async () => {
+  const game = new Game();
+  await game.initializeUI();
 });
