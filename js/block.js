@@ -17,22 +17,46 @@ class Block {
       .map(
         () =>
           new THREE.MeshBasicMaterial({
-            color: 0xd3d3d3,
+            color: 0x000000,
             wireframe: false,
+            transparent: true,
+            opacity: 0.9,
           })
       );
 
     // Create the mesh with geometry and materials
     const mesh = new THREE.Mesh(geometry, materials);
 
-    // Add edges to make the structure visible
+    // Create tube geometry around edges for thicker lines
     const edgesGeometry = new THREE.EdgesGeometry(geometry);
-    const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Black edges
-    const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+    const points = [];
+    const edgePositions = edgesGeometry.attributes.position.array;
+    for (let i = 0; i < edgePositions.length; i += 3) {
+      points.push(
+        new THREE.Vector3(
+          edgePositions[i],
+          edgePositions[i + 1],
+          edgePositions[i + 2]
+        )
+      );
+    }
 
-    mesh.add(edges); // Add edges as a child of the mesh
+    for (let i = 0; i < points.length; i += 2) {
+      const tubeGeometry = new THREE.TubeGeometry(
+        new THREE.CatmullRomCurve3([points[i], points[i + 1]]),
+        1, // path segments
+        0.02, // thickness
+        8, // roundness segments
+        false // closed
+      );
+      const tubeMesh = new THREE.Mesh(
+        tubeGeometry,
+        new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+      );
+      mesh.add(tubeMesh);
+    }
+
     mesh.position.set(this.position.x, this.position.y, this.position.z);
-
     return mesh;
   }
 
@@ -47,7 +71,7 @@ class Block {
   }
 
   fadeOut() {
-    const targetColor = 0xebebeb;
+    const targetColor = 0x000000;
     const startColor = this.symbol;
     const duration = 500;
     const startTime = Date.now();
@@ -87,7 +111,7 @@ class Block {
   }
 
   updateAppearance() {
-    const color = this.isRevealed ? this.symbol : 0xffffff; // White when hidden
+    const color = this.isRevealed ? this.symbol : 0x000000;
     this.mesh.material.forEach((material) => {
       material.color.setHex(color);
     });

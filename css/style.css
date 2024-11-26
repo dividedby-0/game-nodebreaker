@@ -15,18 +15,21 @@ body {
   position: absolute;
   top: 20px;
   left: 20px;
-  color: white;
-  font-family: Arial, sans-serif;
-  font-size: clamp(1rem, 4vw, 1.2rem); /* Responsive font size */
-  background-color: rgba(0, 0, 0, 0.5);
+  /* color: white; */
+  /* border-color: rgba(0, 255, 0, 0.2); */
+  /* border-style: solid; */
+  font-family: "VT323", monospace;
+  font-size: clamp(3rem, 4vw, 3rem);
   padding: 10px;
-  border-radius: 10px;
-  backdrop-filter: blur(5px);
+  /* border-radius: 10px; */
+  opacity: 1;
 }
 
 #score,
 #timer {
-  margin: 10px;
+  /* margin: 2px; */
+  color: #00ff00;
+  letter-spacing: 1px;
 }
 
 /* Mobile-specific styles */
