@@ -12,8 +12,8 @@ class Block {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshBasicMaterial({
       color: 0x000000,
-      transparent: false,
-      opacity: 0.9,
+      transparent: true, // Enable transparency
+      opacity: 1,
     });
 
     const mesh = new THREE.Mesh(geometry, material);

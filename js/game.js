@@ -215,6 +215,44 @@ class Game {
 
     // Show valid moves for next selection
     this.cube.findValidNextMoves(block);
+
+    this.handleSuccessfulConnection();
+  }
+
+  // When you confirm a successful connection, call it like this:
+  handleSuccessfulConnection() {
+    this.selectedBlocks.forEach((block) => {
+      this.removeBlock(block);
+    });
+    this.selectedBlocks = [];
+  }
+
+  removeBlock(block) {
+    const blinkCount = 3;
+    const blinkDuration = 100; // ms per blink
+
+    // Blink animation
+    let currentBlink = 0;
+    const blinkInterval = setInterval(() => {
+      block.mesh.visible = !block.mesh.visible;
+      currentBlink++;
+
+      if (currentBlink >= blinkCount * 2) {
+        // *2 because each blink is two states
+        clearInterval(blinkInterval);
+        block.mesh.visible = true;
+
+        // Final cleanup after blinking
+        this.scene.remove(block.mesh);
+        const index = this.cube.blocks.indexOf(block);
+        if (index > -1) {
+          this.cube.blocks.splice(index, 1);
+        }
+        block.connectedTo = [];
+        block.mesh.geometry.dispose();
+        block.mesh.material.dispose();
+      }
+    }, blinkDuration);
   }
 
   // Touch events handling for mobile
