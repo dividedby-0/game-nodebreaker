@@ -188,21 +188,24 @@ class Game {
   }
 
   handleBlockClick(block) {
-    // Ignore if block is already connected (selected)
-    if (block.isSelected || this.selectedBlocks.includes(block)) {
+    // First check - only proceed if the block is valid for selection
+    if (!block.isValid && this.selectedBlocks.length > 0) {
       return;
     }
 
-    // If this is not the first block, check if it's connected to the last selected block
-    if (this.selectedBlocks.length > 0) {
-      const lastSelectedBlock =
-        this.selectedBlocks[this.selectedBlocks.length - 1];
-      if (!lastSelectedBlock.connectedTo.includes(block)) {
-        return; // Ignore click if not a valid connected block
-      }
+    // Allow first block selection even if not valid (starting block)
+    if (this.selectedBlocks.length === 0) {
+      block.isSelected = true;
+      block.updateAppearance();
+      this.selectedBlocks.push(block);
+
+      // Show valid moves for next selection
+      this.cube.findValidNextMoves(block);
+      this.removeBlock(block);
+      return;
     }
 
-    // Select the block
+    // For subsequent blocks
     block.isSelected = true;
     block.updateAppearance();
     this.selectedBlocks.push(block);
@@ -215,16 +218,7 @@ class Game {
 
     // Show valid moves for next selection
     this.cube.findValidNextMoves(block);
-
-    this.handleSuccessfulConnection();
-  }
-
-  // When you confirm a successful connection, call it like this:
-  handleSuccessfulConnection() {
-    this.selectedBlocks.forEach((block) => {
-      this.removeBlock(block);
-    });
-    this.selectedBlocks = [];
+    this.removeBlock(block);
   }
 
   removeBlock(block) {
