@@ -5,6 +5,65 @@ class Cube {
     this.spacing = 1.5; // Space between blocks
     this.symbols = this.generateSymbols();
     this.initializeBlocks();
+    this.setupBlockConnections();
+  }
+
+  setupBlockConnections() {
+    // Establish connections between adjacent blocks
+    for (let x = 0; x < this.size; x++) {
+      for (let y = 0; y < this.size; y++) {
+        for (let z = 0; z < this.size; z++) {
+          const currentBlock = this.getBlock(x, y, z);
+
+          // Check all 6 possible directions
+          const directions = [
+            { x: x + 1, y, z },
+            { x: x - 1, y, z },
+            { x, y: y + 1, z },
+            { x, y: y - 1, z },
+            { x, y, z: z + 1 },
+            { x, y, z: z - 1 },
+          ];
+
+          directions.forEach((dir) => {
+            if (this.isValidPosition(dir.x, dir.y, dir.z)) {
+              const adjacentBlock = this.getBlock(dir.x, dir.y, dir.z);
+              if (!currentBlock.connectedTo.includes(adjacentBlock)) {
+                currentBlock.connectedTo.push(adjacentBlock);
+              }
+            }
+          });
+        }
+      }
+    }
+  }
+
+  isValidPosition(x, y, z) {
+    return (
+      x >= 0 &&
+      x < this.size &&
+      y >= 0 &&
+      y < this.size &&
+      z >= 0 &&
+      z < this.size
+    );
+  }
+
+  findValidNextMoves(block) {
+    // Reset all blocks' valid state
+    this.blocks.forEach((b) => (b.isValid = false));
+
+    // Mark all connected blocks as valid moves
+    block.connectedTo.forEach((connectedBlock) => {
+      if (!connectedBlock.isRevealed && !connectedBlock.isSelected) {
+        connectedBlock.isValid = true;
+        connectedBlock.updateAppearance();
+      }
+    });
+  }
+
+  getBlock(x, y, z) {
+    return this.blocks[x * this.size * this.size + y * this.size + z];
   }
 
   generateSymbols() {
@@ -37,10 +96,6 @@ class Cube {
         }
       }
     }
-  }
-
-  getBlock(x, y, z) {
-    return this.blocks[x * this.size * this.size + y * this.size + z];
   }
 
   addToScene(scene) {

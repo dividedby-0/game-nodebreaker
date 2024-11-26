@@ -188,12 +188,33 @@ class Game {
   }
 
   handleBlockClick(block) {
-    block.reveal();
+    // Ignore if block is already connected (selected)
+    if (block.isSelected || this.selectedBlocks.includes(block)) {
+      return;
+    }
+
+    // If this is not the first block, check if it's connected to the last selected block
+    if (this.selectedBlocks.length > 0) {
+      const lastSelectedBlock =
+        this.selectedBlocks[this.selectedBlocks.length - 1];
+      if (!lastSelectedBlock.connectedTo.includes(block)) {
+        return; // Ignore click if not a valid connected block
+      }
+    }
+
+    // Select the block
+    block.isSelected = true;
+    block.updateAppearance();
     this.selectedBlocks.push(block);
 
-    if (this.selectedBlocks.length === 3) {
-      this.checkMatch();
-    }
+    // Clear previous valid moves
+    this.cube.blocks.forEach((b) => {
+      b.isValid = false;
+      b.updateAppearance();
+    });
+
+    // Show valid moves for next selection
+    this.cube.findValidNextMoves(block);
   }
 
   // Touch events handling for mobile
@@ -221,35 +242,6 @@ class Game {
     // Reset touch tracking
     this.touchStartPosition = null;
     this.isDragging = false;
-  }
-
-  checkMatch() {
-    const [block1, block2, block3] = this.selectedBlocks;
-
-    if (block1.symbol === block2.symbol && block2.symbol === block3.symbol) {
-      this.isProcessing = true;
-      this.score += 10;
-      this.scoreElement.typeText(
-        `Score: ${this.score}`,
-        document.getElementById("score")
-      );
-      setTimeout(() => {
-        block1.remove();
-        block2.remove();
-        block3.remove();
-        this.selectedBlocks = [];
-        this.isProcessing = false;
-      }, 500);
-    } else {
-      this.isProcessing = true;
-      setTimeout(() => {
-        block1.hide();
-        block2.hide();
-        block3.hide();
-        this.selectedBlocks = [];
-        this.isProcessing = false;
-      }, 500);
-    }
   }
 
   animate() {
