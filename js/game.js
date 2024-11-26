@@ -178,11 +178,16 @@ class Game {
     const intersects = this.raycaster.intersectObjects(this.scene.children);
 
     if (intersects.length > 0) {
-      const clickedBlock = this.cube.blocks.find(
-        (block) => block.mesh === intersects[0].object
+      const raycasterFoundBlock = intersects.find(
+        (intersect) => intersect.face !== null
       );
-      if (clickedBlock && !clickedBlock.isRevealed) {
-        this.handleBlockClick(clickedBlock);
+      if (raycasterFoundBlock) {
+        const clickedBlock = this.cube.blocks.find(
+          (block) => block.mesh === raycasterFoundBlock.object
+        );
+        if (clickedBlock) {
+          this.handleBlockClick(clickedBlock);
+        }
       }
     }
   }
