@@ -11,23 +11,38 @@ class Block {
     // Create a cube geometry
     const geometry = new THREE.BoxGeometry(1, 1, 1);
 
-    // Create materials for all six faces
+    // Create canvas textures for each face of a block
     const materials = Array(6)
       .fill()
-      .map(
-        () =>
-          new THREE.MeshBasicMaterial({
-            color: 0x000000,
-            wireframe: false,
-            transparent: true,
-            opacity: 0.9,
-          })
-      );
+      .map(() => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 128;
+        canvas.height = 128;
+        const context = canvas.getContext("2d");
+
+        // Black background
+        context.fillStyle = "#000000";
+        context.fillRect(0, 0, 128, 128);
+
+        // Add invisible character initially
+        context.fillStyle = "#000000";
+        context.font = "130px VT323";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText(this.symbol, 64, 64);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        return new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          opacity: 0.9,
+        });
+      });
 
     // Create the mesh with geometry and materials
     const mesh = new THREE.Mesh(geometry, materials);
 
-    // Create tube geometry around edges for thicker lines
+    // Create tube geometry around edges for thicker edge lines
     const edgesGeometry = new THREE.EdgesGeometry(geometry);
     const points = [];
     const edgePositions = edgesGeometry.attributes.position.array;
@@ -67,7 +82,8 @@ class Block {
 
   hide() {
     this.isRevealed = false;
-    this.fadeOut();
+    // this.fadeOut();
+    this.updateAppearance();
   }
 
   fadeOut() {
@@ -111,9 +127,22 @@ class Block {
   }
 
   updateAppearance() {
-    const color = this.isRevealed ? this.symbol : 0x000000;
     this.mesh.material.forEach((material) => {
-      material.color.setHex(color);
+      const canvas = material.map.image;
+      const context = canvas.getContext("2d");
+
+      // Clear canvas
+      context.fillStyle = "#000000";
+      context.fillRect(0, 0, 128, 128);
+
+      // Draw character
+      context.fillStyle = this.isRevealed ? "#00ff00" : "#000000";
+      context.font = "130px VT323";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText(this.symbol, 64, 64);
+
+      material.map.needsUpdate = true;
     });
   }
 

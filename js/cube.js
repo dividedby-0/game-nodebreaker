@@ -2,21 +2,16 @@ class Cube {
   constructor() {
     this.blocks = [];
     this.size = 3; // 3x3x3 cube
-    this.spacing = 1.01; // Space between blocks
+    this.spacing = 1.5; // Space between blocks
     this.symbols = this.generateSymbols();
     this.initializeBlocks();
   }
 
   generateSymbols() {
-    // Generate 13 pairs of colors (26 total) plus 1 unique color
-    // Generate 9 triplets of colors (27 total for 3x3x3 cube)
-    const colors = [
-      0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff, 0xff8000,
-      0x8000ff, 0x00ff80,
-    ];
+    const blockChars = ["A", "B", "C", "D", "E", "F", "1", "2", "3"];
 
-    // Triple each color and shuffle
-    const triplets = [...colors, ...colors, ...colors].sort(
+    // Triple each character and shuffle
+    const triplets = [...blockChars, ...blockChars, ...blockChars].sort(
       () => Math.random() - 0.5
     );
 
