@@ -1,8 +1,8 @@
 class Cube {
   constructor() {
     this.blocks = [];
-    this.size = 3; // 3x3x3 cube
-    this.spacing = 1.5; // Space between blocks
+    this.size = 4; // Change from 3 to 4 for 4x4x4 cube
+    this.spacing = 3;
     this.symbols = this.generateSymbols();
     this.initializeBlocks();
     this.setupBlockConnections();
@@ -67,14 +67,33 @@ class Cube {
   }
 
   generateSymbols() {
-    const blockChars = ["A", "B", "C", "D", "E", "F", "1", "2", "3"];
+    const blockChars = [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "O",
+      "P",
+    ];
 
-    // Triple each character and shuffle
-    const triplets = [...blockChars, ...blockChars, ...blockChars].sort(
-      () => Math.random() - 0.5
-    );
+    const quadruplets = [
+      ...blockChars,
+      ...blockChars,
+      ...blockChars,
+      ...blockChars,
+    ].sort(() => Math.random() - 0.5);
 
-    return triplets;
+    return quadruplets;
   }
 
   initializeBlocks() {
@@ -85,11 +104,10 @@ class Cube {
       for (let y = 0; y < this.size; y++) {
         for (let z = 0; z < this.size; z++) {
           const position = {
-            x: (x - 1) * this.spacing,
-            y: (y - 1) * this.spacing,
-            z: (z - 1) * this.spacing,
+            x: (x - (this.size - 1) / 2) * this.spacing,
+            y: (y - (this.size - 1) / 2) * this.spacing,
+            z: (z - (this.size - 1) / 2) * this.spacing,
           };
-
           const block = new Block(position, this.symbols[symbolIndex]);
           this.blocks.push(block);
           symbolIndex++;

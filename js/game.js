@@ -120,8 +120,41 @@ class Game {
       0.1,
       1000
     );
-    this.camera.position.set(4, 4, 4); // initial view
     this.camera.lookAt(0, 0, 0);
+    this.animateInitialCamera();
+  }
+
+  animateInitialCamera() {
+    const startPosition = {
+      x: Math.random() * 5,
+      y: Math.random() * 5,
+      z: Math.random() * 5,
+    };
+    const endPosition = { x: 10, y: 10, z: 10 };
+    const duration = 2000; // Duration in milliseconds
+    const startTime = Date.now();
+
+    const animateCamera = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Use smooth easing
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+      this.camera.position.set(
+        startPosition.x + (endPosition.x - startPosition.x) * easeProgress,
+        startPosition.y + (endPosition.y - startPosition.y) * easeProgress,
+        startPosition.z + (endPosition.z - startPosition.z) * easeProgress
+      );
+
+      if (progress < 1) {
+        requestAnimationFrame(animateCamera);
+      } else {
+        this.controls.enabled = true;
+      }
+    };
+
+    animateCamera();
   }
 
   setupControls() {
@@ -129,6 +162,7 @@ class Game {
       this.camera,
       this.renderer.domElement
     );
+    this.controls.enabled = false;
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
     this.controls.rotateSpeed = 0.6;

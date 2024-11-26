@@ -33,6 +33,11 @@ body {
   color: var(--score-terminal-text-color);
   position: relative;
   display: inline-block;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(8px);
+  /* padding: 10px 20px; */
+  /* border-radius: 5px; */
 }
 
 .score-terminal-caret {
@@ -42,6 +47,8 @@ body {
   position: relative;
   width: 0.6em;
   text-align: center;
+  /* backdrop-filter: blur(1px); */
+  /* -webkit-backdrop-filter: blur(8px); */
 }
 
 /* Timer-specific */
@@ -51,6 +58,11 @@ body {
   color: var(--timer-terminal-text-color);
   position: relative;
   display: inline-block;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(8px);
+  /* padding: 10px 20px; */
+  /* border-radius: 5px; */
 }
 
 .timer-terminal-caret {
@@ -60,6 +72,8 @@ body {
   position: relative;
   width: 0.6em;
   text-align: center;
+  /* backdrop-filter: blur(1px); */
+  /* -webkit-backdrop-filter: blur(8px); */
 }
 
 /* Mobile-specific styles */
