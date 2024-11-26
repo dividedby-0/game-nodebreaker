@@ -193,22 +193,28 @@ class Game {
       return;
     }
 
-    // Allow first block selection even if not valid (starting block)
+    // For the first block (starting block)
     if (this.selectedBlocks.length === 0) {
       block.isSelected = true;
       block.updateAppearance();
       this.selectedBlocks.push(block);
-
+      this.removeBlock(block);
       // Show valid moves for next selection
       this.cube.findValidNextMoves(block);
-      this.removeBlock(block);
       return;
     }
 
     // For subsequent blocks
     block.isSelected = true;
     block.updateAppearance();
+
+    const previousBlock = this.selectedBlocks[this.selectedBlocks.length - 1];
     this.selectedBlocks.push(block);
+
+    // Remove block and draw line after blink animation
+    this.removeBlock(block, () => {
+      this.drawConnectionLine(previousBlock, block);
+    });
 
     // Clear previous valid moves
     this.cube.blocks.forEach((b) => {
@@ -218,12 +224,12 @@ class Game {
 
     // Show valid moves for next selection
     this.cube.findValidNextMoves(block);
-    this.removeBlock(block);
   }
 
-  removeBlock(block) {
+  removeBlock(block, callback) {
     const blinkCount = 3;
     const blinkDuration = 100; // ms per blink
+    const shrinkDuration = 500; // ms for shrinking animation
 
     // Blink animation
     let currentBlink = 0;
@@ -232,21 +238,56 @@ class Game {
       currentBlink++;
 
       if (currentBlink >= blinkCount * 2) {
-        // *2 because each blink is two states
         clearInterval(blinkInterval);
         block.mesh.visible = true;
 
-        // Final cleanup after blinking
-        this.scene.remove(block.mesh);
-        const index = this.cube.blocks.indexOf(block);
-        if (index > -1) {
-          this.cube.blocks.splice(index, 1);
-        }
-        block.connectedTo = [];
-        block.mesh.geometry.dispose();
-        block.mesh.material.dispose();
+        // Execute callback after blinking (draw line)
+        if (callback) callback();
+
+        // Start shrinking animation after blinking
+        const startScale = block.mesh.scale.x;
+        const targetScale = 0.3;
+        const startTime = Date.now();
+
+        const shrinkInterval = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / shrinkDuration, 1);
+
+          // Calculate current scale using linear interpolation
+          const currentScale =
+            startScale + (targetScale - startScale) * progress;
+          block.mesh.scale.set(currentScale, currentScale, currentScale);
+
+          if (progress === 1) {
+            clearInterval(shrinkInterval);
+
+            // Final cleanup after shrinking
+            const index = this.cube.blocks.indexOf(block);
+            if (index > -1) {
+              this.cube.blocks.splice(index, 1);
+            }
+            block.connectedTo = [];
+          }
+        }, 16); // ~60fps
       }
     }, blinkDuration);
+  }
+
+  drawConnectionLine(fromBlock, toBlock) {
+    // Create line geometry from the centers of the blocks
+    const points = [];
+    points.push(fromBlock.mesh.position.clone());
+    points.push(toBlock.mesh.position.clone());
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({
+      color: 0xff0000,
+      linewidth: 5,
+    });
+
+    const line = new THREE.Line(geometry, material);
+    this.scene.add(line);
+    return line;
   }
 
   // Touch events handling for mobile
