@@ -14,6 +14,9 @@ class Game {
     this.isProcessing = false;
     this.scoreElement = new TerminalText("score", {});
     this.timerElement = new TerminalText("timer", {});
+    this.timerStarted = false;
+    this.timerInterval = null;
+    this.timeElapsed = 0;
   }
 
   async initializeUI() {
@@ -22,7 +25,7 @@ class Game {
       document.getElementById("score")
     );
     await this.timerElement.typeText(
-      "Time: 0",
+      "Time: 0s",
       document.getElementById("timer")
     );
   }
@@ -234,6 +237,7 @@ class Game {
 
     // For the first block (starting block)
     if (this.selectedBlocks.length === 0) {
+      this.startTimer();
       block.isSelected = true;
       block.updateAppearance();
       this.selectedBlocks.push(block);
@@ -263,6 +267,26 @@ class Game {
 
     // Show valid moves for next selection
     this.cube.findValidNextMoves(block);
+  }
+
+  startTimer() {
+    if (!this.timerStarted) {
+      this.timerStarted = true;
+      this.startTime = Date.now();
+      this.timerInterval = setInterval(() => {
+        const currentTime = Date.now();
+        const elapsedTime = currentTime - this.startTime;
+        const seconds = Math.floor(elapsedTime / 1000);
+        const milliseconds = Math.floor((elapsedTime % 1000) / 10); // Get 2 digits of milliseconds
+
+        // Format to ensure 2 digits for milliseconds
+        const formattedMilliseconds = milliseconds.toString().padStart(2, "0");
+
+        document.querySelector(
+          ".timer-terminal-text"
+        ).textContent = `Time: ${seconds}.${formattedMilliseconds}s`;
+      }, 10); // Update more frequently to show smooth milliseconds
+    }
   }
 
   removeBlock(block, callback) {
