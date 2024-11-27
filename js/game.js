@@ -34,6 +34,7 @@ class Game {
       "Breakers: 0",
       document.getElementById("breakers")
     );
+    await this.showMessage("go", 400);
   }
 
   setupEventListeners() {
@@ -411,6 +412,38 @@ class Game {
     return line;
   }
 
+  async showMessage(messageText, duration = 2000) {
+    const messageElement = document.getElementById("message");
+    const terminalText = new TerminalText("message", {
+      textColor: "#00ff00",
+      caretColor: "#00ff00",
+    });
+
+    messageElement.addEventListener("click", () => {
+      messageElement.style.opacity = "0";
+      setTimeout(() => {
+        messageElement.innerHTML = "";
+      }, 500);
+    });
+
+    // Show container
+    messageElement.style.opacity = "1";
+
+    // Type the message
+    await terminalText.typeText(messageText, messageElement);
+
+    // Wait for duration
+    await new Promise((resolve) => setTimeout(resolve, duration));
+
+    // Fade out if not already hidden by click
+    if (messageElement.style.opacity !== "0") {
+      messageElement.style.opacity = "0";
+      setTimeout(() => {
+        messageElement.innerHTML = "";
+      }, 500);
+    }
+  }
+
   // Touch events handling for mobile
   handleTouchStart(event) {
     this.touchStartTime = Date.now();
@@ -438,6 +471,7 @@ class Game {
     this.isDragging = false;
   }
 
+  // Three.js scene render cycle
   animate() {
     requestAnimationFrame(() => this.animate());
     this.controls.update(); // Update controls in animation loop

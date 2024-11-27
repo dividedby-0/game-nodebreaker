@@ -24,6 +24,11 @@ body {
 #score,
 #timer {
   letter-spacing: 1px;
+  cursor: default;
+  user-select: none; /* Prevents text selection */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 /* Score-specific */
@@ -36,8 +41,6 @@ body {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(1px);
   -webkit-backdrop-filter: blur(8px);
-  /* padding: 10px 20px; */
-  /* border-radius: 5px; */
 }
 
 .score-terminal-caret {
@@ -47,8 +50,6 @@ body {
   position: relative;
   width: 0.6em;
   text-align: center;
-  /* backdrop-filter: blur(1px); */
-  /* -webkit-backdrop-filter: blur(8px); */
 }
 
 /* Timer-specific */
@@ -61,8 +62,6 @@ body {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(1px);
   -webkit-backdrop-filter: blur(8px);
-  /* padding: 10px 20px; */
-  /* border-radius: 5px; */
 }
 
 .timer-terminal-caret {
@@ -72,8 +71,6 @@ body {
   position: relative;
   width: 0.6em;
   text-align: center;
-  /* backdrop-filter: blur(1px); */
-  /* -webkit-backdrop-filter: blur(8px); */
 }
 
 /* Breakers-specific */
@@ -81,6 +78,11 @@ body {
   position: fixed;
   bottom: 20px;
   right: 20px;
+  cursor: default;
+  user-select: none; /* Prevents text selection */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 .breakers-terminal-text {
@@ -97,6 +99,38 @@ body {
 .breakers-terminal-caret {
   display: inline-block;
   background-color: var(--breakers-terminal-caret-color);
+  color: black;
+  position: relative;
+  width: 0.6em;
+  text-align: center;
+}
+
+#message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  text-align: center;
+  cursor: pointer;
+}
+
+.message-terminal-text {
+  font-family: "VT323", monospace;
+  font-size: clamp(3rem, 4vw, 3rem);
+  color: var(--message-terminal-text-color);
+  position: relative;
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.message-terminal-caret {
+  display: inline-block;
+  background-color: var(--message-terminal-caret-color);
   color: black;
   position: relative;
   width: 0.6em;
