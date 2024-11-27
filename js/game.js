@@ -246,6 +246,13 @@ class Game {
         // block.isBreakable = false;
         // block.isSelected = true;
         block.updateAppearance();
+
+        // Points for breakable block
+        this.score += 10;
+        document.querySelector(
+          ".score-terminal-text"
+        ).textContent = `Score: ${this.score}`;
+
         const previousBlock =
           this.selectedBlocks[this.selectedBlocks.length - 1];
         this.selectedBlocks.push(block);
@@ -270,9 +277,20 @@ class Game {
 
     if (block.isBreaker) {
       this.breakerCount++;
+      // Points for breaker block
+      this.score += 5;
+      document.querySelector(
+        ".score-terminal-text"
+      ).textContent = `Score: ${this.score}`;
       document.querySelector(
         ".breakers-terminal-text"
       ).textContent = `Breakers: ${this.breakerCount}`;
+    } else {
+      // Points for normal block
+      this.score += 5;
+      document.querySelector(
+        ".score-terminal-text"
+      ).textContent = `Score: ${this.score}`;
     }
 
     // For the first block (starting block)
