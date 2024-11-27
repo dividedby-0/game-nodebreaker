@@ -6,6 +6,45 @@ class Cube {
     this.symbols = this.generateSymbols();
     this.initializeBlocks();
     this.setupBlockConnections();
+    this.nonClickableBlockCount = 2;
+    this.breakerBlockCount = 2;
+    this.setRandomNonClickableBlocks();
+    this.setRandomBreakerBlocks();
+  }
+
+  setRandomBreakerBlocks() {
+    // Create array of indices and shuffle it
+    const indices = [...Array(this.blocks.length).keys()].filter(
+      (i) => !this.blocks[i].isBreakable
+    ); // Exclude non-clickable blocks
+
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+
+    // Set the first 2 blocks as special
+    for (let i = 0; i < this.breakerBlockCount; i++) {
+      const blockIndex = indices[i];
+      this.blocks[blockIndex].isBreaker = true;
+      this.blocks[blockIndex].updateAppearance();
+    }
+  }
+
+  setRandomNonClickableBlocks() {
+    // Create array of indices and shuffle it
+    const indices = [...Array(this.blocks.length).keys()];
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+
+    // Set the first n blocks as non-clickable
+    for (let i = 0; i < this.nonClickableBlockCount; i++) {
+      const blockIndex = indices[i];
+      this.blocks[blockIndex].isBreakable = true;
+      this.blocks[blockIndex].updateAppearance();
+    }
   }
 
   setupBlockConnections() {
@@ -53,9 +92,13 @@ class Cube {
     // Reset all blocks' valid state
     this.blocks.forEach((b) => (b.isValid = false));
 
-    // Mark all connected blocks as valid moves
+    // Mark all connected blocks as valid moves, except breakers and non-clickable blocks
     block.connectedTo.forEach((connectedBlock) => {
-      if (!connectedBlock.isRevealed && !connectedBlock.isSelected) {
+      if (
+        !connectedBlock.isRevealed &&
+        !connectedBlock.isSelected &&
+        !connectedBlock.isBreakable
+      ) {
         connectedBlock.isValid = true;
         connectedBlock.updateAppearance();
       }

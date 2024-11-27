@@ -4,6 +4,8 @@ class Block {
     this.isVisited = false;
     this.isSelected = false;
     this.isValid = false; // For highlighting valid next moves
+    this.isBreakable = false;
+    this.isBreaker = false;
     this.connectedTo = []; // Store connected blocks
     this.mesh = this.createMesh();
   }
@@ -34,10 +36,18 @@ class Block {
   }
 
   updateAppearance() {
-    if (this.isSelected) {
-      this.mesh.material.color.setHex(0x00ff00); // Green for selected
+    if (this.isBreakable) {
+      this.mesh.material.color.setHex(0xff0000); // Red for non-clickable
+    } else if (this.isSelected && this.isBreaker) {
+      this.mesh.material.color.setHex(0xffff00); // Yellow for selected breaker blocks
+    } else if (this.isSelected) {
+      this.mesh.material.color.setHex(0x0000ff); // Blue for selected normal blocks
+    } else if (this.isValid && this.isBreaker) {
+      this.mesh.material.color.setHex(0xffff00); // Keep yellow for valid breaker blocks
     } else if (this.isValid) {
       this.mesh.material.color.setHex(0x0000ff); // Blue for valid moves
+    } else if (this.isBreaker) {
+      this.mesh.material.color.setHex(0xffff00); // Default breaker color
     } else {
       this.mesh.material.color.setHex(0x000000); // Default
     }

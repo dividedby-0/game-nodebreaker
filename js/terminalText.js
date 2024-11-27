@@ -86,6 +86,34 @@ class TerminalText {
         }
         break;
 
+      case "breakers":
+        if (this.options.textColor) {
+          document.documentElement.style.setProperty(
+            "--breakers-terminal-text-color",
+            this.options.textColor
+          );
+          const terminalTextElements = document.getElementsByClassName(
+            "breakers-terminal-text"
+          );
+          for (let element of terminalTextElements) {
+            element.style.color = this.options.textColor;
+          }
+        }
+
+        if (this.options.caretColor) {
+          document.documentElement.style.setProperty(
+            "--breakers-terminal-caret-color",
+            this.options.caretColor
+          );
+          const terminalCaretElements = document.getElementsByClassName(
+            "breakers-terminal-caret"
+          );
+          for (let element of terminalCaretElements) {
+            element.style.backgroundColor = options.caretColor;
+          }
+        }
+        break;
+
       default:
         break;
     }
@@ -122,6 +150,11 @@ class TerminalText {
             <span class="timer-terminal-text">${textBeforeCaret}<span class="timer-terminal-caret">${randomChar}</span>
             </span>`;
             break;
+          case "breakers":
+            this.container.innerHTML = `
+            <span class="breakers-terminal-text">${textBeforeCaret}<span class="breakers-terminal-caret">${randomChar}</span>
+            </span>`;
+            break;
 
           default:
             break;
@@ -140,6 +173,10 @@ class TerminalText {
         break;
       case "timer":
         this.caret = document.getElementsByClassName("timer-terminal-caret");
+        this.caret[0].remove();
+        break;
+      case "breakers":
+        this.caret = document.getElementsByClassName("breakers-terminal-caret");
         this.caret[0].remove();
         break;
 

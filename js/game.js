@@ -14,9 +14,11 @@ class Game {
     this.isProcessing = false;
     this.scoreElement = new TerminalText("score", {});
     this.timerElement = new TerminalText("timer", {});
+    this.breakersElement = new TerminalText("breakers", {});
     this.timerStarted = false;
     this.timerInterval = null;
     this.timeElapsed = 0;
+    this.breakerCount = 0;
   }
 
   async initializeUI() {
@@ -27,6 +29,10 @@ class Game {
     await this.timerElement.typeText(
       "Time: 0s",
       document.getElementById("timer")
+    );
+    await this.breakersElement.typeText(
+      "Breakers: 0",
+      document.getElementById("breakers")
     );
   }
 
@@ -230,9 +236,43 @@ class Game {
   }
 
   handleBlockClick(block) {
+    if (block.isBreakable) {
+      if (this.breakerCount > 0) {
+        this.breakerCount--;
+        document.querySelector(
+          ".breakers-terminal-text"
+        ).textContent = `Breakers: ${this.breakerCount}`;
+        block.isValid = true;
+        // block.isBreakable = false;
+        // block.isSelected = true;
+        block.updateAppearance();
+        const previousBlock =
+          this.selectedBlocks[this.selectedBlocks.length - 1];
+        this.selectedBlocks.push(block);
+        this.removeBlock(block, () => {
+          this.drawConnectionLine(previousBlock, block);
+        });
+        this.cube.blocks.forEach((b) => {
+          b.isValid = false;
+          b.updateAppearance();
+        });
+        this.cube.findValidNextMoves(block);
+        return;
+      } else {
+        return; // Exit if no breakers available
+      }
+    }
+
     // First check - only proceed if the block is valid for selection
     if (!block.isValid && this.selectedBlocks.length > 0) {
       return;
+    }
+
+    if (block.isBreaker) {
+      this.breakerCount++;
+      document.querySelector(
+        ".breakers-terminal-text"
+      ).textContent = `Breakers: ${this.breakerCount}`;
     }
 
     // For the first block (starting block)
