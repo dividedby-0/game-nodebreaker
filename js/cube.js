@@ -5,6 +5,16 @@ class Cube {
     this.spacing = 3;
     this.symbols = this.generateSymbols();
     this.initializeBlocks();
+    // Initialize the graph structure using the block connections
+    this.graph = {
+      findValidMoves: (block) => {
+        // Return all connected blocks that haven't been selected
+        return Array.from(block.connections).filter(
+          (connectedBlock) =>
+            !connectedBlock.isSelected && !connectedBlock.isBreakable
+        );
+      },
+    };
     this.setupBlockConnections();
     this.nonClickableBlockCount = 2;
     this.breakerBlockCount = 2;
@@ -48,13 +58,12 @@ class Cube {
   }
 
   setupBlockConnections() {
-    // Establish connections between adjacent blocks
     for (let x = 0; x < this.size; x++) {
       for (let y = 0; y < this.size; y++) {
         for (let z = 0; z < this.size; z++) {
           const currentBlock = this.getBlock(x, y, z);
 
-          // Check all 6 possible directions
+          // Check all 6 adjacent directions
           const directions = [
             { x: x + 1, y, z },
             { x: x - 1, y, z },
@@ -67,9 +76,8 @@ class Cube {
           directions.forEach((dir) => {
             if (this.isValidPosition(dir.x, dir.y, dir.z)) {
               const adjacentBlock = this.getBlock(dir.x, dir.y, dir.z);
-              if (!currentBlock.connectedTo.includes(adjacentBlock)) {
-                currentBlock.connectedTo.push(adjacentBlock);
-              }
+              currentBlock.addConnection(adjacentBlock);
+              adjacentBlock.addConnection(currentBlock); // Bi-directional connection
             }
           });
         }
@@ -89,20 +97,31 @@ class Cube {
   }
 
   findValidNextMoves(block) {
-    // Reset all blocks' valid state
-    this.blocks.forEach((b) => (b.isValid = false));
+    // Get valid moves from the block's connections Set
+    const validMoves = Array.from(block.connections).filter(
+      (connectedBlock) =>
+        !connectedBlock.isSelected && !connectedBlock.isBreakable
+    );
 
-    // Mark all connected blocks as valid moves, except breakers and non-clickable blocks
-    block.connectedTo.forEach((connectedBlock) => {
-      if (
-        !connectedBlock.isRevealed &&
-        !connectedBlock.isSelected &&
-        !connectedBlock.isBreakable
-      ) {
-        connectedBlock.isValid = true;
-        connectedBlock.updateAppearance();
-      }
+    // Reset all blocks' valid state
+    this.blocks.forEach((b) => {
+      b.isValid = false;
+      b.updateAppearance();
     });
+
+    // Mark valid moves
+    validMoves.forEach((validBlock) => {
+      validBlock.isValid = true;
+      validBlock.updateAppearance();
+    });
+  }
+
+  removeBlock(block) {
+    this.graph.removeNode(block);
+    const index = this.blocks.indexOf(block);
+    if (index > -1) {
+      this.blocks.splice(index, 1);
+    }
   }
 
   getBlock(x, y, z) {
@@ -142,7 +161,7 @@ class Cube {
   initializeBlocks() {
     let symbolIndex = 0;
 
-    // Create blocks for each position in the 3x3x3 grid
+    // Create blocks for each position in the 4x4x4 grid
     for (let x = 0; x < this.size; x++) {
       for (let y = 0; y < this.size; y++) {
         for (let z = 0; z < this.size; z++) {

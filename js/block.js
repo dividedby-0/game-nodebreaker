@@ -6,8 +6,20 @@ class Block {
     this.isValid = false; // For highlighting valid next moves
     this.isBreakable = false;
     this.isBreaker = false;
-    this.connectedTo = []; // Store connected blocks
     this.mesh = this.createMesh();
+    this.connections = new Set();
+  }
+
+  addConnection(block) {
+    this.connections.add(block);
+  }
+
+  removeConnection(block) {
+    this.connections.delete(block);
+  }
+
+  clearConnections() {
+    this.connections.clear();
   }
 
   createMesh() {

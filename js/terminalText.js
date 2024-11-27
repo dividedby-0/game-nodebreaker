@@ -202,21 +202,20 @@ class TerminalText {
     switch (element.id) {
       case "score":
         this.caret = document.getElementsByClassName("score-terminal-caret");
-        this.caret[0].remove();
+        if (this.caret[0]) this.caret[0].remove();
         break;
       case "timer":
         this.caret = document.getElementsByClassName("timer-terminal-caret");
-        this.caret[0].remove();
+        if (this.caret[0]) this.caret[0].remove();
         break;
       case "breakers":
         this.caret = document.getElementsByClassName("breakers-terminal-caret");
-        this.caret[0].remove();
+        if (this.caret[0]) this.caret[0].remove();
         break;
       case "message":
         this.caret = document.getElementsByClassName("message-terminal-caret");
-        this.caret[0].remove();
+        if (this.caret[0]) this.caret[0].remove();
         break;
-
       default:
         break;
     }

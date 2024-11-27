@@ -244,12 +244,9 @@ class Game {
           ".breakers-terminal-text"
         ).textContent = `Breakers: ${this.breakerCount}`;
         block.isValid = true;
-        // block.isBreakable = false;
-        // block.isSelected = true;
         block.updateAppearance();
 
-        // Points for breakable block
-        this.score += 10;
+        this.score += 10; // Points for breakable block
         document.querySelector(
           ".score-terminal-text"
         ).textContent = `Score: ${this.score}`;
@@ -257,14 +254,10 @@ class Game {
         const previousBlock =
           this.selectedBlocks[this.selectedBlocks.length - 1];
         this.selectedBlocks.push(block);
+        this.cube.findValidNextMoves(block);
         this.removeBlock(block, () => {
           this.drawConnectionLine(previousBlock, block);
         });
-        this.cube.blocks.forEach((b) => {
-          b.isValid = false;
-          b.updateAppearance();
-        });
-        this.cube.findValidNextMoves(block);
         return;
       } else {
         return; // Exit if no breakers available
@@ -278,8 +271,7 @@ class Game {
 
     if (block.isBreaker) {
       this.breakerCount++;
-      // Points for breaker block
-      this.score += 5;
+      this.score += 5; // Points for breaker block
       document.querySelector(
         ".score-terminal-text"
       ).textContent = `Score: ${this.score}`;
@@ -287,8 +279,7 @@ class Game {
         ".breakers-terminal-text"
       ).textContent = `Breakers: ${this.breakerCount}`;
     } else {
-      // Points for normal block
-      this.score += 5;
+      this.score += 5; // Points for normal block
       document.querySelector(
         ".score-terminal-text"
       ).textContent = `Score: ${this.score}`;
@@ -300,9 +291,8 @@ class Game {
       block.isSelected = true;
       block.updateAppearance();
       this.selectedBlocks.push(block);
-      this.removeBlock(block);
-      // Show valid moves for next selection
       this.cube.findValidNextMoves(block);
+      this.removeBlock(block);
       return;
     }
 
@@ -313,19 +303,13 @@ class Game {
     const previousBlock = this.selectedBlocks[this.selectedBlocks.length - 1];
     this.selectedBlocks.push(block);
 
+    // Show valid moves for next selection
+    this.cube.findValidNextMoves(block);
+
     // Remove block and draw line after blink animation
     this.removeBlock(block, () => {
       this.drawConnectionLine(previousBlock, block);
     });
-
-    // Clear previous valid moves
-    this.cube.blocks.forEach((b) => {
-      b.isValid = false;
-      b.updateAppearance();
-    });
-
-    // Show valid moves for next selection
-    this.cube.findValidNextMoves(block);
   }
 
   startTimer() {
@@ -388,11 +372,20 @@ class Game {
             if (index > -1) {
               this.cube.blocks.splice(index, 1);
             }
-            block.connectedTo = [];
           }
         }, 16); // ~60fps
       }
     }, blinkDuration);
+
+    const index = this.cube.blocks.indexOf(block);
+    if (index > -1) {
+      // Clear connections before removal
+      block.connections.forEach((connectedBlock) => {
+        connectedBlock.removeConnection(block);
+      });
+      block.clearConnections();
+      this.cube.blocks.splice(index, 1);
+    }
   }
 
   drawConnectionLine(fromBlock, toBlock) {
