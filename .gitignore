@@ -378,10 +378,10 @@ FodyWeavers.xsd
 
 # VS Code files for those working on multiple tools
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+# !.vscode/settings.json
+# !.vscode/tasks.json
+# !.vscode/launch.json
+# !.vscode/extensions.json
 *.code-workspace
 
 # Local History for Visual Studio Code
@@ -399,3 +399,19 @@ FodyWeavers.xsd
 
 # Local Netlify folder
 .netlify
+
+# Sonarlint stuff
+sonar-project.properties
+.scannerwork
+.sonarlint
+RunSonarScanner.ps1
+
+# Ignore ESLint configuration files
+.eslintrc.json
+.eslintignore
+eslint.config.mjs
+
+# Exclude package manager files (for npm or yarn)
+package.json
+package-lock.json
+yarn.lock

@@ -11,7 +11,7 @@ class Game {
     this.setupRaycaster();
     this.setupEventListeners();
     this.animate();
-    this.isProcessing = false;
+    this.isProcessing = true;
     this.scoreElement = new TerminalText("score", {});
     this.timerElement = new TerminalText("timer", {});
     this.breakersElement = new TerminalText("breakers", {});
@@ -160,6 +160,7 @@ class Game {
       if (progress < 1) {
         requestAnimationFrame(animateCamera);
       } else {
+        this.isProcessing = false;
         this.controls.enabled = true;
       }
     };
@@ -213,6 +214,83 @@ class Game {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
+  centerCameraOnBlock(block) {
+    this.isProcessing = true;
+    const cubeCenter = new THREE.Vector3(0, 0, 0);
+    const previousCamFocusPoint = this.controls.target.clone();
+    const newCamFocusPoint = block.mesh.position.clone();
+
+    const startCameraPos = this.camera.position.clone();
+    const currentOffset = startCameraPos.clone().sub(previousCamFocusPoint);
+
+    const direction = newCamFocusPoint.clone().sub(cubeCenter);
+    direction.normalize();
+
+    const distance = currentOffset.length();
+
+    // Calculate both horizontal and vertical angles
+    const azimuthalAngle = Math.atan2(direction.z, direction.x);
+    const polarAngle = Math.acos(direction.y);
+
+    // Calculate appropriate rotation based on direction vector
+    const rotatedOffset = currentOffset.clone();
+
+    // Apply azimuthal rotation (x-z plane)
+    rotatedOffset.x =
+      currentOffset.x * Math.cos(azimuthalAngle) -
+      currentOffset.z * Math.sin(azimuthalAngle);
+    rotatedOffset.z =
+      currentOffset.x * Math.sin(azimuthalAngle) +
+      currentOffset.z * Math.cos(azimuthalAngle);
+
+    // Apply polar rotation (vertical)
+    const y = rotatedOffset.y;
+    rotatedOffset.y =
+      y * Math.cos(polarAngle) - rotatedOffset.z * Math.sin(polarAngle);
+    rotatedOffset.z =
+      y * Math.sin(polarAngle) + rotatedOffset.z * Math.cos(polarAngle);
+
+    const endCameraPos = newCamFocusPoint
+      .clone()
+      .add(direction.multiplyScalar(distance));
+
+    const duration = 1000;
+    const startTime = Date.now();
+
+    this.controls.enabled = false;
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+      const newCameraPos = new THREE.Vector3().lerpVectors(
+        startCameraPos,
+        endCameraPos,
+        easeProgress
+      );
+
+      const newTarget = new THREE.Vector3().lerpVectors(
+        previousCamFocusPoint,
+        block.mesh.position,
+        easeProgress
+      );
+
+      this.camera.position.copy(newCameraPos);
+      this.controls.target.copy(newTarget);
+      this.controls.update();
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        this.isProcessing = false;
+        this.controls.enabled = true;
+      }
+    };
+
+    animate();
+  }
+
   handleClick(event) {
     if (this.isProcessing) return;
 
@@ -239,6 +317,7 @@ class Game {
   handleBlockClick(block) {
     if (block.isBreakable) {
       if (this.breakerCount > 0) {
+        this.centerCameraOnBlock(block);
         this.breakerCount--;
         document.querySelector(
           ".breakers-terminal-text"
@@ -270,6 +349,7 @@ class Game {
     }
 
     if (block.isBreaker) {
+      this.centerCameraOnBlock(block);
       this.breakerCount++;
       this.score += 5; // Points for breaker block
       document.querySelector(
@@ -279,6 +359,7 @@ class Game {
         ".breakers-terminal-text"
       ).textContent = `Breakers: ${this.breakerCount}`;
     } else {
+      this.centerCameraOnBlock(block);
       this.score += 5; // Points for normal block
       document.querySelector(
         ".score-terminal-text"

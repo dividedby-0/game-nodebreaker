@@ -53,7 +53,7 @@ class TerminalText {
             "score-terminal-caret"
           );
           for (let element of terminalCaretElements) {
-            element.style.backgroundColor = options.caretColor;
+            element.style.backgroundColor = this.options.caretColor;
           }
         }
         break;
@@ -81,7 +81,7 @@ class TerminalText {
             "timer-terminal-caret"
           );
           for (let element of terminalCaretElements) {
-            element.style.backgroundColor = options.caretColor;
+            element.style.backgroundColor = this.options.caretColor;
           }
         }
         break;
@@ -109,7 +109,7 @@ class TerminalText {
             "breakers-terminal-caret"
           );
           for (let element of terminalCaretElements) {
-            element.style.backgroundColor = options.caretColor;
+            element.style.backgroundColor = this.options.caretColor;
           }
         }
         break;
