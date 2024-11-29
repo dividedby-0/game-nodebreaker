@@ -250,9 +250,12 @@ class Game {
     rotatedOffset.z =
       y * Math.sin(polarAngle) + rotatedOffset.z * Math.cos(polarAngle);
 
+    console.log(distance);
+    const minDistance = 12;
+    const adjustedDistance = distance < minDistance ? minDistance : distance;
     const endCameraPos = newCamFocusPoint
       .clone()
-      .add(direction.multiplyScalar(distance));
+      .add(direction.multiplyScalar(adjustedDistance * 0.9)); // distance from newCamFocusPoint
 
     const duration = 1000;
     const startTime = Date.now();
