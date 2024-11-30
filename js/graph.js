@@ -13,6 +13,7 @@ class GraphNode {
   }
 }
 
+// TODO repurpose or remove
 class CubeGraph {
   constructor() {
     this.nodes = new Map(); // Maps block positions to nodes

@@ -19,6 +19,7 @@ class Game {
     this.timerInterval = null;
     this.timeElapsed = 0;
     this.breakerCount = 0;
+    this.firstBlockClicked = false; // TODO remove if not needed
   }
 
   async initializeUI() {
@@ -134,6 +135,12 @@ class Game {
     this.animateInitialCamera();
   }
 
+  // TODO remove if not needed
+  updateCameraPosition() {
+    this.lastCameraPosition = this.camera.position.clone();
+    this.lastCameraRotation = this.controls.target.clone();
+  }
+
   animateInitialCamera() {
     const startPosition = {
       x: Math.random() * 5,
@@ -204,7 +211,7 @@ class Game {
   }
 
   setupRaycaster() {
-    this.raycaster = new THREE.Raycaster();
+    this.clickRaycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
   }
 
@@ -250,7 +257,6 @@ class Game {
     rotatedOffset.z =
       y * Math.sin(polarAngle) + rotatedOffset.z * Math.cos(polarAngle);
 
-    console.log(distance);
     const minDistance = 12;
     const adjustedDistance = distance < minDistance ? minDistance : distance;
     const endCameraPos = newCamFocusPoint
@@ -288,6 +294,7 @@ class Game {
       } else {
         this.isProcessing = false;
         this.controls.enabled = true;
+        this.checkVisualObstructions(block);
       }
     };
 
@@ -299,8 +306,10 @@ class Game {
 
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-    const intersects = this.raycaster.intersectObjects(this.scene.children);
+    this.clickRaycaster.setFromCamera(this.mouse, this.camera);
+    const intersects = this.clickRaycaster.intersectObjects(
+      this.scene.children
+    );
 
     if (intersects.length > 0) {
       const raycasterFoundBlock = intersects.find(
@@ -318,6 +327,8 @@ class Game {
   }
 
   handleBlockClick(block) {
+    this.firstBlockClicked = true; // TODO remove if not needed
+
     if (block.isBreakable) {
       if (this.breakerCount > 0) {
         this.centerCameraOnBlock(block);
@@ -394,6 +405,10 @@ class Game {
     this.removeBlock(block, () => {
       this.drawConnectionLine(previousBlock, block);
     });
+
+    if (this.currentlyHiddenBlock) {
+      this.unhideObstructingBlock(this.currentlyHiddenBlock);
+    }
   }
 
   startTimer() {
@@ -551,8 +566,112 @@ class Game {
   // Three.js scene render cycle
   animate() {
     requestAnimationFrame(() => this.animate());
-    this.controls.update(); // Update controls in animation loop
+    this.controls.update();
     this.renderer.render(this.scene, this.camera);
+  }
+
+  checkVisualObstructions(block) {
+    const rayEnd = block.mesh.position;
+
+    // Create raycaster from camera to block
+    const raycaster = new THREE.Raycaster();
+    const rayDirection = rayEnd.clone().sub(this.camera.position).normalize();
+    raycaster.set(this.camera.position, rayDirection);
+
+    // Get all intersections between camera and target block
+    const intersects = raycaster.intersectObjects(this.scene.children);
+    const firstIntersectId = intersects[0].object.id;
+    const blockId = block.mesh.id;
+
+    const obstructingMesh = intersects.find((intersection) => {
+      const hitBlock = this.cube.blocks.find(
+        (b) => b.mesh === intersection.object
+      );
+      return hitBlock;
+    });
+
+    if (obstructingMesh) {
+      const obstructingBlock = this.cube.blocks.find(
+        (b) => b.mesh === obstructingMesh.object
+      );
+
+      if (firstIntersectId !== blockId) {
+        this.hideObstructingBlock(obstructingBlock);
+        this.currentlyHiddenBlock = obstructingBlock;
+      }
+    }
+  }
+
+  hideObstructingBlock(obstructingBlock) {
+    // Setup fade animation parameters
+    const fadeOutDuration = 500;
+    const startFadeOutTime = Date.now();
+    const startOpacity = 1;
+    const targetOpacity = 0;
+    obstructingBlock.mesh.material.transparent = true;
+    obstructingBlock.mesh.layers.disable(0); // enables click-through
+
+    const fadeAnimation = () => {
+      const elapsed = Date.now() - startFadeOutTime;
+      const progress = Math.min(elapsed / fadeOutDuration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+      // Update opacity for hit block
+      const newOpacity =
+        startOpacity + (targetOpacity - startOpacity) * easeProgress;
+
+      obstructingBlock.mesh.material.opacity = newOpacity;
+      if (obstructingBlock.mesh.children[0]) {
+        obstructingBlock.mesh.children[0].material.opacity = newOpacity;
+        obstructingBlock.mesh.children[0].material.transparent = true;
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(fadeAnimation);
+      } else {
+        // Hide edges at the end
+        if (obstructingBlock.mesh.children[0]) {
+          obstructingBlock.mesh.children[0].visible = false;
+        }
+      }
+    };
+    fadeAnimation();
+  }
+
+  unhideObstructingBlock(obstructingBlock) {
+    // Setup fade animation parameters
+    const fadeOutDuration = 500;
+    const startFadeOutTime = Date.now();
+    const startOpacity = obstructingBlock.mesh.material.opacity;
+    const targetOpacity = 1;
+    obstructingBlock.mesh.material.transparent = false;
+    obstructingBlock.mesh.layers.enable(0); // re-enable click
+
+    const fadeAnimation = () => {
+      const elapsed = Date.now() - startFadeOutTime;
+      const progress = Math.min(elapsed / fadeOutDuration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+      // Update opacity for hit block
+      const newOpacity =
+        startOpacity + (targetOpacity - startOpacity) * easeProgress;
+
+      obstructingBlock.mesh.material.opacity = newOpacity;
+      if (obstructingBlock.mesh.children[0]) {
+        obstructingBlock.mesh.children[0].material.opacity = newOpacity;
+        obstructingBlock.mesh.children[0].material.transparent = false;
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(fadeAnimation);
+      } else {
+        // Unhide edges at the end
+        if (obstructingBlock.mesh.children[0]) {
+          obstructingBlock.mesh.children[0].visible = true;
+        }
+      }
+    };
+    fadeAnimation();
   }
 }
 

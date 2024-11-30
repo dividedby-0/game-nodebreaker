@@ -1,7 +1,7 @@
 class Cube {
   constructor() {
     this.blocks = [];
-    this.size = 4; // Change from 3 to 4 for 4x4x4 cube
+    this.size = 4;
     this.spacing = 3;
     this.symbols = this.generateSymbols();
     this.initializeBlocks();
@@ -128,6 +128,7 @@ class Cube {
     return this.blocks[x * this.size * this.size + y * this.size + z];
   }
 
+  // TODO repurpose or remove
   generateSymbols() {
     const blockChars = [
       "A",
