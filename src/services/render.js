@@ -1,7 +1,7 @@
 import * as THREE from "/lib/three.module.js";
 import { OrbitControls } from "/lib/OrbitControls.js";
 
-export const RenderService = (gameContainer, gameState) => {
+export const RenderService = (gameContainer, gameState, physicsService) => {
   const renderer = {
     scene: new THREE.Scene(),
     camera: new THREE.PerspectiveCamera(
@@ -20,6 +20,8 @@ export const RenderService = (gameContainer, gameState) => {
     animate();
   };
 
+  // Renderer-related
+
   const onWindowResize = () => {
     renderer.camera.aspect = window.innerWidth / window.innerHeight;
     renderer.camera.updateProjectionMatrix();
@@ -29,8 +31,6 @@ export const RenderService = (gameContainer, gameState) => {
   renderer.renderer.setSize(window.innerWidth, window.innerHeight);
   gameContainer.appendChild(renderer.renderer.domElement);
   renderer.scene.background = new THREE.Color(0x000000);
-
-  // Controls initialization
 
   renderer.controls = new OrbitControls(
     renderer.camera,
@@ -44,9 +44,11 @@ export const RenderService = (gameContainer, gameState) => {
   renderer.controls.minDistance = 5;
   renderer.controls.maxDistance = 15;
 
-  // Camera movements
+  // Camera-related
 
   const animateInitialCamera = () => {
+    gameState.setProcessing(true);
+
     const startPosition = {
       x: Math.random() * 5,
       y: Math.random() * 5,
@@ -125,12 +127,20 @@ export const RenderService = (gameContainer, gameState) => {
       renderer.controls.target.copy(newTarget);
       renderer.controls.update();
 
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
+      // After animation is complete
+      if (progress >= 1) {
+        physicsService.checkVisualObstructions(
+          renderer.camera,
+          node,
+          gameState.getSelectedNodes(),
+          renderer.scene
+        );
+
         gameState.setProcessing(false);
         renderer.controls.enabled = true;
+        return;
       }
+      requestAnimationFrame(animate);
     };
     animate();
   };

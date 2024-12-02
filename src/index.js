@@ -13,9 +13,9 @@ const initialize = async () => {
   const gameContainer = document.getElementById("game-container");
   const eventBus = EventBus();
   const gameState = GameState(eventBus);
-  const renderService = RenderService(gameContainer, gameState);
   const nodeNetwork = NodeNetwork(gameState);
-  const physicsService = PhysicsService();
+  const physicsService = PhysicsService(gameState, nodeNetwork);
+  const renderService = RenderService(gameContainer, gameState, physicsService);
   const gameService = GameService(
     renderService,
     nodeNetwork,

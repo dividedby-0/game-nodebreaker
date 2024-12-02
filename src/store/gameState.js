@@ -7,7 +7,7 @@ export const GameState = (eventBus) => {
     timerStarted: false,
     timerInterval: null,
     isProcessing: false,
-    currentlyHiddenNode: null,
+    hiddenNodes: new Set(),
   };
 
   return {
@@ -18,7 +18,6 @@ export const GameState = (eventBus) => {
     getTimeElapsed: () => state.timeElapsed,
     isTimerStarted: () => state.timerStarted,
     isProcessing: () => state.isProcessing,
-    getCurrentlyHiddenNode: () => state.currentlyHiddenNode,
 
     // State setters
     setScore: (score) => {
@@ -45,9 +44,19 @@ export const GameState = (eventBus) => {
       state.isProcessing = processing;
       eventBus.emit("processing:update", processing);
     },
-    setCurrentlyHiddenNode: (node) => {
-      state.currentlyHiddenNode = node;
-      eventBus.emit("hiddenNodes:update", node);
+
+    getHiddenNodes: () => state.hiddenNodes,
+    addHiddenNode: (node) => {
+      state.hiddenNodes.add(node);
+      eventBus.emit("hiddenNodes:update", Array.from(state.hiddenNodes));
+    },
+    removeHiddenNode: (node) => {
+      state.hiddenNodes.delete(node);
+      eventBus.emit("hiddenNodes:update", Array.from(state.hiddenNodes));
+    },
+    clearHiddenNodes: () => {
+      state.hiddenNodes.clear();
+      eventBus.emit("hiddenNodes:update", []);
     },
 
     // Timer controls
@@ -87,7 +96,7 @@ export const GameState = (eventBus) => {
         state.timerInterval = null;
       }
       state.isProcessing = false;
-      state.currentlyHiddenNode = null;
+      state.hiddenNodes.clear();
       eventBus.emit("state:reset");
     },
   };

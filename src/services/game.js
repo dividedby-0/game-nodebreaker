@@ -45,13 +45,55 @@ export const GameService = (
       return;
     }
 
+    gameState.setProcessing(true);
+
+    // Clear any previously hidden nodes before handling the new selection
+    const hiddenNodes = gameState.getHiddenNodes();
+    hiddenNodes.forEach((node) => {
+      const nodeMesh = node.getMesh();
+      // Setup fade-in animation parameters
+      const fadeInDuration = 500;
+      const startFadeInTime = Date.now();
+      const startOpacity = 0;
+      const targetOpacity = 1;
+
+      nodeMesh.material.transparent = true;
+      nodeMesh.layers.enable(0);
+      if (nodeMesh.children[0]) {
+        nodeMesh.children[0].visible = true;
+      }
+
+      const fadeInAnimation = () => {
+        const elapsed = Date.now() - startFadeInTime;
+        const progress = Math.min(elapsed / fadeInDuration, 1);
+        const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+        const newOpacity =
+          startOpacity + (targetOpacity - startOpacity) * easeProgress;
+        nodeMesh.material.opacity = newOpacity;
+        if (nodeMesh.children[0]) {
+          nodeMesh.children[0].material.opacity = newOpacity;
+          nodeMesh.children[0].material.transparent = true;
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(fadeInAnimation);
+        } else {
+          nodeMesh.material.transparent = false;
+        }
+      };
+      fadeInAnimation();
+    });
+
+    gameState.clearHiddenNodes();
+    gameState.setProcessing(false);
+
     if (clickedNode.isBreakable()) {
       if (gameState.getBreakerCount() <= 0) {
         return;
       }
       clickedNode.setValid(true);
       handleBreakableNode(clickedNode);
-      // return;
     }
 
     if (clickedNode.isBreaker()) {
