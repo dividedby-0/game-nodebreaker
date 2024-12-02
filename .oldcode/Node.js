@@ -1,4 +1,4 @@
-class Block {
+class Node {
   constructor(position) {
     this.position = position;
     this.isVisited = false;

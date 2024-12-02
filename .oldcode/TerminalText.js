@@ -39,7 +39,7 @@ class TerminalText {
           const terminalTextElements = document.getElementsByClassName(
             "score-terminal-text"
           );
-          for (let element of terminalTextElements) {
+          for (const element of terminalTextElements) {
             element.style.color = this.options.textColor;
           }
         }
@@ -52,7 +52,7 @@ class TerminalText {
           const terminalCaretElements = document.getElementsByClassName(
             "score-terminal-caret"
           );
-          for (let element of terminalCaretElements) {
+          for (const element of terminalCaretElements) {
             element.style.backgroundColor = this.options.caretColor;
           }
         }
@@ -67,7 +67,7 @@ class TerminalText {
           const terminalTextElements = document.getElementsByClassName(
             "timer-terminal-text"
           );
-          for (let element of terminalTextElements) {
+          for (const element of terminalTextElements) {
             element.style.color = this.options.textColor;
           }
         }
@@ -80,7 +80,7 @@ class TerminalText {
           const terminalCaretElements = document.getElementsByClassName(
             "timer-terminal-caret"
           );
-          for (let element of terminalCaretElements) {
+          for (const element of terminalCaretElements) {
             element.style.backgroundColor = this.options.caretColor;
           }
         }
@@ -95,7 +95,7 @@ class TerminalText {
           const terminalTextElements = document.getElementsByClassName(
             "breakers-terminal-text"
           );
-          for (let element of terminalTextElements) {
+          for (const element of terminalTextElements) {
             element.style.color = this.options.textColor;
           }
         }
@@ -108,7 +108,7 @@ class TerminalText {
           const terminalCaretElements = document.getElementsByClassName(
             "breakers-terminal-caret"
           );
-          for (let element of terminalCaretElements) {
+          for (const element of terminalCaretElements) {
             element.style.backgroundColor = this.options.caretColor;
           }
         }
@@ -123,7 +123,7 @@ class TerminalText {
           const terminalTextElements = document.getElementsByClassName(
             "message-terminal-text"
           );
-          for (let element of terminalTextElements) {
+          for (const element of terminalTextElements) {
             element.style.color = this.options.textColor;
           }
         }
@@ -136,7 +136,7 @@ class TerminalText {
           const terminalCaretElements = document.getElementsByClassName(
             "message-terminal-caret"
           );
-          for (let element of terminalCaretElements) {
+          for (const element of terminalCaretElements) {
             element.style.backgroundColor = this.options.caretColor;
           }
         }
@@ -148,7 +148,9 @@ class TerminalText {
   }
 
   async typeText(text, element) {
-    if (this.isAnimating) return;
+    if (this.isAnimating) {
+      return;
+    }
 
     this.isAnimating = true;
     this.targetText = text;

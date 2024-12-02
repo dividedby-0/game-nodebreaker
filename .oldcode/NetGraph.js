@@ -1,27 +1,12 @@
-class GraphNode {
-  constructor(block) {
-    this.block = block;
-    this.adjacentNodes = new Map(); // Maps nodes to their edge weights (can be useful for pathfinding)
-  }
-
-  addEdge(node, weight = 1) {
-    this.adjacentNodes.set(node, weight);
-  }
-
-  removeEdge(node) {
-    this.adjacentNodes.delete(node);
-  }
-}
-
 // TODO repurpose or remove
-class CubeGraph {
+class NetGraph {
   constructor() {
     this.nodes = new Map(); // Maps block positions to nodes
   }
 
   addNode(block) {
     const position = `${block.position.x},${block.position.y},${block.position.z}`;
-    const node = new GraphNode(block);
+    const node = new NodeGraph(block);
     this.nodes.set(position, node);
     return node;
   }

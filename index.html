@@ -8,19 +8,21 @@
     />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <title>3D Memory Game</title>
-    <!-- fonts -->
+    <title>Nodebreaker</title>
+    <link rel="preload" href="css/style.css" as="style" />
     <link
       rel="preload"
+      href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
       as="style"
-      href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
-    />
-    <!-- styles -->
     <link rel="stylesheet" href="css/style.css" />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
+      />
+    </noscript>
   </head>
   <body>
     <div id="game-container"></div>
@@ -30,12 +32,14 @@
       <div id="breakers"></div>
       <div id="message"></div>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="js/terminalText.js"></script>
-    <script src="js/block.js"></script>
-    <script src="js/cube.js"></script>
-    <script src="js/game.js"></script>
+    <!-- <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+          "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.128.0/examples/jsm/controls/OrbitControls.js"
+        }
+      }
+    </script> -->
+    <script type="module" src="src/index.js"></script>
   </body>
 </html>

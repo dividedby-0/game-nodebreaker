@@ -415,3 +415,6 @@ eslint.config.mjs
 package.json
 package-lock.json
 yarn.lock
+
+# Old pre-refactor code
+# .oldcode

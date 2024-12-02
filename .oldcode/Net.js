@@ -1,4 +1,4 @@
-class Cube {
+class Net {
   constructor() {
     this.blocks = [];
     this.size = 4;
@@ -171,7 +171,7 @@ class Cube {
             y: (y - (this.size - 1) / 2) * this.spacing,
             z: (z - (this.size - 1) / 2) * this.spacing,
           };
-          const block = new Block(position, this.symbols[symbolIndex]);
+          const block = new Node(position, this.symbols[symbolIndex]);
           this.blocks.push(block);
           symbolIndex++;
         }

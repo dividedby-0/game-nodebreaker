@@ -206,10 +206,11 @@ class Game {
   }
 
   setupCube() {
-    this.cube = new Cube();
+    this.cube = new Net();
     this.cube.addToScene(this.scene);
   }
 
+  // TODO implemented in refactor?
   setupRaycaster() {
     this.clickRaycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
