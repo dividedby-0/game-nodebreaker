@@ -13,11 +13,11 @@ export const PhysicsService = (gameState, nodeNetwork) => {
   // Node-related
 
   const animateNodeRemoval = (node, onComplete) => {
-    const blinkCount = 2;
+    gameState.setProcessing(true);
+    const blinkCount = 3;
     let currentBlink = 0;
     const mesh = node.getMesh();
 
-    // Blink animation
     const blinkInterval = setInterval(() => {
       mesh.visible = !mesh.visible;
       currentBlink++;
@@ -26,7 +26,7 @@ export const PhysicsService = (gameState, nodeNetwork) => {
         clearInterval(blinkInterval);
         mesh.visible = true;
 
-        // Start shrinking animation after blinking
+        // Start shrinking animation
         const startScale = mesh.scale.x;
         const targetScale = 0.3;
         const startTime = Date.now();
@@ -45,6 +45,7 @@ export const PhysicsService = (gameState, nodeNetwork) => {
 
           if (progress === 1) {
             clearInterval(shrinkInterval);
+            gameState.setProcessing(false);
             if (onComplete) {
               onComplete();
             }

@@ -147,7 +147,7 @@ export const GameService = (
     clickedNode.setSelected(true);
     gameState.getSelectedNodes().push(clickedNode);
     nodeNetwork.findValidNextMoves(clickedNode);
-    shrinkNode(clickedNode);
+    physicsService.animateNodeRemoval(clickedNode);
 
     if (gameState.getSelectedNodes().length === 1) {
       gameState.startTimer();
@@ -161,59 +161,9 @@ export const GameService = (
     );
   };
 
-  // Animations
-
-  const shrinkNode = (node, callback) => {
-    gameState.setProcessing(true);
-    const blinkCount = 3;
-    const blinkDuration = 100; // ms
-    const shrinkDuration = 500; // ms
-
-    let currentBlink = 0;
-    const blinkInterval = setInterval(() => {
-      node.getMesh().visible = !node.getMesh().visible;
-      currentBlink++;
-
-      if (currentBlink >= blinkCount * 2) {
-        clearInterval(blinkInterval);
-        node.getMesh().visible = true;
-
-        // Start shrinking animation
-        const startScale = node.getMesh().scale.x;
-        const targetScale = 0.3;
-        const startTime = Date.now();
-
-        const shrinkInterval = setInterval(() => {
-          const elapsed = Date.now() - startTime;
-          const progress = Math.min(elapsed / shrinkDuration, 1);
-
-          // Ease out cubic
-          const easeProgress = 1 - Math.pow(1 - progress, 3);
-
-          // Calculate current scale using linear interpolation
-          const currentScale =
-            startScale + (targetScale - startScale) * easeProgress;
-          node.getMesh().scale.set(currentScale, currentScale, currentScale);
-
-          if (progress === 1) {
-            clearInterval(shrinkInterval);
-
-            // Final cleanup
-            const index = nodeNetwork.getNodesArray().indexOf(node);
-            if (index > -1) {
-              nodeNetwork.removeNode(node);
-            }
-            gameState.setProcessing(false);
-          }
-        }, 16); // ~60fps
-      }
-    }, blinkDuration);
-  };
-
   return {
     initialize,
     handleNodeClick,
-    shrinkNode,
     getNodeNetwork: () => nodeNetwork,
     getGameState: () => ({ ...gameState }),
     on: eventBus.on,
