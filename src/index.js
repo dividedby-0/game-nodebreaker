@@ -1,5 +1,6 @@
 import { GameState } from "./store/gameState.js";
 import { NodeNetwork } from "./components/NodeNetwork/index.js";
+import { PhysicsService } from "./services/physics.js";
 import { GameService } from "./services/game.js";
 import { RenderService } from "./services/render.js";
 import { UIService } from "./services/ui.js";
@@ -14,12 +15,14 @@ const initialize = async () => {
   const gameState = GameState(eventBus);
   const renderService = RenderService(gameContainer, gameState);
   const nodeNetwork = NodeNetwork(gameState);
+  const physicsService = PhysicsService();
   const gameService = GameService(
     renderService,
     nodeNetwork,
     eventBus,
     gameState,
-    gameConfig
+    gameConfig,
+    physicsService
   );
   const uiService = UIService(eventBus, gameState);
   const inputService = InputService(

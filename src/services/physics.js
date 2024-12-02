@@ -8,10 +8,12 @@ export const PhysicsService = () => {
     blinkDuration: 100, // ms per blink
   };
 
-  const animateBlockRemoval = (block, onComplete) => {
+  // Node-related
+
+  const animateNodeRemoval = (node, onComplete) => {
     const blinkCount = 3;
     let currentBlink = 0;
-    const mesh = block.getMesh();
+    const mesh = node.getMesh();
 
     // Blink animation
     const blinkInterval = setInterval(() => {
@@ -50,9 +52,29 @@ export const PhysicsService = () => {
     }, physicsState.blinkDuration);
   };
 
-  const checkVisualObstruction = (camera, targetBlock, allBlocks) => {
+  // Lines-related
+
+  const drawConnectionLine = (scene, fromNode, toNode) => {
+    const points = [];
+    points.push(fromNode.getMesh().position.clone());
+    points.push(toNode.getMesh().position.clone());
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({
+      color: 0xff0000,
+      linewidth: 5,
+    });
+
+    const line = new THREE.Line(geometry, material);
+    scene.add(line);
+    return line;
+  };
+
+  // Camera-related
+
+  const checkVisualObstructions = (camera, targetNode, allNodes) => {
     const raycaster = new THREE.Raycaster();
-    const rayDirection = targetBlock
+    const rayDirection = targetNode
       .getMesh()
       .position.clone()
       .sub(camera.position)
@@ -61,16 +83,16 @@ export const PhysicsService = () => {
     raycaster.set(camera.position, rayDirection);
 
     const intersects = raycaster.intersectObjects(
-      allBlocks.map((block) => block.getMesh())
+      allNodes.map((node) => node.getMesh())
     );
 
     if (intersects.length > 0) {
-      const firstHitBlock = allBlocks.find(
-        (block) => block.getMesh() === intersects[0].object
+      const firstHitNode = allNodes.find(
+        (node) => node.getMesh() === intersects[0].object
       );
 
-      if (firstHitBlock && firstHitBlock !== targetBlock) {
-        return firstHitBlock;
+      if (firstHitNode && firstHitNode !== targetNode) {
+        return firstHitNode;
       }
     }
 
@@ -78,8 +100,9 @@ export const PhysicsService = () => {
   };
 
   return {
-    animateBlockRemoval,
-    checkVisualObstruction,
+    animateNodeRemoval,
+    drawConnectionLine,
+    checkVisualObstructions,
     setAnimationSpeed: (speed) => {
       physicsState.animationSpeed = speed;
     },

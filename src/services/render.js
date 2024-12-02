@@ -80,13 +80,13 @@ export const RenderService = (gameContainer, gameState) => {
     animateCamera();
   };
 
-  const focusCamOnNode = (block) => {
+  const focusCamOnNode = (node) => {
     gameState.setProcessing(true);
     renderer.controls.enabled = false;
 
     const cubeCenter = new THREE.Vector3(0, 0, 0);
     const previousCamFocusPoint = renderer.controls.target.clone();
-    const newCamFocusPoint = block.getMesh().position.clone();
+    const newCamFocusPoint = node.getMesh().position.clone();
 
     const startCameraPos = renderer.camera.position.clone();
     const currentOffset = startCameraPos.clone().sub(previousCamFocusPoint);
@@ -117,7 +117,7 @@ export const RenderService = (gameContainer, gameState) => {
 
       const newTarget = new THREE.Vector3().lerpVectors(
         previousCamFocusPoint,
-        block.getMesh().position,
+        node.getMesh().position,
         easeProgress
       );
 
@@ -135,24 +135,6 @@ export const RenderService = (gameContainer, gameState) => {
     animate();
   };
 
-  // Other animations
-
-  const drawConnectionLine = (fromBlock, toBlock) => {
-    const points = [];
-    points.push(fromBlock.getMesh().position.clone());
-    points.push(toBlock.getMesh().position.clone());
-
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({
-      color: 0xff0000,
-      linewidth: 5,
-    });
-
-    const line = new THREE.Line(geometry, material);
-    renderer.scene.add(line);
-    return line;
-  };
-
   const animate = () => {
     requestAnimationFrame(animate);
     renderer.controls.update();
@@ -167,6 +149,5 @@ export const RenderService = (gameContainer, gameState) => {
     getRenderer: () => renderer.renderer,
     onWindowResize,
     focusCamOnNode,
-    drawConnectionLine,
   };
 };

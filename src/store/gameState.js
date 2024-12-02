@@ -27,7 +27,7 @@ export const GameState = (eventBus) => {
     },
     addSelectedNode: (node) => {
       state.selectedNodes.push(node);
-      eventBus.emit("blocks:update", state.selectedNodes);
+      eventBus.emit("nodes:update", state.selectedNodes);
     },
     setBreakerCount: (count) => {
       state.breakerCount = count;
@@ -47,7 +47,7 @@ export const GameState = (eventBus) => {
     },
     setCurrentlyHiddenNode: (node) => {
       state.currentlyHiddenNode = node;
-      eventBus.emit("hiddenBlock:update", node);
+      eventBus.emit("hiddenNodes:update", node);
     },
 
     // Timer controls

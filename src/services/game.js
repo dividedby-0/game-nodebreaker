@@ -3,7 +3,8 @@ export const GameService = (
   nodeNetwork,
   eventBus,
   gameState,
-  gameConfig
+  gameConfig,
+  physicsService
 ) => {
   const initialize = async () => {
     eventBus.emit("game:initialized");
@@ -111,7 +112,11 @@ export const GameService = (
       return;
     }
 
-    renderService.drawConnectionLine(clickedNode, previousNode);
+    physicsService.drawConnectionLine(
+      renderService.getScene(),
+      clickedNode,
+      previousNode
+    );
   };
 
   // Animations
