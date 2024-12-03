@@ -1,6 +1,6 @@
 import { Node } from "../Node/index.js";
 
-export const NodeNetwork = () => {
+export const NodeNetwork = (gameState) => {
   const nodeNetwork = {
     nodesArray: [],
     size: 4,
@@ -109,7 +109,9 @@ export const NodeNetwork = () => {
 
   const findValidNextMoves = (node) => {
     const validMoves = Array.from(node.getConnections()).filter(
-      (connectedNode) => !connectedNode.isSelected()
+      (connectedNode) =>
+        !connectedNode.isSelected() &&
+        (!connectedNode.isBreakable() || gameState.getBreakerCount() > 0)
     );
 
     nodeNetwork.nodesArray.forEach((node) => {
