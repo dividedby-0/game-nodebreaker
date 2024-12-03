@@ -65,7 +65,7 @@ export const PhysicsService = (gameState, nodeNetwork) => {
       const fadeOutDuration = 500;
       const startFadeOutTime = Date.now();
       const startOpacity = 1;
-      const targetOpacity = 0;
+      const targetOpacity = 0.3;
       nodeToHideMesh.material.transparent = true;
       nodeToHideMesh.layers.disable(0);
 
@@ -87,9 +87,9 @@ export const PhysicsService = (gameState, nodeNetwork) => {
         if (progress < 1) {
           requestAnimationFrame(fadeAnimation);
         } else {
-          if (nodeToHideMesh.children[0]) {
-            nodeToHideMesh.children[0].visible = false;
-          }
+          // if (nodeToHideMesh.children[0]) {
+          //   nodeToHideMesh.children[0].visible = false;
+          // }
         }
       };
       fadeAnimation();
@@ -100,7 +100,7 @@ export const PhysicsService = (gameState, nodeNetwork) => {
     const nodeMesh = node.getMesh();
     const fadeInDuration = 500;
     const startFadeInTime = Date.now();
-    const startOpacity = 0;
+    const startOpacity = 0.3;
     const targetOpacity = 1;
 
     nodeMesh.material.transparent = true;
