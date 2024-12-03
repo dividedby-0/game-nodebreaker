@@ -45,7 +45,6 @@ export const GameService = (
       return;
     }
 
-    renderService.triggerGlitchEffect();
     gameState.setProcessing(true);
 
     if (isValidMove(clickedNode)) {
@@ -98,6 +97,12 @@ export const GameService = (
     );
     eventBus.emit("score:update", gameState.getScore());
     eventBus.emit("breakers:update", gameState.getBreakerCount());
+
+    if (!gameState.hasInteractedWithBreakable()) {
+      renderService.triggerGlitchEffect();
+      eventBus.emit("message:show", "YOU ARE BEING TRACED");
+      gameState.setInteractedWithBreakable(true);
+    }
   };
 
   const handleBreakerNode = (clickedNode) => {

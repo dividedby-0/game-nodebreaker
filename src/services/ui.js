@@ -35,6 +35,14 @@ export const UIService = (eventBus, gameState) => {
     terminalTextAnimation("breakers", `Breakers: ${breakers}`)
   );
 
+  eventBus.on("message:show", (text) => {
+    const messageElement = htmlElements.message;
+    if (messageElement) {
+      messageElement.innerHTML = `<span class="message-terminal-text">${text}</span>`;
+      messageElement.style.animation = "fadeInOut 2s ease-in-out infinite";
+    }
+  });
+
   // Event listeners: updaters
 
   eventBus.on("timer:update", (time) =>
