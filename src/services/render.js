@@ -1,5 +1,8 @@
 import * as THREE from "/lib/three.module.js";
 import { OrbitControls } from "/lib/OrbitControls.js";
+import { EffectComposer } from "/lib/postprocessing/EffectComposer.js";
+import { RenderPass } from "/lib/postprocessing/RenderPass.js";
+import { GlitchPass } from "/lib/postprocessing/GlitchPass.js";
 
 export const RenderService = (gameContainer, gameState, physicsService) => {
   const renderer = {
@@ -12,11 +15,23 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
     ),
     renderer: new THREE.WebGLRenderer({ antialias: true }),
     controls: null,
+    composer: null,
+    glitchPass: null,
   };
 
   const initialize = () => {
     renderer.camera.lookAt(0, 0, 0);
     animateInitialCamera();
+
+    // Setup post-processing
+    renderer.composer = new EffectComposer(renderer.renderer);
+    const renderPass = new RenderPass(renderer.scene, renderer.camera);
+    renderer.composer.addPass(renderPass);
+
+    renderer.glitchPass = new GlitchPass();
+    renderer.glitchPass.enabled = false; // Start with glitch disabled
+    renderer.composer.addPass(renderer.glitchPass);
+
     animate();
   };
 
@@ -26,6 +41,7 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
     renderer.camera.aspect = window.innerWidth / window.innerHeight;
     renderer.camera.updateProjectionMatrix();
     renderer.renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.composer.setSize(window.innerWidth, window.innerHeight);
   };
 
   renderer.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -43,6 +59,13 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
   renderer.controls.enablePan = false;
   renderer.controls.minDistance = 5;
   renderer.controls.maxDistance = 15;
+
+  const triggerGlitchEffect = () => {
+    renderer.glitchPass.enabled = true;
+    setTimeout(() => {
+      renderer.glitchPass.enabled = false;
+    }, 1000); // Disable after 1 second
+  };
 
   // Camera-related
 
@@ -148,7 +171,7 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
   const animate = () => {
     requestAnimationFrame(animate);
     renderer.controls.update();
-    renderer.renderer.render(renderer.scene, renderer.camera);
+    renderer.composer.render();
   };
 
   return {
@@ -159,5 +182,6 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
     getRenderer: () => renderer.renderer,
     onWindowResize,
     focusCamOnNode,
+    triggerGlitchEffect,
   };
 };

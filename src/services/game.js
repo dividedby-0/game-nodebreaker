@@ -45,6 +45,7 @@ export const GameService = (
       return;
     }
 
+    renderService.triggerGlitchEffect();
     gameState.setProcessing(true);
 
     if (isValidMove(clickedNode)) {
