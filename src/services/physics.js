@@ -96,6 +96,41 @@ export const PhysicsService = (gameState, nodeNetwork) => {
     });
   };
 
+  const unhideObstructingNodes = (node) => {
+    const nodeMesh = node.getMesh();
+    const fadeInDuration = 500;
+    const startFadeInTime = Date.now();
+    const startOpacity = 0;
+    const targetOpacity = 1;
+
+    nodeMesh.material.transparent = true;
+    nodeMesh.layers.enable(0);
+    if (nodeMesh.children[0]) {
+      nodeMesh.children[0].visible = true;
+    }
+
+    const fadeInAnimation = () => {
+      const elapsed = Date.now() - startFadeInTime;
+      const progress = Math.min(elapsed / fadeInDuration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+      const newOpacity =
+        startOpacity + (targetOpacity - startOpacity) * easeProgress;
+      nodeMesh.material.opacity = newOpacity;
+      if (nodeMesh.children[0]) {
+        nodeMesh.children[0].material.opacity = newOpacity;
+        nodeMesh.children[0].material.transparent = true;
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(fadeInAnimation);
+      } else {
+        nodeMesh.material.transparent = false;
+      }
+    };
+    fadeInAnimation();
+  };
+
   // Lines-related
 
   const drawConnectionLine = (scene, fromNode, toNode) => {
@@ -162,6 +197,7 @@ export const PhysicsService = (gameState, nodeNetwork) => {
     animateNodeRemoval,
     drawConnectionLine,
     checkVisualObstructions,
+    unhideObstructingNodes,
     getState: () => ({ ...physicsState }),
   };
 };
