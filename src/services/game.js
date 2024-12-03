@@ -47,13 +47,15 @@ export const GameService = (
 
     gameState.setProcessing(true);
 
-    // Clear any previously hidden nodes
-    const hiddenNodes = gameState.getHiddenNodes();
-    hiddenNodes.forEach((node) => {
-      physicsService.unhideObstructingNodes(node);
-    });
+    if (isValidMove(clickedNode)) {
+      // Clear any previously hidden nodes
+      const hiddenNodes = gameState.getHiddenNodes();
+      hiddenNodes.forEach((node) => {
+        physicsService.unhideObstructingNodes(node);
+      });
+      gameState.clearHiddenNodes();
+    }
 
-    gameState.clearHiddenNodes();
     gameState.setProcessing(false);
 
     if (clickedNode.isBreakable()) {
