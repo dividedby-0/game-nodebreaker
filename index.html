@@ -8,11 +8,15 @@
     />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <title>Nodebreaker</title>
+    <title>NodeBreaker</title>
     <link rel="preload" href="./css/style.css" as="style" />
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
+  <div id="loading-view" class="view">
+    <div class="loading-text">Loading...</div>
+  </div>
+  <div id="game-view" class="view">
     <div id="game-container"></div>
     <div id="score-timer-container">
       <div id="score"></div>
@@ -20,6 +24,7 @@
       <div id="message"></div>
       <div id="breakers"></div>
     </div>
+  </div>
     <!-- <script type="importmap">
       {
         "imports": {

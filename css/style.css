@@ -14,6 +14,21 @@ body {
   touch-action: none; /* Prevents default touch behaviors */
 }
 
+.view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none;
+}
+
+/*GAME SCREEN*/
+
+#game-view {
+  background-color: #000;
+}
+
 #game-container {
   width: 100vw;
   height: 100vh;
@@ -142,6 +157,30 @@ body {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(1px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+/*LOADING SCREEN VIEW*/
+
+#loading-view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-text {
+  font-family: "VT323", monospace;
+  font-size: clamp(4rem, 6vw, 6rem);
+  color: #00ff00;
+  text-align: center;
+  margin: 0;
+  padding: 0;
 }
 
 /* Mobile-specific styles */
