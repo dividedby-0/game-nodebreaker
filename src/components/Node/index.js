@@ -11,24 +11,24 @@ export const Node = (position) => {
     connections: new Set(),
   };
 
+  const sharedGeometry = new THREE.BoxGeometry(1, 1, 1);
+  const sharedMaterial = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    transparent: true,
+    opacity: 1,
+    wireframe: false,
+  });
+  const sharedEdgesGeometry = new THREE.EdgesGeometry(sharedGeometry);
+  const sharedEdgesMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+
   const createNodeMesh = () => {
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({
-      color: 0x000000,
-      transparent: true,
-      opacity: 1,
-      wireframe: false,
-    });
-
-    const nodeMesh = new THREE.Mesh(geometry, material);
+    const nodeMesh = new THREE.Mesh(sharedGeometry, sharedMaterial.clone());
     nodeMesh.position.set(position.x, position.y, position.z);
-
-    // Add edge highlighting
-    const edgesGeometry = new THREE.EdgesGeometry(geometry);
-    const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
-    const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+    const edges = new THREE.LineSegments(
+      sharedEdgesGeometry,
+      sharedEdgesMaterial,
+    );
     nodeMesh.add(edges);
-
     return nodeMesh;
   };
 

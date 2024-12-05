@@ -21,7 +21,6 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
 
   const initialize = () => {
     renderer.camera.lookAt(0, 0, 0);
-    // animateInitialCamera();
 
     // Setup post-processing
     renderer.composer = new EffectComposer(renderer.renderer);
@@ -29,8 +28,10 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
     renderer.composer.addPass(renderPass);
 
     renderer.glitchPass = new GlitchPass();
-    renderer.glitchPass.enabled = false; // Start with glitch disabled
+    renderer.glitchPass.enabled = false;
     renderer.composer.addPass(renderer.glitchPass);
+
+    renderer.composer.setPixelRatio(window.devicePixelRatio * 0.5);
 
     animate();
   };

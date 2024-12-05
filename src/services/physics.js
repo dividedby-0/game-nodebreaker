@@ -133,16 +133,21 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
   };
 
   // Lines-related
+  const lineGeometryPool = [];
+  const getLineGeometry = () => {
+    return lineGeometryPool.pop() || new THREE.BufferGeometry();
+  };
 
   const drawConnectionLine = (scene, fromNode, toNode) => {
-    const points = [];
-    points.push(fromNode.getMesh().position.clone());
-    points.push(toNode.getMesh().position.clone());
+    const geometry = getLineGeometry();
+    geometry.setFromPoints([
+      fromNode.getMesh().position,
+      toNode.getMesh().position,
+    ]);
 
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const material = new THREE.LineBasicMaterial({
       color: 0x00ffff,
-      linewidth: 5,
+      linewidth: 7,
     });
 
     const line = new THREE.Line(geometry, material);
@@ -183,15 +188,14 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
   };
 
   // Camera-related
+  const rayTarget = new THREE.Vector3();
 
   const checkVisualObstructions = (camera, targetNode, allNodes, scene) => {
-    const raycaster = new THREE.Raycaster();
-    const rayTarget = targetNode
-      .getMesh()
-      .position.clone()
+    rayTarget
+      .copy(targetNode.getMesh().position)
       .sub(camera.position)
       .normalize();
-
+    const raycaster = new THREE.Raycaster();
     raycaster.set(camera.position, rayTarget);
 
     // Create or update debug ray line
