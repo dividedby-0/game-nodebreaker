@@ -3,6 +3,8 @@ import { OrbitControls } from "../../lib/OrbitControls.js";
 import { EffectComposer } from "../../lib/postprocessing/EffectComposer.js";
 import { RenderPass } from "../../lib/postprocessing/RenderPass.js";
 import { GlitchPass } from "../../lib/postprocessing/GlitchPass.js";
+import { ScanlinesShader } from "../../lib/shaders/scanlines.js";
+import { ShaderPass } from "../../lib/postprocessing/ShaderPass.js";
 
 export const RenderService = (gameContainer, gameState, physicsService) => {
   const renderer = {
@@ -32,6 +34,13 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
     renderer.composer = new EffectComposer(renderer.renderer);
     const renderPass = new RenderPass(renderer.scene, renderer.camera);
     renderer.composer.addPass(renderPass);
+
+    const scanlinesPass = new ShaderPass(ScanlinesShader);
+    scanlinesPass.uniforms.resolution.value.set(
+      window.innerWidth * 0.5,
+      window.innerHeight * 0.5,
+    );
+    renderer.composer.addPass(scanlinesPass);
 
     renderer.glitchPass = new GlitchPass();
     renderer.glitchPass.enabled = false;
