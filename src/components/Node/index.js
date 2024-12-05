@@ -19,16 +19,28 @@ export const Node = (position) => {
     wireframe: false,
   });
   const sharedEdgesGeometry = new THREE.EdgesGeometry(sharedGeometry);
-  const sharedEdgesMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+  const sharedEdgesMaterial = new THREE.LineBasicMaterial({
+    color: 0x00ff00,
+    linewidth: 2,
+    opacity: 1,
+  });
 
   const createNodeMesh = () => {
     const nodeMesh = new THREE.Mesh(sharedGeometry, sharedMaterial.clone());
     nodeMesh.position.set(position.x, position.y, position.z);
+
     const edges = new THREE.LineSegments(
       sharedEdgesGeometry,
       sharedEdgesMaterial,
     );
+    const edges2 = new THREE.LineSegments(
+      sharedEdgesGeometry,
+      sharedEdgesMaterial,
+    );
+    edges2.scale.multiplyScalar(1.02);
+
     nodeMesh.add(edges);
+    nodeMesh.add(edges2);
     return nodeMesh;
   };
 
