@@ -13,11 +13,17 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
       0.1,
       1000,
     ),
-    renderer: new THREE.WebGLRenderer({ antialias: true }),
+    renderer: new THREE.WebGLRenderer({
+      antialias: true,
+      powerPreference: "high-performance",
+      precision: "mediump",
+    }),
     controls: null,
     composer: null,
     glitchPass: null,
   };
+
+  renderer.renderer.capabilities.maxTextureSize = 2048;
 
   const initialize = () => {
     renderer.camera.lookAt(0, 0, 0);
@@ -177,7 +183,12 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
   const animate = () => {
     requestAnimationFrame(animate);
     renderer.controls.update();
-    renderer.composer.render();
+    if (renderer.composer) {
+      renderer.composer.render();
+    } else {
+      renderer.renderer.render(renderer.scene, renderer.camera);
+    }
+    renderer.renderer.state.reset();
   };
 
   return {
