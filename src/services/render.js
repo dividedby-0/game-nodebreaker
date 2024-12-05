@@ -1,8 +1,8 @@
-import * as THREE from "/lib/three.module.js";
-import { OrbitControls } from "/lib/OrbitControls.js";
-import { EffectComposer } from "/lib/postprocessing/EffectComposer.js";
-import { RenderPass } from "/lib/postprocessing/RenderPass.js";
-import { GlitchPass } from "/lib/postprocessing/GlitchPass.js";
+import * as THREE from "../../lib/three.module.js"; 
+import { OrbitControls } from "../../lib/OrbitControls.js";
+import { EffectComposer } from "../../lib/postprocessing/EffectComposer.js";
+import { RenderPass } from "../../lib/postprocessing/RenderPass.js";
+import { GlitchPass } from "../../lib/postprocessing/GlitchPass.js";
 
 export const RenderService = (gameContainer, gameState, physicsService) => {
   const renderer = {

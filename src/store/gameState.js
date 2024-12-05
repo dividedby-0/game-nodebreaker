@@ -8,7 +8,7 @@ export const GameState = (eventBus) => {
     timerInterval: null,
     isProcessing: false,
     hiddenNodes: new Set(),
-    hasInteractedWithBreakableNode: false,
+    isBeingTraced: false,
   };
 
   return {
@@ -20,7 +20,7 @@ export const GameState = (eventBus) => {
     getHiddenNodes: () => state.hiddenNodes,
     isTimerStarted: () => state.timerStarted,
     isProcessing: () => state.isProcessing,
-    hasInteractedWithBreakable: () => state.hasInteractedWithBreakableNode,
+    isBeingTraced: () => state.isBeingTraced,
 
     // State setters
     setScore: (score) => {
@@ -47,8 +47,8 @@ export const GameState = (eventBus) => {
       state.isProcessing = processing;
       eventBus.emit("processing:update", processing);
     },
-    setInteractedWithBreakable: (value) => {
-      state.hasInteractedWithBreakableNode = value;
+    setTraced: (value) => {
+      state.isBeingTraced = value;
     },
 
     // Node-related

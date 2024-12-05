@@ -1,7 +1,7 @@
-import * as THREE from "/lib/three.module.js";
-import { EffectComposer } from "/lib/postprocessing/EffectComposer.js";
-import { GlitchPass } from "/lib/postprocessing/GlitchPass.js";
-import { RenderPass } from "/lib/postprocessing/RenderPass.js";
+import * as THREE from "../../lib/three.module.js";
+import { EffectComposer } from "../../lib/postprocessing/EffectComposer.js";
+import { GlitchPass } from "../../lib/postprocessing/GlitchPass.js";
+import { RenderPass } from "../../lib/postprocessing/RenderPass.js";
 
 export const GlitchService = (renderer, scene, camera) => {
   const pixelRatio = window.devicePixelRatio;

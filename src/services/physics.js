@@ -1,6 +1,6 @@
-import * as THREE from "/lib/three.module.js";
+import * as THREE from "../../lib/three.module.js";
 
-export const PhysicsService = (gameState, nodeNetwork) => {
+export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
   const physicsState = {
     gravity: -9.8,
     animationSpeed: 1.0,
@@ -8,6 +8,7 @@ export const PhysicsService = (gameState, nodeNetwork) => {
     blinkDuration: 100, // ms per blink
     showVisualObstructionRaycaster: false, // set to true for debugging
     debugRaycasterLine: null,
+    connectionLines: [],
   };
 
   // Node-related
@@ -146,7 +147,39 @@ export const PhysicsService = (gameState, nodeNetwork) => {
 
     const line = new THREE.Line(geometry, material);
     scene.add(line);
+    physicsState.connectionLines.push(line);
     return line;
+  };
+
+  const triggerTraceAnimation = () => {
+    if (physicsState.connectionLines.length === 0) {
+      console.log("No more lines to trace");
+      return;
+    }
+
+    const line = physicsState.connectionLines[0];
+    const startColor = new THREE.Color(0x00ffff);
+    const endColor = new THREE.Color(0xff0000);
+    const duration = 2000;
+    const startTime = Date.now();
+
+    function updateColor() {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const currentColor = new THREE.Color();
+      currentColor.lerpColors(startColor, endColor, progress);
+      line.material.color = currentColor;
+
+      if (progress < 1) {
+        requestAnimationFrame(updateColor);
+      } else {
+        physicsState.connectionLines.shift();
+        setTimeout(() => {
+          triggerTraceAnimation();
+        }, 2000);
+      }
+    }
+    updateColor();
   };
 
   // Camera-related
@@ -195,9 +228,11 @@ export const PhysicsService = (gameState, nodeNetwork) => {
 
   return {
     animateNodeRemoval,
+    triggerTraceAnimation,
     drawConnectionLine,
     checkVisualObstructions,
     unhideObstructingNodes,
     getState: () => ({ ...physicsState }),
+    getConnectionLines: () => physicsState.connectionLines,
   };
 };

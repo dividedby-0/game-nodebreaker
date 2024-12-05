@@ -1,4 +1,4 @@
-import * as THREE from "/lib/three.module.js";
+import * as THREE from "../../lib/three.module.js";
 
 export const InputService = (camera, eventBus, gameState) => {
   const inputState = {

@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'VT323';
+  src: url('../fonts/VT323-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -105,6 +113,7 @@ body {
   text-align: center;
 }
 
+/*Message-specific*/
 #message {
   position: fixed;
   width: 100vw;
@@ -133,15 +142,6 @@ body {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(1px);
   -webkit-backdrop-filter: blur(8px);
-}
-
-.message-terminal-caret {
-  display: inline-block;
-  background-color: var(--message-terminal-caret-color);
-  color: black;
-  position: relative;
-  width: 0.6em;
-  text-align: center;
 }
 
 /* Mobile-specific styles */

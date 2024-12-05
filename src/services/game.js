@@ -4,7 +4,7 @@ export const GameService = (
   eventBus,
   gameState,
   gameConfig,
-  physicsService
+  physicsService,
 ) => {
   const initialize = async () => {
     eventBus.emit("game:initialized");
@@ -20,12 +20,12 @@ export const GameService = (
       return;
     }
     const intersectedMeshes = raycaster.intersectObjects(
-      nodeNetwork.getNodesArray().map((node) => node.getMesh())
+      nodeNetwork.getNodesArray().map((node) => node.getMesh()),
     );
 
     if (intersectedMeshes.length > 0) {
       const raycasterFoundNode = intersectedMeshes.find(
-        (mesh) => mesh.face !== null
+        (mesh) => mesh.face !== null,
       );
       if (raycasterFoundNode) {
         const clickedNode = nodeNetwork
@@ -58,57 +58,58 @@ export const GameService = (
 
     gameState.setProcessing(false);
 
+    const previousNode =
+      gameState.getSelectedNodes()[gameState.getSelectedNodes().length - 1];
+    updateGameState(clickedNode, previousNode);
+
     if (clickedNode.isBreakable()) {
       if (gameState.getBreakerCount() <= 0) {
         return;
       }
       clickedNode.setValid(true);
-      handleBreakableNode(clickedNode);
+      handleBreakableNode(clickedNode, previousNode);
     }
 
     if (clickedNode.isBreaker()) {
-      handleBreakerNode(clickedNode);
+      handleBreakerNode(clickedNode, previousNode);
     } else {
-      handleNormalNode(clickedNode);
+      handleNormalNode(clickedNode, previousNode);
     }
-    const previousNode =
-      gameState.getSelectedNodes()[gameState.getSelectedNodes().length - 1];
 
-    updategameState(clickedNode, previousNode);
     renderService.focusCamOnNode(clickedNode);
-
     gameState.getSelectedNodes().push(clickedNode);
     nodeNetwork.findValidNextMoves(clickedNode);
   };
 
   // Node click handlers
 
-  const handleNormalNode = (clickedNode) => {
+  const handleNormalNode = (clickedNode, previousNode) => {
     gameState.setScore(
-      gameState.getScore() + gameConfig.game.scoreIncrement.normal
+      gameState.getScore() + gameConfig.game.scoreIncrement.normal,
     );
     eventBus.emit("score:update", gameState.getScore());
   };
 
-  const handleBreakableNode = (clickedNode) => {
+  const handleBreakableNode = (clickedNode, previousNode) => {
     gameState.setBreakerCount(gameState.getBreakerCount() - 1);
     gameState.setScore(
-      gameState.getScore() + gameConfig.game.scoreIncrement.breakable
+      gameState.getScore() + gameConfig.game.scoreIncrement.breakable,
     );
     eventBus.emit("score:update", gameState.getScore());
     eventBus.emit("breakers:update", gameState.getBreakerCount());
 
-    if (!gameState.hasInteractedWithBreakable()) {
+    if (!gameState.isBeingTraced()) {
+      gameState.setTraced(true);
       renderService.triggerGlitchEffect();
-      eventBus.emit("message:show", "YOU ARE BEING TRACED");
-      gameState.setInteractedWithBreakable(true);
+      eventBus.emit("message:show", "YOU'RE BEING TRACED");
+      physicsService.triggerTraceAnimation();
     }
   };
 
-  const handleBreakerNode = (clickedNode) => {
+  const handleBreakerNode = (clickedNode, previousNode) => {
     gameState.setBreakerCount(gameState.getBreakerCount() + 1);
     gameState.setScore(
-      gameState.getScore() + gameConfig.game.scoreIncrement.breaker
+      gameState.getScore() + gameConfig.game.scoreIncrement.breaker,
     );
     eventBus.emit("score:update", gameState.getScore());
     eventBus.emit("breakers:update", gameState.getBreakerCount());
@@ -119,8 +120,17 @@ export const GameService = (
   const isValidMove = (clickedNode) =>
     gameState.getSelectedNodes().length === 0 || clickedNode.isValid();
 
-  const updategameState = (clickedNode, previousNode) => {
+  const updateGameState = (clickedNode, previousNode) => {
     clickedNode.setSelected(true);
+
+    if (previousNode) {
+      physicsService.drawConnectionLine(
+        renderService.getScene(),
+        previousNode,
+        clickedNode,
+      );
+    }
+
     gameState.getSelectedNodes().push(clickedNode);
     nodeNetwork.findValidNextMoves(clickedNode);
     physicsService.animateNodeRemoval(clickedNode);
@@ -129,12 +139,6 @@ export const GameService = (
       gameState.startTimer();
       return;
     }
-
-    physicsService.drawConnectionLine(
-      renderService.getScene(),
-      clickedNode,
-      previousNode
-    );
   };
 
   return {
