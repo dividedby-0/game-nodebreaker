@@ -1,4 +1,4 @@
-import * as THREE from "../../lib/three.module.js"; 
+import * as THREE from "../../lib/three.module.js";
 import { OrbitControls } from "../../lib/OrbitControls.js";
 import { EffectComposer } from "../../lib/postprocessing/EffectComposer.js";
 import { RenderPass } from "../../lib/postprocessing/RenderPass.js";
@@ -11,7 +11,7 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
       75,
       window.innerWidth / window.innerHeight,
       0.1,
-      1000
+      1000,
     ),
     renderer: new THREE.WebGLRenderer({ antialias: true }),
     controls: null,
@@ -21,7 +21,7 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
 
   const initialize = () => {
     renderer.camera.lookAt(0, 0, 0);
-    animateInitialCamera();
+    // animateInitialCamera();
 
     // Setup post-processing
     renderer.composer = new EffectComposer(renderer.renderer);
@@ -50,7 +50,7 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
 
   renderer.controls = new OrbitControls(
     renderer.camera,
-    renderer.renderer.domElement
+    renderer.renderer.domElement,
   );
   renderer.controls.enabled = false;
   renderer.controls.enableDamping = true;
@@ -69,36 +69,41 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
 
   // Camera-related
 
-  const animateInitialCamera = () => {
-    gameState.setProcessing(true);
+  const startGameAnimations = () =>
+    new Promise((resolve) => {
+      gameState.setProcessing(true);
+      animateInitialCamera(() => {
+        gameState.setProcessing(false);
+        renderer.controls.enabled = true;
+        resolve();
+      });
+    });
 
+  const animateInitialCamera = (onComplete) => {
     const startPosition = {
       x: Math.random() * 5,
       y: Math.random() * 5,
       z: Math.random() * 5,
     };
     const endPosition = { x: 10, y: 10, z: 10 };
-    const duration = 2000; // ms
+    const duration = 2000;
     const startTime = Date.now();
 
     const animateCamera = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-
-      // Use smooth easing
       const easeProgress = 1 - Math.pow(1 - progress, 3);
 
       renderer.camera.position.set(
         startPosition.x + (endPosition.x - startPosition.x) * easeProgress,
         startPosition.y + (endPosition.y - startPosition.y) * easeProgress,
-        startPosition.z + (endPosition.z - startPosition.z) * easeProgress
+        startPosition.z + (endPosition.z - startPosition.z) * easeProgress,
       );
 
       if (progress < 1) {
         requestAnimationFrame(animateCamera);
       } else {
-        gameState.setProcessing(false);
-        renderer.controls.enabled = true;
+        if (onComplete) onComplete();
       }
     };
 
@@ -137,13 +142,13 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
       const newCameraPos = new THREE.Vector3().lerpVectors(
         startCameraPos,
         endCameraPos,
-        easeProgress
+        easeProgress,
       );
 
       const newTarget = new THREE.Vector3().lerpVectors(
         previousCamFocusPoint,
         node.getMesh().position,
-        easeProgress
+        easeProgress,
       );
 
       renderer.camera.position.copy(newCameraPos);
@@ -156,7 +161,7 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
           renderer.camera,
           node,
           gameState.getSelectedNodes(),
-          renderer.scene
+          renderer.scene,
         );
 
         gameState.setProcessing(false);
@@ -176,6 +181,7 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
 
   return {
     initialize,
+    startGameAnimations,
     getScene: () => renderer.scene,
     getCamera: () => renderer.camera,
     getControls: () => renderer.controls,

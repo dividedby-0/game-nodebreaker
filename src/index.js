@@ -35,11 +35,8 @@ const initialize = async () => {
     );
     const uiService = UIService(eventBus, gameState);
 
-    await Promise.all([
-      uiService.initialize(),
-      renderService.initialize(),
-      gameService.initialize(),
-    ]);
+    renderService.initialize();
+    await Promise.all([uiService.initialize(), gameService.initialize()]);
 
     const inputService = InputService(
       renderService.getCamera(),
@@ -57,6 +54,8 @@ const initialize = async () => {
     );
 
     viewManager.switchToView("gameView");
+
+    await renderService.startGameAnimations().then(gameService.initializeUI());
   } catch (error) {
     console.error("Failed to initialize game screen:", error);
     const loadingText = document.querySelector(".loading-text");

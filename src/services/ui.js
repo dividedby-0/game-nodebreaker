@@ -23,16 +23,16 @@ export const UIService = (eventBus, gameState) => {
 
   // Event listeners: initializers
 
-  eventBus.on("timer:initialize", (time) =>
-    terminalTextAnimation("timer", `Time: ${time.toFixed(2)}s`)
+  eventBus.on("score:initialize", (score) =>
+    terminalTextAnimation("score", `Score: ${score}`),
   );
 
-  eventBus.on("score:initialize", (score) =>
-    terminalTextAnimation("score", `Score: ${score}`)
+  eventBus.on("timer:initialize", (time) =>
+    terminalTextAnimation("timer", `Time: ${time.toFixed(2)}s`),
   );
 
   eventBus.on("breakers:initialize", (breakers) =>
-    terminalTextAnimation("breakers", `Breakers: ${breakers}`)
+    terminalTextAnimation("breakers", `Breakers: ${breakers}`),
   );
 
   eventBus.on("message:show", (text) => {
@@ -45,16 +45,16 @@ export const UIService = (eventBus, gameState) => {
 
   // Event listeners: updaters
 
-  eventBus.on("timer:update", (time) =>
-    updateUiElement("timer", `Time: ${(time || 0).toFixed(2)}s`)
+  eventBus.on("score:update", (score) =>
+    updateUiElement("score", `Score: ${score}`),
   );
 
-  eventBus.on("score:update", (score) =>
-    updateUiElement("score", `Score: ${score}`)
+  eventBus.on("timer:update", (time) =>
+    updateUiElement("timer", `Time: ${(time || 0).toFixed(2)}s`),
   );
 
   eventBus.on("breakers:update", (count) =>
-    updateUiElement("breakers", `Breakers: ${count}`)
+    updateUiElement("breakers", `Breakers: ${count}`),
   );
 
   // UI update methods
@@ -75,14 +75,14 @@ export const UIService = (eventBus, gameState) => {
     document.documentElement.style.setProperty(cssVars.text, uiState.textColor);
     document.documentElement.style.setProperty(
       cssVars.caret,
-      uiState.caretColor
+      uiState.caretColor,
     );
 
     const textElements = document.getElementsByClassName(
-      `${htmlElementId}-terminal-text`
+      `${htmlElementId}-terminal-text`,
     );
     const caretElements = document.getElementsByClassName(
-      `${htmlElementId}-terminal-caret`
+      `${htmlElementId}-terminal-caret`,
     );
 
     Array.from(textElements).forEach((element) => {
@@ -127,7 +127,7 @@ export const UIService = (eventBus, gameState) => {
       }
 
       const caret = htmlElement.querySelector(
-        `.${htmlElementId}-terminal-caret`
+        `.${htmlElementId}-terminal-caret`,
       );
       if (caret) {
         caret.remove();

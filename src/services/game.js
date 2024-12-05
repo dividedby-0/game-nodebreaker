@@ -8,6 +8,9 @@ export const GameService = (
 ) => {
   const initialize = async () => {
     eventBus.emit("game:initialized");
+  };
+
+  const initializeUI = async () => {
     await eventBus.emit("score:initialize", gameState.getScore());
     await eventBus.emit("timer:initialize", gameState.getTimeElapsed());
     await eventBus.emit("breakers:initialize", gameState.getBreakerCount());
@@ -143,6 +146,7 @@ export const GameService = (
 
   return {
     initialize,
+    initializeUI,
     handleNodeClick,
     getNodeNetwork: () => nodeNetwork,
     getGameState: () => ({ ...gameState }),
