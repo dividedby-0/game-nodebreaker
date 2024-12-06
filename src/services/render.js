@@ -29,6 +29,7 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
 
   const initialize = () => {
     renderer.camera.lookAt(0, 0, 0);
+    renderer.controls.enabled = false;
 
     // Setup post-processing
     renderer.composer = new EffectComposer(renderer.renderer);
@@ -90,7 +91,7 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
       gameState.setProcessing(true);
       animateInitialCamera(() => {
         gameState.setProcessing(false);
-        renderer.controls.enabled = true;
+        // renderer.controls.enabled = true;
         resolve();
       });
     });

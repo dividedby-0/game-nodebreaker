@@ -1,4 +1,4 @@
-export const UIService = (eventBus, gameState) => {
+export const UIService = (eventBus, gameState, renderService) => {
   const htmlElements = {
     score: document.getElementById("score"),
     timer: document.getElementById("timer"),
@@ -58,6 +58,40 @@ export const UIService = (eventBus, gameState) => {
   );
 
   // UI update methods
+
+  const toggleModal = (show, text = "") => {
+    const modal = document.querySelector(".modal");
+    if (modal) {
+      if (show) {
+        modal.style.display = "block";
+        modal.classList.remove("modal-fadeout");
+        gameState.setProcessing(true);
+        if (text) {
+          const modalText = modal.querySelector(".modal-text");
+          if (modalText) {
+            modalText.innerHTML = text;
+          }
+        }
+        modal.onclick = () => {
+          modal.classList.add("modal-fadeout");
+          setTimeout(() => {
+            modal.style.display = "none";
+            modal.classList.remove("modal-fadeout");
+            gameState.setProcessing(false);
+            renderService.getControls().enabled = true;
+          }, 2000);
+        };
+      } else {
+        modal.classList.add("modal-fadeout");
+        setTimeout(() => {
+          modal.style.display = "none";
+          modal.classList.remove("modal-fadeout");
+          gameState.setProcessing(false);
+          renderService.getControls().enabled = true;
+        }, 2000);
+      }
+    }
+  };
 
   const updateUiElement = (elementId, text) => {
     const element = htmlElements[elementId];
@@ -143,5 +177,6 @@ export const UIService = (eventBus, gameState) => {
 
   return {
     initialize,
+    toggleModal,
   };
 };

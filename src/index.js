@@ -15,9 +15,10 @@ const initialize = async () => {
   viewManager.initialize();
 
   try {
+    const gameState = GameState(eventBus);
+    gameState.setProcessing(true);
     const gameConfig = GameConfig;
     const gameContainer = document.getElementById("game-container");
-    const gameState = GameState(eventBus);
     const nodeNetwork = NodeNetwork(gameState);
     const physicsService = PhysicsService(gameState, nodeNetwork, eventBus);
     const renderService = RenderService(
@@ -33,7 +34,7 @@ const initialize = async () => {
       gameConfig,
       physicsService,
     );
-    const uiService = UIService(eventBus, gameState);
+    const uiService = UIService(eventBus, gameState, renderService);
 
     renderService.initialize();
     await Promise.all([uiService.initialize(), gameService.initialize()]);
@@ -55,7 +56,19 @@ const initialize = async () => {
 
     viewManager.switchToView("gameView");
 
-    await renderService.startGameAnimations().then(gameService.initializeUI());
+    await renderService.startGameAnimations();
+    await gameService.initializeUI();
+
+    uiService.toggleModal(
+      true,
+      "Welcome to NodeBreaker.<br>The blocks you see are <i>nodes</i>.<br>Tap nodes to link them.<br>" +
+        "<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>Red</span> " +
+        "nodes are <i>data nodes</i>, you can only link to them if you have <i>breakers</i>.<br>" +
+        "<span style='color: #ffff00; text-shadow: 0 0 5px rgba(255, 255, 0, 0.7), 0 0 10px rgba(255, 255, 0, 0.5)'>Yellow</span> " +
+        "nodes give you breakers.<br>You must get all the " +
+        "<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>data</span> " +
+        "nodes to win.<br>Try not to get stuck.<br>Tap to dismiss this message.<br>Good luck! ;)",
+    );
   } catch (error) {
     console.error("Failed to initialize game screen:", error);
     const loadingText = document.querySelector(".loading-text");

@@ -255,6 +255,66 @@ body {
   -webkit-backdrop-filter: blur(8px);
 }
 
+/*Modal-related*/
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 30px rgba(0, 255, 0, 0.3);
+  border: 2px solid rgba(0, 255, 0, 0.7);
+  width: 80vw;
+  min-height: 20vh;
+  max-height: 80vh;
+  overflow-y: auto;
+  text-align: center;
+  border-radius: 15px;
+  opacity: 0;
+  animation: modalFadeIn 2s ease-out forwards;
+}
+
+.modal-text {
+  font-family: "VT323", monospace;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: #00ff00;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7),
+  0 0 10px rgba(0, 255, 0, 0.5);
+  padding: 20px 0;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.modal-fadeout {
+  animation: modalFadeOut 2s ease-out forwards;
+}
+
+@keyframes modalFadeOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -52%);
+  }
+}
+
 /*LOADING SCREEN VIEW*/
 
 #loading-view {
