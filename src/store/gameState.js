@@ -1,6 +1,7 @@
 export const GameState = (eventBus) => {
   const state = {
     score: 0,
+    highScore: parseInt(localStorage.getItem("nodebreaker_highscore")) || 0,
     selectedNodes: [],
     breakerCount: 0,
     timeElapsed: 0,
@@ -107,6 +108,11 @@ export const GameState = (eventBus) => {
     },
 
     showGameOver: (reason = "") => {
+      const isNewHighScore = state.score > state.highScore;
+      if (isNewHighScore) {
+        state.highScore = state.score;
+        localStorage.setItem("nodebreaker_highscore", state.highScore);
+      }
       state.isProcessing = false;
       eventBus.emit("scene:flash");
       eventBus.emit("modal:show", {
@@ -114,9 +120,13 @@ export const GameState = (eventBus) => {
           `<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>GAME OVER${reason ? `<br><br>${reason}` : ""}</span><br><br>` +
           `Final Score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.score}</span><br>` +
           `Time elapsed: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.timeElapsed.toFixed(2)}s</span><br><br>` +
-          "(Tap to dismiss)",
+          (isNewHighScore
+            ? "<span style='color: #ffff00'>New High Score!</span>"
+            : `Your highest score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.highScore}</span>`) +
+          "<br><br>(Tap to dismiss)",
         enforceDelay: true,
       });
     },
+    getHighScore: () => state.highScore,
   };
 };
