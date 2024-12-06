@@ -278,6 +278,11 @@ body {
   border-radius: 15px;
   opacity: 0;
   animation: modalFadeIn 2s ease-out forwards;
+  cursor: pointer;
+  user-select: none; /* Prevents text selection */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 .modal-text {
@@ -287,6 +292,10 @@ body {
   text-shadow: 0 0 5px rgba(0, 255, 0, 0.7),
   0 0 10px rgba(0, 255, 0, 0.5);
   padding: 20px 0;
+  user-select: none; /* Prevents text selection */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE/Edge */
 }
 
 @keyframes modalFadeIn {

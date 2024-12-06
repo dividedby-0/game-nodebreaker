@@ -105,5 +105,18 @@ export const GameState = (eventBus) => {
       state.hiddenNodes.clear();
       eventBus.emit("state:reset");
     },
+
+    showGameOver: (reason = "") => {
+      state.isProcessing = false;
+      eventBus.emit("scene:flash");
+      eventBus.emit("modal:show", {
+        message:
+          `<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>GAME OVER${reason ? `<br><br>${reason}` : ""}</span><br><br>` +
+          `Final Score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.score}</span><br>` +
+          `Time elapsed: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.timeElapsed.toFixed(2)}s</span><br><br>` +
+          "(Tap to dismiss)",
+        enforceDelay: true,
+      });
+    },
   };
 };

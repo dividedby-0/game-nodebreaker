@@ -25,6 +25,7 @@ const initialize = async () => {
       gameContainer,
       gameState,
       physicsService,
+      eventBus,
     );
     const gameService = GameService(
       renderService,
@@ -61,13 +62,13 @@ const initialize = async () => {
 
     uiService.toggleModal(
       true,
-      "Welcome to NodeBreaker.<br>The blocks you see are <i>nodes</i>.<br>Tap nodes to link them.<br>" +
+      "Welcome to NodeBreaker<br><br>The blocks you see are <i>nodes</i>.<br>Tap nodes to link them.<br>" +
         "<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>Red</span> " +
         "nodes are <i>data nodes</i>, you can only link to them if you have <i>breakers</i>.<br>" +
         "<span style='color: #ffff00; text-shadow: 0 0 5px rgba(255, 255, 0, 0.7), 0 0 10px rgba(255, 255, 0, 0.5)'>Yellow</span> " +
         "nodes give you breakers.<br>You must get all the " +
         "<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>data</span> " +
-        "nodes to win.<br>Try not to get stuck.<br>Tap to dismiss this message.<br>Good luck! ;)",
+        "nodes to win.<br>Try not to get stuck.<br>Good luck! ;)<br><br>(Tap to dismiss this message)<br>",
     );
   } catch (error) {
     console.error("Failed to initialize game screen:", error);

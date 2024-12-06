@@ -7,6 +7,7 @@ export const GameService = (
   physicsService,
 ) => {
   const initialize = async () => {
+    gameState.setProcessing(true);
     eventBus.emit("game:initialized");
   };
 
@@ -103,6 +104,7 @@ export const GameService = (
 
     if (!gameState.isBeingTraced()) {
       gameState.setTraced(true);
+      eventBus.emit("scene:flash");
       renderService.triggerGlitchEffect();
       eventBus.emit("message:show", "YOU'RE BEING TRACED");
       physicsService.triggerTraceAnimation();

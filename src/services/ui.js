@@ -57,9 +57,21 @@ export const UIService = (eventBus, gameState, renderService) => {
     updateUiElement("breakers", `Breakers: ${count}`),
   );
 
+  eventBus.on("message:hide", () => {
+    const messageElement = htmlElements.message;
+    if (messageElement) {
+      messageElement.innerHTML = "";
+      messageElement.style.animation = "none";
+    }
+  });
+
+  eventBus.on("modal:show", ({ message }) => {
+    toggleModal(true, message);
+  });
+
   // UI update methods
 
-  const toggleModal = (show, text = "") => {
+  const toggleModal = (show, text = "", options = {}) => {
     const modal = document.querySelector(".modal");
     if (modal) {
       if (show) {
@@ -72,7 +84,18 @@ export const UIService = (eventBus, gameState, renderService) => {
             modalText.innerHTML = text;
           }
         }
+
+        let canDismiss = !options.enforceDelay && !text.includes("GAME OVER");
+        if (!canDismiss) {
+          setTimeout(() => {
+            canDismiss = true;
+          }, 3000);
+        }
+
         modal.onclick = () => {
+          if (!canDismiss) {
+            return;
+          }
           modal.classList.add("modal-fadeout");
           setTimeout(() => {
             modal.style.display = "none";

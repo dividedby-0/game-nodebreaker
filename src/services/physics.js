@@ -158,7 +158,11 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
 
   const triggerTraceAnimation = () => {
     if (physicsState.connectionLines.length === 0) {
-      console.log("No more lines to trace");
+      gameState.setProcessing(true);
+      gameState.stopTimer();
+      eventBus.emit("scene:flash");
+      eventBus.emit("message:hide");
+      gameState.showGameOver("You have been traced :/");
       return;
     }
 

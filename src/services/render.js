@@ -6,7 +6,12 @@ import { GlitchPass } from "../../lib/postprocessing/GlitchPass.js";
 import { ScanlinesShader } from "../../lib/shaders/scanlines.js";
 import { ShaderPass } from "../../lib/postprocessing/ShaderPass.js";
 
-export const RenderService = (gameContainer, gameState, physicsService) => {
+export const RenderService = (
+  gameContainer,
+  gameState,
+  physicsService,
+  eventBus,
+) => {
   const renderer = {
     scene: new THREE.Scene(),
     camera: new THREE.PerspectiveCamera(
@@ -49,6 +54,15 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
 
     renderer.composer.setPixelRatio(window.devicePixelRatio * 0.5);
 
+    // Event listeners
+    eventBus.on("glitch:trigger", () => {
+      triggerGlitchEffect();
+    });
+
+    eventBus.on("scene:flash", () => {
+      flashScene();
+    });
+
     animate();
   };
 
@@ -84,13 +98,39 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
     }, 1000); // Disable after 1 second
   };
 
+  const flashScene = () => {
+    const originalColor = new THREE.Color(0x000000);
+    renderer.scene.background = new THREE.Color(0xff0000);
+
+    const startTime = Date.now();
+    const duration = 2000;
+
+    const fadeBack = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+      const currentColor = new THREE.Color().lerpColors(
+        new THREE.Color(0xff0000),
+        originalColor,
+        easeProgress,
+      );
+      renderer.scene.background = currentColor;
+
+      if (progress < 1) {
+        requestAnimationFrame(fadeBack);
+      }
+    };
+    requestAnimationFrame(fadeBack);
+  };
+
   // Camera-related
 
   const startGameAnimations = () =>
     new Promise((resolve) => {
       gameState.setProcessing(true);
       animateInitialCamera(() => {
-        gameState.setProcessing(false);
+        // gameState.setProcessing(false);
         // renderer.controls.enabled = true;
         resolve();
       });
@@ -120,7 +160,9 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
       if (progress < 1) {
         requestAnimationFrame(animateCamera);
       } else {
-        if (onComplete) onComplete();
+        if (onComplete) {
+          onComplete();
+        }
       }
     };
 
@@ -172,7 +214,6 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
       renderer.controls.target.copy(newTarget);
       renderer.controls.update();
 
-      // After animation is complete
       if (progress >= 1) {
         physicsService.checkVisualObstructions(
           renderer.camera,
@@ -211,5 +252,6 @@ export const RenderService = (gameContainer, gameState, physicsService) => {
     onWindowResize,
     focusCamOnNode,
     triggerGlitchEffect,
+    flashScene,
   };
 };
