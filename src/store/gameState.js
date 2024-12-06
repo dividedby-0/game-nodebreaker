@@ -10,6 +10,7 @@ export const GameState = (eventBus) => {
     isProcessing: false,
     hiddenNodes: new Set(),
     isBeingTraced: false,
+    gameAlreadyInitialized: false,
   };
 
   return {
@@ -22,8 +23,12 @@ export const GameState = (eventBus) => {
     isTimerStarted: () => state.timerStarted,
     isProcessing: () => state.isProcessing,
     isBeingTraced: () => state.isBeingTraced,
+    getGameAlreadyInitialized: () => state.gameAlreadyInitialized,
 
     // State setters
+    setGameAlreadyInitialized: (initialized) => {
+      state.gameAlreadyInitialized = true;
+    },
     setScore: (score) => {
       state.score = score;
       eventBus.emit("score:update", score);
@@ -91,8 +96,11 @@ export const GameState = (eventBus) => {
     on: eventBus.on,
     off: eventBus.off,
 
-    // Reset game state
     reset: () => {
+      state.highScore =
+        parseInt(localStorage.getItem("nodebreaker_highscore")) || 0;
+      state.isBeingTraced = false;
+      state.gameAlreadyInitialized = true;
       state.score = 0;
       state.selectedNodes = [];
       state.breakerCount = 0;

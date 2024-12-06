@@ -223,7 +223,7 @@ body {
   text-align: center;
 }
 
-/*Message-specific*/
+/*Traced message-specific*/
 #message {
   position: fixed;
   width: 100vw;
@@ -319,6 +319,71 @@ body {
     transform: translate(-50%, -52%);
   }
 }
+
+/*Reset button-related*/
+.reset-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  z-index: 1000;
+  background: transparent;
+  border: none;
+  padding: 0;
+  opacity: 0;
+}
+
+.reset-button svg {
+  width: 100%;
+  height: 100%;
+  stroke: #ff0000;
+  stroke-width: 2;
+  fill: transparent;
+  filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.7))
+  drop-shadow(0 0 10px rgba(255, 0, 0, 0.5));
+}
+
+.reset-button circle {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.reset-button svg text {
+  stroke: none;
+  fill: #ff0000;
+  filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.7))
+  drop-shadow(0 0 10px rgba(255, 0, 0, 0.5));
+}
+
+.reset-fadein {
+  animation: resetFadeIn 2s ease-out forwards;
+}
+
+@keyframes pulse {
+  0% {
+    stroke-width: 2;
+    stroke-opacity: 1;
+  }
+  50% {
+    stroke-width: 3;
+    stroke-opacity: 0.8;
+  }
+  100% {
+    stroke-width: 2;
+    stroke-opacity: 1;
+  }
+}
+
+@keyframes resetFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 
 /*LOADING SCREEN VIEW*/
 

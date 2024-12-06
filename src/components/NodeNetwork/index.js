@@ -80,7 +80,7 @@ export const NodeNetwork = (gameState) => {
   const setRandomBreakerNodes = () => {
     const indices = [...Array(nodeNetwork.nodesArray.length).keys()].filter(
       (i) =>
-        nodeNetwork.nodesArray[i] && !nodeNetwork.nodesArray[i].isBreakable()
+        nodeNetwork.nodesArray[i] && !nodeNetwork.nodesArray[i].isBreakable(),
     );
 
     for (let i = indices.length - 1; i > 0; i--) {
@@ -111,7 +111,7 @@ export const NodeNetwork = (gameState) => {
     const validMoves = Array.from(node.getConnections()).filter(
       (connectedNode) =>
         !connectedNode.isSelected() &&
-        (!connectedNode.isBreakable() || gameState.getBreakerCount() > 0)
+        (!connectedNode.isBreakable() || gameState.getBreakerCount() > 0),
     );
 
     nodeNetwork.nodesArray.forEach((node) => {
@@ -132,12 +132,25 @@ export const NodeNetwork = (gameState) => {
 
   const getNodesArray = () => nodeNetwork.nodesArray;
 
+  const reset = (scene) => {
+    nodeNetwork.nodesArray.forEach((node) => {
+      scene.remove(node.getMesh());
+    });
+    nodeNetwork.nodesArray = [];
+    initializeNodes();
+    setupNodesConnections();
+    setRandomBreakableNodes();
+    setRandomBreakerNodes();
+    addToScene(scene);
+  };
+
   initializeNodes();
   setupNodesConnections();
   setRandomBreakableNodes();
   setRandomBreakerNodes();
 
   return {
+    reset,
     addToScene,
     findValidNextMoves,
     getNodesArray,

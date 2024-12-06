@@ -158,6 +158,10 @@ export const RenderService = (
         startPosition.z + (endPosition.z - startPosition.z) * easeProgress,
       );
 
+      renderer.camera.lookAt(0, 0, 0);
+      renderer.controls.target.set(0, 0, 0);
+      renderer.controls.update();
+
       if (progress < 1) {
         requestAnimationFrame(animateCamera);
       } else {
@@ -232,6 +236,15 @@ export const RenderService = (
     animate();
   };
 
+  const resetCamera = () => {
+    renderer.camera.position.set(10, 10, 10);
+    renderer.camera.lookAt(0, 0, 0);
+    if (renderer.controls) {
+      renderer.controls.target.set(0, 0, 0);
+      renderer.controls.update();
+    }
+  };
+
   const animate = () => {
     requestAnimationFrame(animate);
     renderer.controls.update();
@@ -250,9 +263,13 @@ export const RenderService = (
     getCamera: () => renderer.camera,
     getControls: () => renderer.controls,
     getRenderer: () => renderer.renderer,
+    setControls: (value) => {
+      renderer.controls.enabled = value;
+    },
     onWindowResize,
     focusCamOnNode,
     triggerGlitchEffect,
     flashScene,
+    resetCamera,
   };
 };

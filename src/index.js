@@ -55,10 +55,33 @@ const initialize = async () => {
       false,
     );
 
+    eventBus.on("game:reset", async () => {
+      if (gameState.getGameAlreadyInitialized() === true) {
+        renderService.setControls(false);
+        gameState.setProcessing(true);
+        gameState.reset();
+        physicsService.clearConnectionLines(renderService.getScene());
+        nodeNetwork.reset(renderService.getScene());
+        renderService.resetCamera();
+        inputService.setupEventListeners(
+          renderService.getRenderer().domElement,
+        );
+        eventBus.emit("message:hide");
+        await renderService.startGameAnimations();
+        await gameService.initializeUI();
+        await gameState.setProcessing(false);
+        await renderService.setControls(true);
+      }
+    });
+
     viewManager.switchToView("gameView");
 
-    await renderService.startGameAnimations();
-    await gameService.initializeUI();
+    if (gameState.getGameAlreadyInitialized() === false) {
+      await renderService.startGameAnimations();
+      await gameService.initializeUI();
+      await gameState.setGameAlreadyInitialized(true);
+      await gameState.setProcessing(false);
+    }
 
     uiService.toggleModal(
       true,
@@ -68,7 +91,11 @@ const initialize = async () => {
         "<span style='color: #ffff00; text-shadow: 0 0 5px rgba(255, 255, 0, 0.7), 0 0 10px rgba(255, 255, 0, 0.5)'>Yellow</span> " +
         "nodes give you breakers.<br>You must get all the " +
         "<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>data</span> " +
-        "nodes to win.<br>Try not to get stuck.<br>Good luck! ;)<br><br>(Tap to dismiss this message)<br>",
+        "nodes to win.<br>" +
+        "Also, try not to get stuck.<br>" +
+        "Tap and hold the <span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>(R)</span> button to reset the game.<br><br>" +
+        "Good luck! ;)<br><br>" +
+        "(Tap to dismiss this message)<br>",
     );
   } catch (error) {
     console.error("Failed to initialize game screen:", error);

@@ -10,6 +10,7 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
     debugRaycasterLine: null,
     connectionLines: [],
   };
+  const redLines = new Map();
 
   // Node-related
 
@@ -134,9 +135,8 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
 
   // Lines-related
   const lineGeometryPool = [];
-  const getLineGeometry = () => {
-    return lineGeometryPool.pop() || new THREE.BufferGeometry();
-  };
+  const getLineGeometry = () =>
+    lineGeometryPool.pop() || new THREE.BufferGeometry();
 
   const drawConnectionLine = (scene, fromNode, toNode) => {
     const geometry = getLineGeometry();
@@ -153,6 +153,7 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
     const line = new THREE.Line(geometry, material);
     scene.add(line);
     physicsState.connectionLines.push(line);
+    redLines.set(line, false);
     return line;
   };
 
@@ -165,29 +166,29 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
       gameState.showGameOver("You have been traced :/");
       return;
     }
-
-    const line = physicsState.connectionLines[0];
     const startColor = new THREE.Color(0x00ffff);
     const endColor = new THREE.Color(0xff0000);
     const duration = 2000;
     const startTime = Date.now();
 
-    function updateColor() {
+    const updateColor = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const currentColor = new THREE.Color();
+      const line = physicsState.connectionLines[0];
       currentColor.lerpColors(startColor, endColor, progress);
       line.material.color = currentColor;
 
       if (progress < 1) {
         requestAnimationFrame(updateColor);
       } else {
+        redLines.set(line, true);
         physicsState.connectionLines.shift();
         setTimeout(() => {
           triggerTraceAnimation();
         }, 2000);
       }
-    }
+    };
     updateColor();
   };
 
@@ -234,12 +235,33 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
     }
   };
 
+  const clearConnectionLines = (scene) => {
+    if (!scene) {
+      return;
+    }
+    physicsState.connectionLines.forEach((line) => {
+      if (line && scene.children.includes(line)) {
+        scene.remove(line);
+        line.geometry.dispose();
+        line.material.dispose();
+      }
+    });
+    redLines.forEach((value, line) => {
+      scene.remove(line);
+      line.geometry.dispose();
+      line.material.dispose();
+    });
+    redLines.clear();
+    physicsState.connectionLines = [];
+  };
+
   return {
     animateNodeRemoval,
     triggerTraceAnimation,
     drawConnectionLine,
     checkVisualObstructions,
     unhideObstructingNodes,
+    clearConnectionLines,
     getState: () => ({ ...physicsState }),
     getConnectionLines: () => physicsState.connectionLines,
   };

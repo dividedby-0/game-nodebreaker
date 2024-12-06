@@ -15,6 +15,7 @@ export const GameService = (
     await eventBus.emit("score:initialize", gameState.getScore());
     await eventBus.emit("timer:initialize", gameState.getTimeElapsed());
     await eventBus.emit("breakers:initialize", gameState.getBreakerCount());
+    await eventBus.emit("reset:initialize");
   };
 
   // Event listeners

@@ -35,6 +35,55 @@ export const UIService = (eventBus, gameState, renderService) => {
     terminalTextAnimation("breakers", `Breakers: ${breakers}`),
   );
 
+  eventBus.on("reset:initialize", () => {
+    const resetButton = document.querySelector(".reset-button");
+    resetButton.classList.add("reset-fadein");
+
+    let pressTimer;
+
+    resetButton.addEventListener("mousedown", () => {
+      pressTimer = setTimeout(() => {
+        eventBus.emit("game:reset");
+      }, 1000); // Hold for 1 sec
+    });
+
+    resetButton.addEventListener("mouseup", () => {
+      clearTimeout(pressTimer);
+    });
+
+    let touchStartTime;
+    const HOLD_DURATION = 1000;
+    resetButton.addEventListener(
+      "touchstart",
+      (event) => {
+        event.preventDefault();
+        touchStartTime = Date.now();
+      },
+      // { passive: true },
+    );
+
+    resetButton.addEventListener(
+      "touchcancel",
+      () => {
+        touchStartTime = null;
+      },
+      // { passive: true },
+    );
+
+    resetButton.addEventListener(
+      "touchend",
+      (event) => {
+        const touchEndTime = Date.now();
+        const touchDuration = touchEndTime - touchStartTime;
+
+        if (touchDuration >= HOLD_DURATION) {
+          eventBus.emit("game:reset");
+        }
+      },
+      // { passive: true },
+    );
+  });
+
   eventBus.on("message:show", (text) => {
     const messageElement = htmlElements.message;
     if (messageElement) {

@@ -7,6 +7,7 @@ export const InputService = (camera, eventBus, gameState) => {
     mouse: new THREE.Vector2(),
     raycaster: new THREE.Raycaster(),
   };
+  let pointerDownHandler, pointerMoveHandler, pointerUpHandler;
 
   const handleClick = (event) => {
     inputState.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -19,26 +20,44 @@ export const InputService = (camera, eventBus, gameState) => {
     });
   };
 
+  const cleanup = (domElement) => {
+    if (pointerDownHandler) {
+      domElement.removeEventListener("pointerdown", pointerDownHandler);
+    }
+    if (pointerMoveHandler) {
+      domElement.removeEventListener("pointermove", pointerMoveHandler);
+    }
+    if (pointerUpHandler) {
+      domElement.removeEventListener("pointerup", pointerUpHandler);
+    }
+  };
+
   const setupEventListeners = (domElement) => {
-    domElement.addEventListener("pointerdown", () => {
+    cleanup(domElement);
+
+    pointerDownHandler = () => {
       inputState.isPointerDown = true;
       inputState.pointerMoved = false;
-    });
+    };
 
-    domElement.addEventListener("pointermove", () => {
+    pointerMoveHandler = () => {
       if (inputState.isPointerDown) {
         inputState.pointerMoved = true;
       }
-    });
+    };
 
-    domElement.addEventListener("pointerup", (event) => {
-      // to avoid misclicks
+    pointerUpHandler = (event) => {
+      // Avoid misclicks
       if (!inputState.pointerMoved) {
         handleClick(event);
       }
       inputState.isPointerDown = false;
       inputState.pointerMoved = false;
-    });
+    };
+
+    domElement.addEventListener("pointerdown", pointerDownHandler);
+    domElement.addEventListener("pointermove", pointerMoveHandler);
+    domElement.addEventListener("pointerup", pointerUpHandler);
   };
 
   return {
