@@ -11,7 +11,7 @@ body {
   padding: 0;
   overflow: hidden;
   background-color: #000;
-  touch-action: none; /* Prevents default touch behaviors */
+  touch-action: none;
 }
 
 .view {
@@ -89,9 +89,6 @@ body {
   text-shadow:
           0 0 5px rgba(0, 255, 0, 0.7),
           0 0 10px rgba(0, 255, 0, 0.5);
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(1px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .loading-text::after {
@@ -101,11 +98,6 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-          transparent 50%,
-          rgba(0, 255, 0, 0.25) 50%
-  );
-  background-size: 100% 4px;
   animation: scanlines 1s steps(30) infinite;
   pointer-events: none;
 }
@@ -128,6 +120,22 @@ body {
 #game-container {
   width: 100vw;
   height: 100vh;
+  background: linear-gradient(45deg, #000000, #003300);
+  animation: gradientBG 2s ease infinite;
+  background-size: 200% 200%;
+  opacity: 1;
+}
+
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 #score-timer-container {
@@ -144,10 +152,10 @@ body {
 #timer {
   letter-spacing: 1px;
   cursor: default;
-  user-select: none; /* Prevents text selection */
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE/Edge */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* Score-specific */
@@ -157,9 +165,6 @@ body {
   color: var(--score-terminal-text-color);
   position: relative;
   display: inline-block;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(1px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .score-terminal-caret {
@@ -178,9 +183,6 @@ body {
   color: var(--timer-terminal-text-color);
   position: relative;
   display: inline-block;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(1px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .timer-terminal-caret {
@@ -198,10 +200,10 @@ body {
   bottom: 20px;
   right: 20px;
   cursor: default;
-  user-select: none; /* Prevents text selection */
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE/Edge */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .breakers-terminal-text {
@@ -210,9 +212,6 @@ body {
   color: var(--breakers-terminal-text-color);
   position: relative;
   display: inline-block;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(1px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .breakers-terminal-caret {
@@ -250,9 +249,6 @@ body {
 }
 
 .message-terminal-text {
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(1px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 /*Modal-related*/
@@ -279,10 +275,10 @@ body {
   opacity: 0;
   animation: modalFadeIn 2s ease-out forwards;
   cursor: pointer;
-  user-select: none; /* Prevents text selection */
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE/Edge */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .modal-text {
@@ -292,10 +288,10 @@ body {
   text-shadow: 0 0 5px rgba(0, 255, 0, 0.7),
   0 0 10px rgba(0, 255, 0, 0.5);
   padding: 20px 0;
-  user-select: none; /* Prevents text selection */
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE/Edge */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 @keyframes modalFadeIn {

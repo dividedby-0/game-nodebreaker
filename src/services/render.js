@@ -24,6 +24,7 @@ export const RenderService = (
       antialias: true,
       powerPreference: "high-performance",
       precision: "mediump",
+      alpha: true,
     }),
     controls: null,
     composer: null,
@@ -33,6 +34,9 @@ export const RenderService = (
   renderer.renderer.capabilities.maxTextureSize = 2048;
 
   const initialize = () => {
+    renderer.renderer.setClearColor(0x000000, 0);
+    renderer.scene.background = null;
+    // renderer.renderer.setClearAlpha(0);
     renderer.camera.lookAt(0, 0, 0);
     renderer.controls.enabled = false;
 
@@ -77,7 +81,6 @@ export const RenderService = (
 
   renderer.renderer.setSize(window.innerWidth, window.innerHeight);
   gameContainer.appendChild(renderer.renderer.domElement);
-  renderer.scene.background = new THREE.Color(0x000000);
 
   renderer.controls = new OrbitControls(
     renderer.camera,
@@ -99,8 +102,8 @@ export const RenderService = (
   };
 
   const flashScene = () => {
-    const originalColor = new THREE.Color(0x000000);
     renderer.scene.background = new THREE.Color(0xff0000);
+    renderer.renderer.setClearAlpha(1);
 
     const startTime = Date.now();
     const duration = 2000;
@@ -110,15 +113,15 @@ export const RenderService = (
       const progress = Math.min(elapsed / duration, 1);
       const easeProgress = 1 - Math.pow(1 - progress, 3);
 
-      const currentColor = new THREE.Color().lerpColors(
-        new THREE.Color(0xff0000),
-        originalColor,
-        easeProgress,
-      );
-      renderer.scene.background = currentColor;
-
       if (progress < 1) {
+        renderer.scene.background = new THREE.Color(0xff0000).multiplyScalar(
+          1 - easeProgress,
+        );
+        renderer.renderer.setClearAlpha(1 - easeProgress);
         requestAnimationFrame(fadeBack);
+      } else {
+        renderer.scene.background = null;
+        renderer.renderer.setClearAlpha(0);
       }
     };
     requestAnimationFrame(fadeBack);
@@ -130,8 +133,6 @@ export const RenderService = (
     new Promise((resolve) => {
       gameState.setProcessing(true);
       animateInitialCamera(() => {
-        // gameState.setProcessing(false);
-        // renderer.controls.enabled = true;
         resolve();
       });
     });
