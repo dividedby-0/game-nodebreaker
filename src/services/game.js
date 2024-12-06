@@ -122,8 +122,17 @@ export const GameService = (
 
   // Auxiliary methods
 
-  const isValidMove = (clickedNode) =>
-    gameState.getSelectedNodes().length === 0 || clickedNode.isValid();
+  const isValidMove = (clickedNode) => {
+    if (
+      gameState.getSelectedNodes().length === 0 &&
+      clickedNode.isBreakable() &&
+      gameState.getBreakerCount() <= 0
+    ) {
+      return false;
+    }
+
+    return gameState.getSelectedNodes().length === 0 || clickedNode.isValid();
+  };
 
   const updateGameState = (clickedNode, previousNode) => {
     clickedNode.setSelected(true);
