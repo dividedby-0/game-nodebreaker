@@ -158,6 +158,10 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
   };
 
   const triggerTraceAnimation = () => {
+    if (!gameState.isBeingTraced() === true) {
+      return;
+    }
+
     if (physicsState.connectionLines.length === 0) {
       gameState.setProcessing(true);
       gameState.stopTimer();
