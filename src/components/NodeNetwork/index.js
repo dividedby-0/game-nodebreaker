@@ -1,12 +1,13 @@
 import { Node } from "../Node/index.js";
+import { GameConfig } from "../../config/gameConfig.js";
 
 export const NodeNetwork = (gameState, eventBus) => {
   const nodeNetwork = {
     nodesArray: [],
-    size: 4,
-    spacing: 3,
-    nonClickableNodesCount: 2,
-    breakerNodesCount: 2,
+    size: GameConfig.game.nodeNetworkSize,
+    spacing: GameConfig.game.nodeNetworkSpacing,
+    nonClickableNodesCount: GameConfig.game.nonClickableNodesCount,
+    breakerNodesCount: GameConfig.game.breakerNodesCount,
   };
 
   const initializeNodes = () => {
