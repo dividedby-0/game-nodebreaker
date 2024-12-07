@@ -11,6 +11,8 @@ export const GameState = (eventBus) => {
     hiddenNodes: new Set(),
     isBeingTraced: false,
     gameAlreadyInitialized: false,
+    isGameCompleted: false,
+    areValidNodesLeft: false,
   };
 
   return {
@@ -24,10 +26,18 @@ export const GameState = (eventBus) => {
     isProcessing: () => state.isProcessing,
     isBeingTraced: () => state.isBeingTraced,
     getGameAlreadyInitialized: () => state.gameAlreadyInitialized,
+    isGameCompleted: () => state.isGameCompleted,
+    areValidNodesLeft: () => state.areValidNodesLeft,
 
     // State setters
-    setGameAlreadyInitialized: (initialized) => {
+    setGameAlreadyInitialized: () => {
       state.gameAlreadyInitialized = true;
+    },
+    setGameCompleted: (completed) => {
+      state.isGameCompleted = completed;
+    },
+    setValidNodesLeft: (areValidNodesLeft) => {
+      state.areValidNodesLeft = areValidNodesLeft;
     },
     setScore: (score) => {
       state.score = score;
@@ -129,7 +139,26 @@ export const GameState = (eventBus) => {
           `Final Score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.score}</span><br>` +
           `Time elapsed: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.timeElapsed.toFixed(2)}s</span><br><br>` +
           (isNewHighScore
-            ? "<span style='color: #ffff00'>New High Score!</span>"
+            ? "<span style='color: #ffff00'>New High Score! :O</span>"
+            : `Your highest score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.highScore}</span>`) +
+          "<br><br>(Tap to dismiss)",
+        enforceDelay: true,
+      });
+    },
+    showWin: (reason = "") => {
+      const isNewHighScore = state.score > state.highScore;
+      if (isNewHighScore) {
+        state.highScore = state.score;
+        localStorage.setItem("nodebreaker_highscore", state.highScore);
+      }
+      state.isProcessing = false;
+      eventBus.emit("modal:show", {
+        message:
+          `<span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>GOOD JOB!${reason ? `<br><br>${reason}` : ""}</span><br><br>` +
+          `Final Score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.score}</span><br>` +
+          `Time elapsed: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.timeElapsed.toFixed(2)}s</span><br><br>` +
+          (isNewHighScore
+            ? "<span style='color: #ffff00'>New High Score! :O</span>"
             : `Your highest score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.highScore}</span>`) +
           "<br><br>(Tap to dismiss)",
         enforceDelay: true,

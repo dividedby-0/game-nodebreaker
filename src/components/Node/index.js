@@ -95,7 +95,9 @@ export const Node = (position) => {
     isBreakable: () => node.isBreakable,
     isBreaker: () => node.isBreaker,
     isVisited: () => node.isVisited,
-    addConnection: (otherNode) => node.connections.add(otherNode),
+    addConnection: (otherNode) => {
+      node.connections.add(otherNode);
+    },
     removeConnection: (node) => node.connections.delete(node),
     clearConnections: () => node.connections.clear(),
     getConnections: () => node.connections,

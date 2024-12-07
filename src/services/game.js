@@ -53,7 +53,6 @@ export const GameService = (
     gameState.setProcessing(true);
 
     if (isValidMove(clickedNode)) {
-      // Clear any previously hidden nodes
       const hiddenNodes = gameState.getHiddenNodes();
       hiddenNodes.forEach((node) => {
         physicsService.unhideObstructingNodes(node);
@@ -65,7 +64,6 @@ export const GameService = (
 
     const previousNode =
       gameState.getSelectedNodes()[gameState.getSelectedNodes().length - 1];
-    updateGameState(clickedNode, previousNode);
 
     if (clickedNode.isBreakable()) {
       if (gameState.getBreakerCount() <= 0) {
@@ -83,7 +81,7 @@ export const GameService = (
 
     renderService.focusCamOnNode(clickedNode);
     gameState.getSelectedNodes().push(clickedNode);
-    nodeNetwork.findValidNextMoves(clickedNode);
+    updateGameState(clickedNode, previousNode);
   };
 
   // Node click handlers
@@ -137,6 +135,7 @@ export const GameService = (
 
   const updateGameState = (clickedNode, previousNode) => {
     clickedNode.setSelected(true);
+    clickedNode.setVisited(true);
 
     if (previousNode) {
       physicsService.drawConnectionLine(
@@ -152,7 +151,6 @@ export const GameService = (
 
     if (gameState.getSelectedNodes().length === 1) {
       gameState.startTimer();
-      return;
     }
   };
 

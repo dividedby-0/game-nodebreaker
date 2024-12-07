@@ -1,5 +1,6 @@
 import { Node } from "../Node/index.js";
 import { GameConfig } from "../../config/gameConfig.js";
+import { GameState } from "../../store/gameState.js";
 
 export const NodeNetwork = (gameState, eventBus) => {
   const nodeNetwork = {
@@ -115,16 +116,6 @@ export const NodeNetwork = (gameState, eventBus) => {
         (!connectedNode.isBreakable() || gameState.getBreakerCount() > 0),
     );
 
-    if (validMoves.length === 0) {
-      gameState.setProcessing(true);
-      gameState.stopTimer();
-      eventBus.emit("scene:flash");
-      eventBus.emit("message:hide");
-      gameState.setTraced(false);
-      gameState.showGameOver("You got stuck ¯\\_(ツ)_/¯");
-      return;
-    }
-
     nodeNetwork.nodesArray.forEach((node) => {
       node.setValid(false);
     });
@@ -132,6 +123,37 @@ export const NodeNetwork = (gameState, eventBus) => {
     validMoves.forEach((validNode) => {
       validNode.setValid(true);
     });
+
+    if (validMoves.length === 0) {
+      checkGameCompleted();
+
+      if (
+        gameState &&
+        gameState.isGameCompleted() &&
+        gameState.areValidNodesLeft()
+      ) {
+        gameState.setProcessing(true);
+        gameState.stopTimer();
+        eventBus.emit("scene:flash");
+        eventBus.emit("message:hide");
+        gameState.setTraced(false);
+        gameState.showGameOver("You got stuck ¯\\_(ツ)_/¯");
+      } else if (gameState && gameState.isGameCompleted()) {
+        gameState.setProcessing(true);
+        gameState.stopTimer();
+        eventBus.emit("scene:flash");
+        eventBus.emit("message:hide");
+        gameState.setTraced(false);
+        gameState.showWin("You linked all the nodes!");
+      } else {
+        gameState.setProcessing(true);
+        gameState.stopTimer();
+        eventBus.emit("scene:flash");
+        eventBus.emit("message:hide");
+        gameState.setTraced(false);
+        gameState.showGameOver("You didn't link all the nodes");
+      }
+    }
   };
 
   const removeNode = (node) => {
@@ -155,6 +177,22 @@ export const NodeNetwork = (gameState, eventBus) => {
     addToScene(scene);
   };
 
+  const checkGameCompleted = () => {
+    const validNodesLeft = nodeNetwork.nodesArray.filter(
+      (node) =>
+        !node.isVisited() &&
+        !node.isBreakable() &&
+        gameState.getBreakerCount() === 0,
+    );
+
+    if (validNodesLeft.length > 0) {
+      gameState.setValidNodesLeft(true);
+    } else {
+      gameState.setValidNodesLeft(false);
+      gameState.setGameCompleted(true);
+    }
+  };
+
   initializeNodes();
   setupNodesConnections();
   setRandomBreakableNodes();
@@ -166,6 +204,7 @@ export const NodeNetwork = (gameState, eventBus) => {
     findValidNextMoves,
     getNodesArray,
     removeNode,
+    checkGameCompleted,
     getSize: () => nodeNetwork.size,
     getSpacing: () => nodeNetwork.spacing,
     getNonClickableNodesCount: () => nodeNetwork.nonClickableNodesCount,
