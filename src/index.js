@@ -19,7 +19,7 @@ const initialize = async () => {
     gameState.setProcessing(true);
     const gameConfig = GameConfig;
     const gameContainer = document.getElementById("game-container");
-    const nodeNetwork = NodeNetwork(gameState);
+    const nodeNetwork = NodeNetwork(gameState, eventBus);
     const physicsService = PhysicsService(gameState, nodeNetwork, eventBus);
     const renderService = RenderService(
       gameContainer,

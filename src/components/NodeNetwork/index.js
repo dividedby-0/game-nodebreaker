@@ -1,6 +1,6 @@
 import { Node } from "../Node/index.js";
 
-export const NodeNetwork = (gameState) => {
+export const NodeNetwork = (gameState, eventBus) => {
   const nodeNetwork = {
     nodesArray: [],
     size: 4,
@@ -113,6 +113,16 @@ export const NodeNetwork = (gameState) => {
         !connectedNode.isSelected() &&
         (!connectedNode.isBreakable() || gameState.getBreakerCount() > 0),
     );
+
+    if (validMoves.length === 0) {
+      gameState.setProcessing(true);
+      gameState.stopTimer();
+      eventBus.emit("scene:flash");
+      eventBus.emit("message:hide");
+      gameState.setTraced(false);
+      gameState.showGameOver("You got stuck ¯\\_(ツ)_/¯");
+      return;
+    }
 
     nodeNetwork.nodesArray.forEach((node) => {
       node.setValid(false);
