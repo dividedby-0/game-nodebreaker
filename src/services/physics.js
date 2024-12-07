@@ -1,4 +1,5 @@
 import * as THREE from "../../lib/three.module.js";
+import { GameConfig } from "../config/gameConfig.js";
 
 export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
   const physicsState = {
@@ -146,7 +147,7 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
     ]);
 
     const material = new THREE.LineBasicMaterial({
-      color: 0x00ffff,
+      color: GameConfig.colors.normalConnection,
       linewidth: 7,
     });
 
@@ -170,8 +171,8 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
       gameState.showGameOver("You have been traced :/");
       return;
     }
-    const startColor = new THREE.Color(0x00ffff);
-    const endColor = new THREE.Color(0xff0000);
+    const startColor = new THREE.Color(GameConfig.colors.normalConnection);
+    const endColor = new THREE.Color(GameConfig.colors.traceConnection);
     const duration = 2000;
     const startTime = Date.now();
 

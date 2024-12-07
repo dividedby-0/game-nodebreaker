@@ -5,6 +5,7 @@ import { RenderPass } from "../../lib/postprocessing/RenderPass.js";
 import { GlitchPass } from "../../lib/postprocessing/GlitchPass.js";
 import { ScanlinesShader } from "../../lib/shaders/scanlines.js";
 import { ShaderPass } from "../../lib/postprocessing/ShaderPass.js";
+import { GameConfig } from "../config/gameConfig.js";
 
 export const RenderService = (
   gameContainer,
@@ -102,7 +103,7 @@ export const RenderService = (
   };
 
   const flashScene = () => {
-    renderer.scene.background = new THREE.Color(0xff0000);
+    renderer.scene.background = new THREE.Color(GameConfig.colors.flashColor);
     renderer.renderer.setClearAlpha(1);
 
     const startTime = Date.now();
@@ -114,9 +115,9 @@ export const RenderService = (
       const easeProgress = 1 - Math.pow(1 - progress, 3);
 
       if (progress < 1) {
-        renderer.scene.background = new THREE.Color(0xff0000).multiplyScalar(
-          1 - easeProgress,
-        );
+        renderer.scene.background = new THREE.Color(
+          GameConfig.colors.flashColor,
+        ).multiplyScalar(1 - easeProgress);
         renderer.renderer.setClearAlpha(1 - easeProgress);
         requestAnimationFrame(fadeBack);
       } else {

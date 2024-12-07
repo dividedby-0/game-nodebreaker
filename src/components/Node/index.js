@@ -1,4 +1,5 @@
 import * as THREE from "../../../lib/three.module.js";
+import { GameConfig } from "../../config/gameConfig.js";
 
 export const Node = (position) => {
   const node = {
@@ -13,14 +14,14 @@ export const Node = (position) => {
 
   const sharedGeometry = new THREE.BoxGeometry(1, 1, 1);
   const sharedMaterial = new THREE.MeshBasicMaterial({
-    color: 0x000000,
+    color: GameConfig.colors.normalNode,
     transparent: true,
     opacity: 1,
     wireframe: false,
   });
   const sharedEdgesGeometry = new THREE.EdgesGeometry(sharedGeometry);
   const sharedEdgesMaterial = new THREE.LineBasicMaterial({
-    color: 0x00ff00,
+    color: GameConfig.colors.nodeEdgeLines,
     linewidth: 2,
     opacity: 1,
   });
@@ -48,20 +49,42 @@ export const Node = (position) => {
 
   const updateNodeAppearance = () => {
     if (node.isBreakable) {
-      nodeMesh.material.color.setHex(0xff0000);
+      nodeMesh.material.color.setHex(GameConfig.colors.breakableNode);
     } else if (node.isSelected && node.isBreaker) {
-      nodeMesh.material.color.setHex(0xffff00);
+      nodeMesh.material.color.setHex(GameConfig.colors.breakerNode);
     } else if (node.isSelected) {
-      nodeMesh.material.color.setHex(0x0000ff);
+      fadeToColor(GameConfig.colors.validNode);
     } else if (node.isValid && node.isBreaker) {
-      nodeMesh.material.color.setHex(0xffff00);
+      nodeMesh.material.color.setHex(GameConfig.colors.breakerNode);
     } else if (node.isValid) {
-      nodeMesh.material.color.setHex(0x0000ff);
+      fadeToColor(GameConfig.colors.validNode);
     } else if (node.isBreaker) {
-      nodeMesh.material.color.setHex(0xffff00);
+      nodeMesh.material.color.setHex(GameConfig.colors.breakerNode);
     } else {
-      nodeMesh.material.color.setHex(0x000000);
+      nodeMesh.material.color.setHex(GameConfig.colors.normalNode);
     }
+  };
+
+  const fadeToColor = (color) => {
+    const startTime = Date.now();
+    const duration = 1000;
+
+    const fadeAnimation = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+      nodeMesh.material.color.lerpColors(
+        nodeMesh.material.color,
+        new THREE.Color(color),
+        easeProgress,
+      );
+
+      if (progress < 1) {
+        requestAnimationFrame(fadeAnimation);
+      }
+    };
+    fadeAnimation();
   };
 
   return {
