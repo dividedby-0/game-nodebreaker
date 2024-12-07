@@ -133,25 +133,22 @@ export const NodeNetwork = (gameState, eventBus) => {
         gameState.areValidNodesLeft()
       ) {
         gameState.setProcessing(true);
-        gameState.stopTimer();
         eventBus.emit("scene:flash");
         eventBus.emit("message:hide");
         gameState.setTraced(false);
         gameState.showGameOver("You got stuck ¯\\_(ツ)_/¯");
       } else if (gameState && gameState.isGameCompleted()) {
         gameState.setProcessing(true);
-        gameState.stopTimer();
         eventBus.emit("scene:flash");
         eventBus.emit("message:hide");
         gameState.setTraced(false);
         gameState.showWin("You linked all the nodes!");
       } else {
         gameState.setProcessing(true);
-        gameState.stopTimer();
         eventBus.emit("scene:flash");
         eventBus.emit("message:hide");
         gameState.setTraced(false);
-        gameState.showGameOver("You didn't link all the nodes");
+        gameState.showGameOver("That's a dead end :(");
       }
     }
   };

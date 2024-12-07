@@ -13,7 +13,6 @@ export const GameService = (
 
   const initializeUI = async () => {
     await eventBus.emit("score:initialize", gameState.getScore());
-    await eventBus.emit("timer:initialize", gameState.getTimeElapsed());
     await eventBus.emit("breakers:initialize", gameState.getBreakerCount());
     await eventBus.emit("reset:initialize");
   };
@@ -148,10 +147,6 @@ export const GameService = (
     gameState.getSelectedNodes().push(clickedNode);
     nodeNetwork.findValidNextMoves(clickedNode);
     physicsService.animateNodeRemoval(clickedNode);
-
-    if (gameState.getSelectedNodes().length === 1) {
-      gameState.startTimer();
-    }
   };
 
   return {

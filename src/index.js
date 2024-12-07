@@ -57,9 +57,9 @@ const initialize = async () => {
 
     eventBus.on("game:reset", async () => {
       if (gameState.getGameAlreadyInitialized() === true) {
+        gameState.reset();
         renderService.setControls(false);
         gameState.setProcessing(true);
-        gameState.reset();
         physicsService.clearConnectionLines(renderService.getScene());
         nodeNetwork.reset(renderService.getScene());
         renderService.resetCamera();
@@ -67,6 +67,7 @@ const initialize = async () => {
           renderService.getRenderer().domElement,
         );
         eventBus.emit("message:hide");
+
         await renderService.startGameAnimations();
         await gameService.initializeUI();
         await gameState.setProcessing(false);
@@ -85,7 +86,7 @@ const initialize = async () => {
 
     uiService.toggleModal(
       true,
-      "Welcome to ./NodeBreaker<br><br>" +
+      "Welcome to ./nodebreaker<br><br>" +
         "The cubes you see are <i>nodes</i>.<br>" +
         "Tap nodes to link them.<br>" +
         "<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>Red</span> " +

@@ -1,7 +1,6 @@
 export const UIService = (eventBus, gameState, renderService) => {
   const htmlElements = {
     score: document.getElementById("score"),
-    timer: document.getElementById("timer"),
     breakers: document.getElementById("breakers"),
     message: document.getElementById("message"),
   };
@@ -25,10 +24,6 @@ export const UIService = (eventBus, gameState, renderService) => {
 
   eventBus.on("score:initialize", (score) =>
     terminalTextAnimation("score", `Score: ${score}`),
-  );
-
-  eventBus.on("timer:initialize", (time) =>
-    terminalTextAnimation("timer", `Time: ${time.toFixed(2)}s`),
   );
 
   eventBus.on("breakers:initialize", (breakers) =>
@@ -96,10 +91,6 @@ export const UIService = (eventBus, gameState, renderService) => {
 
   eventBus.on("score:update", (score) =>
     updateUiElement("score", `Score: ${score}`),
-  );
-
-  eventBus.on("timer:update", (time) =>
-    updateUiElement("timer", `Time: ${(time || 0).toFixed(2)}s`),
   );
 
   eventBus.on("breakers:update", (count) =>

@@ -165,7 +165,6 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
 
     if (physicsState.connectionLines.length === 0) {
       gameState.setProcessing(true);
-      gameState.stopTimer();
       eventBus.emit("scene:flash");
       eventBus.emit("message:hide");
       gameState.showGameOver("You have been traced :/");

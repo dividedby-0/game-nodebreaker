@@ -4,9 +4,6 @@ export const GameState = (eventBus) => {
     highScore: parseInt(localStorage.getItem("nodebreaker_highscore")) || 0,
     selectedNodes: [],
     breakerCount: 0,
-    timeElapsed: 0,
-    timerStarted: false,
-    timerInterval: null,
     isProcessing: false,
     hiddenNodes: new Set(),
     isBeingTraced: false,
@@ -20,9 +17,7 @@ export const GameState = (eventBus) => {
     getScore: () => state.score,
     getSelectedNodes: () => state.selectedNodes,
     getBreakerCount: () => state.breakerCount,
-    getTimeElapsed: () => state.timeElapsed,
     getHiddenNodes: () => state.hiddenNodes,
-    isTimerStarted: () => state.timerStarted,
     isProcessing: () => state.isProcessing,
     isBeingTraced: () => state.isBeingTraced,
     getGameAlreadyInitialized: () => state.gameAlreadyInitialized,
@@ -51,14 +46,6 @@ export const GameState = (eventBus) => {
       state.breakerCount = count;
       eventBus.emit("breakers:update", count);
     },
-    setTimeElapsed: (time) => {
-      state.timeElapsed = time;
-      eventBus.emit("timer:update", time);
-    },
-    setTimerStarted: (started) => {
-      state.timerStarted = started;
-      eventBus.emit("timer:state", started);
-    },
     setProcessing: (processing) => {
       state.isProcessing = processing;
       eventBus.emit("processing:update", processing);
@@ -81,27 +68,6 @@ export const GameState = (eventBus) => {
       eventBus.emit("hiddenNodes:update", []);
     },
 
-    // Timer controls
-    startTimer: () => {
-      if (!state.timerStarted) {
-        state.timerStarted = true;
-        const startTime = Date.now();
-        state.timerInterval = setInterval(() => {
-          const currentTime = Date.now();
-          state.timeElapsed = (currentTime - startTime) / 1000;
-          eventBus.emit("timer:update", state.timeElapsed);
-        }, 100);
-      }
-    },
-
-    stopTimer: () => {
-      if (state.timerInterval) {
-        clearInterval(state.timerInterval);
-        state.timerInterval = null;
-        eventBus.emit("timer:stop");
-      }
-    },
-
     // Event subscription
     on: eventBus.on,
     off: eventBus.off,
@@ -114,12 +80,6 @@ export const GameState = (eventBus) => {
       state.score = 0;
       state.selectedNodes = [];
       state.breakerCount = 0;
-      state.timeElapsed = 0;
-      state.timerStarted = false;
-      if (state.timerInterval) {
-        clearInterval(state.timerInterval);
-        state.timerInterval = null;
-      }
       state.isProcessing = false;
       state.hiddenNodes.clear();
       eventBus.emit("state:reset");
@@ -137,7 +97,6 @@ export const GameState = (eventBus) => {
         message:
           `<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>GAME OVER${reason ? `<br><br>${reason}` : ""}</span><br><br>` +
           `Final Score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.score}</span><br>` +
-          `Time elapsed: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.timeElapsed.toFixed(2)}s</span><br><br>` +
           (isNewHighScore
             ? "<span style='color: #ffff00'>New High Score! :O</span>"
             : `Your highest score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.highScore}</span>`) +
@@ -156,7 +115,6 @@ export const GameState = (eventBus) => {
         message:
           `<span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>GOOD JOB!${reason ? `<br><br>${reason}` : ""}</span><br><br>` +
           `Final Score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.score}</span><br>` +
-          `Time elapsed: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.timeElapsed.toFixed(2)}s</span><br><br>` +
           (isNewHighScore
             ? "<span style='color: #ffff00'>New High Score! :O</span>"
             : `Your highest score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${state.highScore}</span>`) +
