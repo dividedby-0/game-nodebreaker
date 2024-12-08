@@ -251,7 +251,7 @@ body {
   width: 80vw;
   min-height: 20vh;
   max-height: 80vh;
-  overflow-y: auto;
+  overflow-y: scroll;
   text-align: center;
   border-radius: 15px;
   opacity: 0;
@@ -261,6 +261,11 @@ body {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .modal-text {
@@ -403,5 +408,18 @@ body {
   #breakers {
     bottom: 10px;
     right: 10px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .modal {
+    width: 60%;
+    max-width: 800px;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .modal {
+    width: 50%;
   }
 }
