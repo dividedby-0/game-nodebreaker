@@ -34,7 +34,7 @@ const gameService = GameService(
   gameConfig,
   physicsService,
 );
-const uiService = UIService(eventBus, gameState, renderService);
+const uiService = UIService(eventBus, gameState, renderService, audioService);
 const inputService = InputService(
   renderService.getCamera(),
   eventBus,

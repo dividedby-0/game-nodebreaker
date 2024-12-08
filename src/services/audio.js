@@ -53,8 +53,21 @@ export const AudioService = (eventBus, gameState) => {
     }
   };
 
+  const toggleSound = () => {
+    if (audioState.bgMusic) {
+      if (audioState.bgMusic.paused) {
+        audioState.bgMusic.play().catch((error) => {
+          console.log("Audio play failed:", error);
+        });
+      } else {
+        audioState.bgMusic.pause();
+      }
+    }
+  };
+
   return {
     initialize,
     setVolume,
+    toggleSound,
   };
 };

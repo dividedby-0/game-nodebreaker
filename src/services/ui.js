@@ -1,6 +1,6 @@
 import { GameConfig } from "../config/gameConfig.js";
 
-export const UIService = (eventBus, gameState, renderService) => {
+export const UIService = (eventBus, gameState, renderService, audioService) => {
   const htmlElements = {
     score: document.getElementById("score"),
     breakers: document.getElementById("breakers"),
@@ -42,7 +42,7 @@ export const UIService = (eventBus, gameState, renderService) => {
     const blocks = 4;
     const blockChar = "█";
 
-    resetButton.classList.add("reset-fadein");
+    resetButton.classList.add("generic-fadein");
 
     let pressTimer;
 
@@ -120,6 +120,22 @@ export const UIService = (eventBus, gameState, renderService) => {
       },
       // { passive: true },
     );
+  });
+
+  eventBus.on("musicBtn:initialize", () => {
+    if (!gameState.getGameAlreadyInitialized()) {
+      const musicButton = document.querySelector(".music-button");
+      const disabledLine = musicButton.querySelector(".disabled-line");
+      disabledLine.style.display = "none";
+      musicButton.classList.add("generic-fadein");
+      musicButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        const newSoundState = !gameState.isSoundEnabled();
+        gameState.setSoundEnabled(newSoundState);
+        audioService.toggleSound();
+        disabledLine.style.display = newSoundState ? "none" : "block";
+      });
+    }
   });
 
   eventBus.on("message:show", (text) => {

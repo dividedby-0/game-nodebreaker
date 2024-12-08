@@ -10,6 +10,7 @@ export const GameState = (eventBus) => {
     gameAlreadyInitialized: false,
     isGameCompleted: false,
     areValidNodesLeft: false,
+    isSoundEnabled: true,
   };
 
   return {
@@ -23,6 +24,7 @@ export const GameState = (eventBus) => {
     getGameAlreadyInitialized: () => state.gameAlreadyInitialized,
     isGameCompleted: () => state.isGameCompleted,
     areValidNodesLeft: () => state.areValidNodesLeft,
+    isSoundEnabled: () => state.isSoundEnabled,
 
     // State setters
     setGameAlreadyInitialized: () => {
@@ -52,6 +54,10 @@ export const GameState = (eventBus) => {
     },
     setTraced: (value) => {
       state.isBeingTraced = value;
+    },
+    setSoundEnabled: (enabled) => {
+      state.isSoundEnabled = enabled;
+      eventBus.emit("sound:toggle", enabled);
     },
 
     // Node-related
