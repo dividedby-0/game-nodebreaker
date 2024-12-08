@@ -35,26 +35,66 @@ export const UIService = (eventBus, gameState, renderService) => {
 
   eventBus.on("reset:initialize", () => {
     const resetButton = document.querySelector(".reset-button");
+    const progressOverlay = document.querySelector(".reset-progress-overlay");
+    const progressBar = progressOverlay.querySelector(".reset-progress");
+    let progressInterval;
+    const progressDuration = 2000;
+    const blocks = 4;
+    const blockChar = "█";
+
     resetButton.classList.add("reset-fadein");
 
     let pressTimer;
 
     resetButton.addEventListener("mousedown", () => {
+      progressOverlay.style.display = "block";
+      let currentBlock = 0;
+      const intervalTime = progressDuration / blocks;
+
+      progressInterval = setInterval(() => {
+        currentBlock++;
+        const progress = blockChar.repeat(currentBlock);
+        progressBar.textContent = `[${progress}]`;
+
+        if (currentBlock >= blocks) {
+          clearInterval(progressInterval);
+          progressOverlay.style.display = "none";
+          eventBus.emit("game:reset");
+        }
+      }, intervalTime);
+
       pressTimer = setTimeout(() => {
         eventBus.emit("game:reset");
-      }, 1000); // Hold for 1 sec
+      }, 2000);
     });
 
     resetButton.addEventListener("mouseup", () => {
+      clearInterval(progressInterval);
+      progressOverlay.style.display = "none";
+      progressBar.textContent = "[    ]";
       clearTimeout(pressTimer);
     });
 
     let touchStartTime;
-    const HOLD_DURATION = 1000;
     resetButton.addEventListener(
       "touchstart",
       (event) => {
         event.preventDefault();
+        progressOverlay.style.display = "block";
+        let currentBlock = 0;
+        const intervalTime = progressDuration / blocks;
+
+        progressInterval = setInterval(() => {
+          currentBlock++;
+          const progress = blockChar.repeat(currentBlock);
+          progressBar.textContent = `[${progress}]`;
+
+          if (currentBlock >= blocks) {
+            clearInterval(progressInterval);
+            progressOverlay.style.display = "none";
+            eventBus.emit("game:reset");
+          }
+        }, intervalTime);
         touchStartTime = Date.now();
       },
       // { passive: true },
@@ -62,7 +102,10 @@ export const UIService = (eventBus, gameState, renderService) => {
 
     resetButton.addEventListener(
       "touchcancel",
-      () => {
+      (event) => {
+        clearInterval(progressInterval);
+        progressOverlay.style.display = "none";
+        progressBar.textContent = "[    ]";
         touchStartTime = null;
       },
       // { passive: true },
@@ -71,12 +114,9 @@ export const UIService = (eventBus, gameState, renderService) => {
     resetButton.addEventListener(
       "touchend",
       (event) => {
-        const touchEndTime = Date.now();
-        const touchDuration = touchEndTime - touchStartTime;
-
-        if (touchDuration >= HOLD_DURATION) {
-          eventBus.emit("game:reset");
-        }
+        clearInterval(progressInterval);
+        progressOverlay.style.display = "none";
+        progressBar.textContent = "[    ]";
       },
       // { passive: true },
     );
