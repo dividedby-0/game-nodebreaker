@@ -13,8 +13,8 @@ import { AudioService } from "./services/audio.js";
 
 const eventBus = EventBus();
 const viewManager = ViewManager(eventBus);
-const audioService = AudioService(eventBus);
 const gameState = GameState(eventBus);
+const audioService = AudioService(eventBus, gameState);
 gameState.setProcessing(true);
 const gameConfig = GameConfig;
 const gameContainer = document.getElementById("game-container");

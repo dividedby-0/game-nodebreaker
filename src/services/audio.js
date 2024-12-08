@@ -1,4 +1,4 @@
-export const AudioService = (eventBus) => {
+export const AudioService = (eventBus, gameState) => {
   const audioState = {
     bgMusic: null,
     soundEffects: new Map(),
@@ -15,6 +15,21 @@ export const AudioService = (eventBus) => {
     // audioState.soundEffects.set('effect1', new Audio('../assets/audio/effects/effect1.mp3'));
 
     setupEventListeners();
+    setupVisibilityHandler();
+  };
+
+  const setupVisibilityHandler = () => {
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        audioState.bgMusic.pause();
+      } else {
+        if (gameState.getGameAlreadyInitialized()) {
+          audioState.bgMusic.play().catch((error) => {
+            console.log("Audio resume failed:", error);
+          });
+        }
+      }
+    });
   };
 
   const setupEventListeners = () => {
