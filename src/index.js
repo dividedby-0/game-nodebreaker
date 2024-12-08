@@ -86,12 +86,12 @@ const initialize = async () => {
 
     uiService.toggleModal(
       true,
-      "Welcome to ./nodebreaker<br><br>" +
+      "Welcome to ./nodebreaker_<br><br>" +
         "The cubes you see are <i>nodes</i>.<br>" +
         "Tap nodes to link them.<br>" +
-        "<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>Red</span> " +
+        "<span style='color: #ff4500; text-shadow: 0 0 5px rgba(255, 69, 0, 0.7), 0 0 10px rgba(255, 69, 0, 0.5)'>Red</span> " +
         "nodes are <i>data nodes</i>, you can only link to them if you have <i>breakers</i>.<br>" +
-        "<span style='color: #8A2BE2; text-shadow: 0 0 5px rgba(138, 43, 226, 0.7), 0 0 10px rgba(138, 43, 226, 0.5)'>Violet</span> " +
+        "<span style='color: #7799cc; text-shadow: 0 0 5px rgba(119, 153, 204, 0.7), 0 0 10px rgba(119, 153, 204, 0.5)'>Violet</span> " +
         "nodes give you <i>breakers</i>.<br>" +
         "There's a limited amount of them.<br>" +
         "Link all the nodes to win.<br>" +

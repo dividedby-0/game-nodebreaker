@@ -16,7 +16,7 @@ export const RenderService = (
   const renderer = {
     scene: new THREE.Scene(),
     camera: new THREE.PerspectiveCamera(
-      75,
+      80,
       window.innerWidth / window.innerHeight,
       0.1,
       1000,
@@ -37,7 +37,6 @@ export const RenderService = (
   const initialize = () => {
     renderer.renderer.setClearColor(0x000000, 0);
     renderer.scene.background = null;
-    // renderer.renderer.setClearAlpha(0);
     renderer.camera.lookAt(0, 0, 0);
     renderer.controls.enabled = false;
 

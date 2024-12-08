@@ -1,3 +1,5 @@
+import { GameConfig } from "../config/gameConfig.js";
+
 export const UIService = (eventBus, gameState, renderService) => {
   const htmlElements = {
     score: document.getElementById("score"),
@@ -8,8 +10,8 @@ export const UIService = (eventBus, gameState, renderService) => {
   const uiState = {
     typingSpeed: 15,
     randomCharHoldTime: 25,
-    textColor: "#00ff00",
-    caretColor: "#00ff00",
+    textColor: GameConfig.colors.textColor,
+    caretColor: GameConfig.colors.caretColor,
     randomChars: "!@#$%^&*()_+-=[]{}|;:,.<>?/~",
     isAnimating: false,
   };

@@ -119,7 +119,7 @@ body {
   width: 100vw;
   height: 100vh;
   background: linear-gradient(45deg, #000000, #003300);
-  animation: gradientBG 2s ease infinite;
+  animation: gradientBG 3s ease infinite;
   background-size: 200% 200%;
   opacity: 1;
 }
