@@ -57,11 +57,28 @@ const initialize = async () => {
   });
 };
 
+const pickRandomGroundColor = () =>
+  gameConfig.groundColors[
+    Math.floor(Math.random() * gameConfig.groundColors.length)
+  ];
+
+const newRandomGroundColor = () => {
+  const newGroundColor = pickRandomGroundColor();
+  const groundPlanes = renderService
+    .getScene()
+    .children.filter((mesh) => mesh.geometry.type === "PlaneGeometry");
+  groundPlanes.forEach((plane) => {
+    plane.material.color.setHex(newGroundColor);
+  });
+};
+
 const startGame = async () => {
   try {
     renderService.initialize();
     await Promise.all([uiService.initialize(), gameService.initialize()]);
-    addGroundToScene();
+    const randomGroundColor = pickRandomGroundColor();
+    addGroundToScene(-30, randomGroundColor);
+    addGroundToScene(30, randomGroundColor);
     nodeNetwork.addToScene(renderService.getScene());
     inputService.setupEventListeners(renderService.getRenderer().domElement);
 
@@ -70,8 +87,8 @@ const startGame = async () => {
       () => renderService.onWindowResize(),
       false,
     );
-
     eventBus.on("game:reset", async () => {
+      newRandomGroundColor();
       if (gameState.getGameAlreadyInitialized() === true) {
         gameState.reset();
         renderService.setControls(false);
@@ -126,11 +143,7 @@ const startGame = async () => {
   }
 };
 
-const addGroundToScene = () => {
-  const randomColor =
-    gameConfig.groundColors[
-      Math.floor(Math.random() * gameConfig.groundColors.length)
-    ];
+const addGroundToScene = (positionY, randomColor) => {
   const groundThreeColor = new THREE.Color(randomColor);
   const groundGeometry = new THREE.PlaneGeometry(700, 700, 80, 80);
 
@@ -142,7 +155,7 @@ const addGroundToScene = () => {
   });
 
   const groundMesh = new THREE.Mesh(groundGeometry, wireframeMaterial);
-  groundMesh.position.set(0, -30, 0);
+  groundMesh.position.set(0, positionY, 0);
   groundMesh.rotation.x = -Math.PI / 4;
   renderService.getScene().add(groundMesh);
 };
