@@ -9,10 +9,11 @@ export const UIService = (eventBus, gameState, renderService) => {
 
   const uiState = {
     typingSpeed: 15,
-    randomCharHoldTime: 25,
+    randomCharHoldTime: 20,
     textColor: GameConfig.colors.textColor,
     caretColor: GameConfig.colors.caretColor,
-    randomChars: "!@#$%^&*()_+-=[]{}|;:,.<>?/~",
+    randomChars:
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
     isAnimating: false,
   };
 
@@ -212,12 +213,7 @@ export const UIService = (eventBus, gameState, renderService) => {
               Math.floor(Math.random() * uiState.randomChars.length)
             ];
 
-          htmlElement.innerHTML = `
-            <span class="${htmlElementId}-terminal-text">
-              ${textBeforeCaret}
-              <span class="${htmlElementId}-terminal-caret">${randomChar}</span>
-            </span>`;
-
+          htmlElement.innerHTML = `<span class="${htmlElementId}-terminal-text">${textBeforeCaret}<span class="${htmlElementId}-terminal-caret">${randomChar}</span></span>`;
           await delay(uiState.randomCharHoldTime);
         }
 

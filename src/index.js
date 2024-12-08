@@ -8,6 +8,7 @@ import { UIService } from "./services/ui.js";
 import { EventBus } from "./events/eventBus.js";
 import { InputService } from "./services/input.js";
 import { GameConfig } from "./config/gameConfig.js";
+import * as THREE from "../lib/three.module.js";
 
 const initialize = async () => {
   const eventBus = EventBus();
@@ -45,6 +46,26 @@ const initialize = async () => {
       eventBus,
       gameState,
     );
+
+    const randomColor =
+      gameConfig.groundColors[
+        Math.floor(Math.random() * gameConfig.groundColors.length)
+      ];
+    const groundThreeColor = new THREE.Color(randomColor);
+    const groundGeometry = new THREE.PlaneGeometry(700, 700, 80, 80);
+
+    const wireframeMaterial = new THREE.MeshBasicMaterial({
+      wireframe: true,
+      linewidth: 0.1,
+      opacity: 0.3,
+      transparent: true,
+      color: groundThreeColor,
+    });
+
+    const groundMesh = new THREE.Mesh(groundGeometry, wireframeMaterial);
+    groundMesh.position.set(0, -30, 0);
+    groundMesh.rotation.x = -Math.PI / 4;
+    renderService.getScene().add(groundMesh);
 
     nodeNetwork.addToScene(renderService.getScene());
     inputService.setupEventListeners(renderService.getRenderer().domElement);
@@ -96,7 +117,7 @@ const initialize = async () => {
         "There's a limited amount of them.<br>" +
         "Link all the nodes to win.<br>" +
         "Also, try not to get stuck.<br><br>" +
-        "Tap and hold the <span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>(R)</span> button to reset the game any moment.<br><br>" +
+        "Tap and hold the <span style='color: rgba(0, 255, 0, 0.9); text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>(R)</span> button to reset the game any moment.<br><br>" +
         "Good luck! ;)<br><br>" +
         "(Tap to dismiss)<br>",
     );
@@ -104,7 +125,7 @@ const initialize = async () => {
     console.error("Failed to initialize game screen:", error);
     const loadingText = document.querySelector(".loading-text");
     if (loadingText) {
-      loadingText.style.color = "#ff0000";
+      loadingText.style.color = "#00ff00";
       loadingText.textContent = "Loading failed";
     }
   }

@@ -22,7 +22,7 @@ export const Node = (position) => {
   const sharedEdgesGeometry = new THREE.EdgesGeometry(sharedGeometry);
   const sharedEdgesMaterial = new THREE.LineBasicMaterial({
     color: GameConfig.colors.nodeEdgeLines,
-    linewidth: 2,
+    linewidth: 3,
     opacity: 1,
   });
 

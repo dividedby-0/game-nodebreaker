@@ -16,7 +16,7 @@ export const RenderService = (
   const renderer = {
     scene: new THREE.Scene(),
     camera: new THREE.PerspectiveCamera(
-      80,
+      90,
       window.innerWidth / window.innerHeight,
       0.1,
       1000,

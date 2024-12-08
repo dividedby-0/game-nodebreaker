@@ -1,7 +1,7 @@
 export const GameConfig = {
   game: {
     nodeNetworkSize: 4,
-    nodeNetworkSpacing: 3,
+    nodeNetworkSpacing: 4,
     nonClickableNodesCount: 8,
     breakerNodesCount: 2,
     scoreIncrement: {
@@ -28,10 +28,11 @@ export const GameConfig = {
     breakerNode: 0x7799cc,
     normalNode: 0x2c2c54,
     nodeEdgeLines: 0x4682b4,
-    normalConnection: 0x7fff00,
+    normalConnection: 0x87cefa,
     traceConnection: 0xff0000,
     flashColor: 0xff0000,
     textColor: "#00ff00",
     caretColor: "#00ff00",
   },
+  groundColors: [0x1e90ff, 0xff69b4, 0x32cd32, 0x8a2be2],
 };
