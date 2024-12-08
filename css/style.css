@@ -38,7 +38,9 @@ body {
 .breakers-terminal-text::after,
 .reset-button::after,
 .loading-text::after,
-.modal-text::after {
+.modal-text::after,
+.consent-text::after,
+.consent-button::after {
   content: "";
   position: absolute;
   top: 0;
@@ -394,6 +396,78 @@ body {
   text-align: center;
   margin: 0;
   padding: 0;
+}
+
+/*Audio consent message-specific*/
+#consent-view {
+  width: 100vw;
+  height: 100vh;
+  background-color: #1a001a;
+  z-index: 9999;
+}
+
+.consent-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  height: 100vh;
+  width: 100vw;
+}
+
+.consent-warning {
+  font-family: "VT323", monospace;
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  color: #ff0000;
+  text-align: center;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.7),
+  0 0 10px rgba(255, 0, 0, 0.5);
+  opacity: 0;
+  animation: audioConsentFadeIn 1s ease-in forwards;
+}
+
+.consent-text {
+  font-family: "VT323", monospace;
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: #00ff00;
+  text-align: center;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7),
+  0 0 10px rgba(0, 255, 0, 0.5);
+  opacity: 0;
+  animation: audioConsentFadeIn 1s ease-in forwards;
+}
+
+.consent-button {
+  font-family: "VT323", monospace;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  padding: 0.5rem 2rem;
+  background: transparent;
+  border: 2px solid #00ff00;
+  color: #00ff00;
+  cursor: pointer;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7),
+  0 0 10px rgba(0, 255, 0, 0.5);
+  box-shadow: 0 0 5px rgba(0, 255, 0, 0.7),
+  0 0 10px rgba(0, 255, 0, 0.5);
+  transition: all 0.3s ease;
+  opacity: 0;
+  animation: audioConsentFadeIn 1s ease-in forwards;
+  animation-delay: 1.5s;
+}
+
+.consent-button:hover {
+  background: #00ff00;
+  color: #000;
+}
+
+@keyframes audioConsentFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Mobile-specific styles */

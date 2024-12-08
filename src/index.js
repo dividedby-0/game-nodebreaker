@@ -1,3 +1,4 @@
+import * as THREE from "../lib/three.module.js";
 import { ViewManager } from "./services/viewManager.js";
 import { GameState } from "./store/gameState.js";
 import { NodeNetwork } from "./components/NodeNetwork/index.js";
@@ -8,65 +9,59 @@ import { UIService } from "./services/ui.js";
 import { EventBus } from "./events/eventBus.js";
 import { InputService } from "./services/input.js";
 import { GameConfig } from "./config/gameConfig.js";
-import * as THREE from "../lib/three.module.js";
+import { AudioService } from "./services/audio.js";
+
+const eventBus = EventBus();
+const viewManager = ViewManager(eventBus);
+const audioService = AudioService(eventBus);
+const gameState = GameState(eventBus);
+gameState.setProcessing(true);
+const gameConfig = GameConfig;
+const gameContainer = document.getElementById("game-container");
+const nodeNetwork = NodeNetwork(gameState, eventBus);
+const physicsService = PhysicsService(gameState, nodeNetwork, eventBus);
+const renderService = RenderService(
+  gameContainer,
+  gameState,
+  physicsService,
+  eventBus,
+);
+const gameService = GameService(
+  renderService,
+  nodeNetwork,
+  eventBus,
+  gameState,
+  gameConfig,
+  physicsService,
+);
+const uiService = UIService(eventBus, gameState, renderService);
+const inputService = InputService(
+  renderService.getCamera(),
+  eventBus,
+  gameState,
+);
+
+const loadAssets = async () => {
+  audioService.initialize();
+};
 
 const initialize = async () => {
-  const eventBus = EventBus();
-  const viewManager = ViewManager(eventBus);
   viewManager.initialize();
+  await loadAssets();
+  viewManager.switchToView("audioConsentView");
 
+  const audioConsentBtn = document.querySelector(".consent-button");
+  audioConsentBtn.addEventListener("click", () => {
+    viewManager.switchToView("gameView");
+    startGame();
+  });
+};
+
+const startGame = async () => {
   try {
-    const gameState = GameState(eventBus);
-    gameState.setProcessing(true);
-    const gameConfig = GameConfig;
-    const gameContainer = document.getElementById("game-container");
-    const nodeNetwork = NodeNetwork(gameState, eventBus);
-    const physicsService = PhysicsService(gameState, nodeNetwork, eventBus);
-    const renderService = RenderService(
-      gameContainer,
-      gameState,
-      physicsService,
-      eventBus,
-    );
-    const gameService = GameService(
-      renderService,
-      nodeNetwork,
-      eventBus,
-      gameState,
-      gameConfig,
-      physicsService,
-    );
-    const uiService = UIService(eventBus, gameState, renderService);
-
     renderService.initialize();
     await Promise.all([uiService.initialize(), gameService.initialize()]);
-
-    const inputService = InputService(
-      renderService.getCamera(),
-      eventBus,
-      gameState,
-    );
-
-    const randomColor =
-      gameConfig.groundColors[
-        Math.floor(Math.random() * gameConfig.groundColors.length)
-      ];
-    const groundThreeColor = new THREE.Color(randomColor);
-    const groundGeometry = new THREE.PlaneGeometry(700, 700, 80, 80);
-
-    const wireframeMaterial = new THREE.MeshBasicMaterial({
-      wireframe: true,
-      linewidth: 0.1,
-      opacity: 0.3,
-      transparent: true,
-      color: groundThreeColor,
-    });
-
-    const groundMesh = new THREE.Mesh(groundGeometry, wireframeMaterial);
-    groundMesh.position.set(0, -30, 0);
-    groundMesh.rotation.x = -Math.PI / 4;
-    renderService.getScene().add(groundMesh);
-
+    addGroundToScene();
     nodeNetwork.addToScene(renderService.getScene());
     inputService.setupEventListeners(renderService.getRenderer().domElement);
 
@@ -129,6 +124,27 @@ const initialize = async () => {
       loadingText.textContent = "Loading failed";
     }
   }
+};
+
+const addGroundToScene = () => {
+  const randomColor =
+    gameConfig.groundColors[
+      Math.floor(Math.random() * gameConfig.groundColors.length)
+    ];
+  const groundThreeColor = new THREE.Color(randomColor);
+  const groundGeometry = new THREE.PlaneGeometry(700, 700, 80, 80);
+
+  const wireframeMaterial = new THREE.MeshBasicMaterial({
+    wireframe: true,
+    opacity: 0.3,
+    transparent: true,
+    color: groundThreeColor,
+  });
+
+  const groundMesh = new THREE.Mesh(groundGeometry, wireframeMaterial);
+  groundMesh.position.set(0, -30, 0);
+  groundMesh.rotation.x = -Math.PI / 4;
+  renderService.getScene().add(groundMesh);
 };
 
 window.addEventListener("load", initialize);

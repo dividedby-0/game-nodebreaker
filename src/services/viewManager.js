@@ -1,6 +1,7 @@
 export const ViewManager = (eventBus) => {
   const views = {
     loadingView: document.getElementById("loading-view"),
+    audioConsentView: document.getElementById("audio-consent-view"),
     gameView: document.getElementById("game-view"),
   };
 
