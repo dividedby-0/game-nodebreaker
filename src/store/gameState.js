@@ -98,6 +98,7 @@ export const GameState = (eventBus) => {
         state.highScore = state.score;
         localStorage.setItem("nodebreaker_highscore", state.highScore);
       }
+      eventBus.emit("game:over");
       eventBus.emit("scene:flash");
       eventBus.emit("modal:show", {
         message:
