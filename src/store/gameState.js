@@ -118,6 +118,7 @@ export const GameState = (eventBus) => {
         state.highScore = state.score;
         localStorage.setItem("nodebreaker_highscore", state.highScore);
       }
+      eventBus.emit("game:win");
       eventBus.emit("modal:show", {
         message:
           `<span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>GOOD JOB!${reason ? `<br><br>${reason}` : ""}</span><br><br>` +

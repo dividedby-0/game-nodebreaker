@@ -38,6 +38,11 @@ export const AudioService = (eventBus, gameState) => {
       new Audio("../assets/audio/effects/game_over.mp3"),
     );
 
+    audioState.soundEffects.set(
+      "win",
+      new Audio("../assets/audio/effects/win.mp3"),
+    );
+
     setupEventListeners();
     setupVisibilityHandler();
   };
@@ -75,6 +80,33 @@ export const AudioService = (eventBus, gameState) => {
     if (audioState.bgMusic) {
       audioState.bgMusic.volume = 0.4;
       playSoundEffect("gameOver");
+
+      setTimeout(() => {
+        const fadeDuration = 2000;
+        const fadeInterval = 50;
+        const startVolume = 0.5;
+        const targetVolume = 1.0;
+        const volumeStep =
+          (targetVolume - startVolume) / (fadeDuration / fadeInterval);
+
+        let currentVolume = startVolume;
+
+        const fadeIn = setInterval(() => {
+          currentVolume = Math.min(currentVolume + volumeStep, targetVolume);
+          audioState.bgMusic.volume = currentVolume;
+
+          if (currentVolume >= targetVolume) {
+            clearInterval(fadeIn);
+          }
+        }, fadeInterval);
+      }, 2000);
+    }
+  });
+
+  eventBus.on("game:win", () => {
+    if (audioState.bgMusic) {
+      audioState.bgMusic.volume = 0.4;
+      playSoundEffect("win");
 
       setTimeout(() => {
         const fadeDuration = 2000;
