@@ -5,6 +5,7 @@ export const GameService = (
   gameState,
   gameConfig,
   physicsService,
+  audioService,
 ) => {
   const initialize = async () => {
     gameState.setProcessing(true);
@@ -71,9 +72,7 @@ export const GameService = (
       }
       clickedNode.setValid(true);
       handleBreakableNode(clickedNode, previousNode);
-    }
-
-    if (clickedNode.isBreaker()) {
+    } else if (clickedNode.isBreaker()) {
       handleBreakerNode(clickedNode, previousNode);
     } else {
       handleNormalNode(clickedNode, previousNode);
@@ -91,6 +90,7 @@ export const GameService = (
       gameState.getScore() + gameConfig.game.scoreIncrement.normal,
     );
     eventBus.emit("score:update", gameState.getScore());
+    audioService.playSoundEffect("normalNode");
   };
 
   const handleBreakableNode = (clickedNode, previousNode) => {
@@ -100,8 +100,10 @@ export const GameService = (
     );
     eventBus.emit("score:update", gameState.getScore());
     eventBus.emit("breakers:update", gameState.getBreakerCount());
+    audioService.playSoundEffect("dataNode");
 
     if (!gameState.isBeingTraced()) {
+      audioService.playSoundEffect("traced");
       gameState.setTraced(true);
       eventBus.emit("scene:flash");
       renderService.triggerGlitchEffect();
@@ -117,6 +119,7 @@ export const GameService = (
     );
     eventBus.emit("score:update", gameState.getScore());
     eventBus.emit("breakers:update", gameState.getBreakerCount());
+    audioService.playSoundEffect("breakerNode");
   };
 
   // Auxiliary methods

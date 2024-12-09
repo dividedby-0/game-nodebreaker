@@ -3,6 +3,7 @@ export const AudioService = (eventBus, gameState) => {
     bgMusic: null,
     soundEffects: new Map(),
     fadeInterval: null,
+    currentlyPlayingEffect: null,
   };
 
   const initialize = () => {
@@ -12,7 +13,25 @@ export const AudioService = (eventBus, gameState) => {
     audioState.bgMusic.loop = true;
     audioState.bgMusic.volume = 1;
 
-    // audioState.soundEffects.set('effect1', new Audio('../assets/audio/effects/effect1.mp3'));
+    audioState.soundEffects.set(
+      "normalNode",
+      new Audio("../assets/audio/effects/normal_node.mp3"),
+    );
+
+    audioState.soundEffects.set(
+      "breakerNode",
+      new Audio("../assets/audio/effects/breaker_node.mp3"),
+    );
+
+    audioState.soundEffects.set(
+      "dataNode",
+      new Audio("../assets/audio/effects/data_node.mp3"),
+    );
+
+    audioState.soundEffects.set(
+      "traced",
+      new Audio("../assets/audio/effects/traced.mp3"),
+    );
 
     setupEventListeners();
     setupVisibilityHandler();
@@ -47,6 +66,20 @@ export const AudioService = (eventBus, gameState) => {
     }
   };
 
+  const playSoundEffect = (effectName) => {
+    const soundEffect = audioState.soundEffects.get(effectName);
+    if (soundEffect) {
+      if (audioState.currentlyPlayingEffect) {
+        audioState.currentlyPlayingEffect.pause();
+        audioState.currentlyPlayingEffect.currentTime = 0;
+      }
+      soundEffect.play().catch((error) => {
+        console.log(`${effectName} sound play failed:`, error);
+      });
+      audioState.currentlyPlayingEffect = soundEffect;
+    }
+  };
+
   const setVolume = (volume) => {
     if (audioState.bgMusic) {
       audioState.bgMusic.volume = volume;
@@ -65,9 +98,15 @@ export const AudioService = (eventBus, gameState) => {
     }
   };
 
+  const getSoundEffects = () => {
+    return audioState.soundEffects;
+  };
+
   return {
     initialize,
     setVolume,
     toggleSound,
+    playSoundEffect,
+    getSoundEffects,
   };
 };
