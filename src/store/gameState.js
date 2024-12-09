@@ -92,12 +92,12 @@ export const GameState = (eventBus) => {
     },
 
     showGameOver: (reason = "") => {
+      state.isProcessing = true;
       const isNewHighScore = state.score > state.highScore;
       if (isNewHighScore) {
         state.highScore = state.score;
         localStorage.setItem("nodebreaker_highscore", state.highScore);
       }
-      state.isProcessing = false;
       eventBus.emit("scene:flash");
       eventBus.emit("modal:show", {
         message:
@@ -111,12 +111,12 @@ export const GameState = (eventBus) => {
       });
     },
     showWin: (reason = "") => {
+      state.isProcessing = true;
       const isNewHighScore = state.score > state.highScore;
       if (isNewHighScore) {
         state.highScore = state.score;
         localStorage.setItem("nodebreaker_highscore", state.highScore);
       }
-      state.isProcessing = false;
       eventBus.emit("modal:show", {
         message:
           `<span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>GOOD JOB!${reason ? `<br><br>${reason}` : ""}</span><br><br>` +

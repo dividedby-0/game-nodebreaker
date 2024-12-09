@@ -23,6 +23,10 @@ body {
   display: none;
 }
 
+.disabled-element {
+  pointer-events: none;
+}
+
 /*TEXT SCANLINES EFFECT*/
 
 .score-terminal-text,
@@ -323,6 +327,21 @@ body {
   border: none;
   padding: 0;
   opacity: 0;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.reset-button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.reset-button:active {
+  outline: none;
 }
 
 .reset-button svg {
@@ -414,6 +433,21 @@ body {
   border: none;
   padding: 0;
   opacity: 0;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.music-button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.music-button:active {
+  outline: none;
 }
 
 .music-button svg {

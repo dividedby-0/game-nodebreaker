@@ -46,7 +46,12 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
 
     let pressTimer;
 
-    resetButton.addEventListener("mousedown", () => {
+    resetButton.addEventListener("mousedown", (event) => {
+      if (gameState.isProcessing()) {
+        return;
+      }
+      event.preventDefault();
+
       progressOverlay.style.display = "block";
       let currentBlock = 0;
       const intervalTime = progressDuration / blocks;
@@ -59,6 +64,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
         if (currentBlock >= blocks) {
           clearInterval(progressInterval);
           progressOverlay.style.display = "none";
+          progressBar.textContent = `[ ]`;
           eventBus.emit("game:reset");
         }
       }, intervalTime);
@@ -68,18 +74,27 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
       }, 2000);
     });
 
-    resetButton.addEventListener("mouseup", () => {
+    resetButton.addEventListener("mouseup", (event) => {
+      if (gameState.isProcessing()) {
+        return;
+      }
+      event.preventDefault();
       clearInterval(progressInterval);
       progressOverlay.style.display = "none";
-      progressBar.textContent = "[    ]";
+      progressBar.textContent = "[ ]";
       clearTimeout(pressTimer);
     });
 
     let touchStartTime;
+
     resetButton.addEventListener(
       "touchstart",
       (event) => {
+        if (gameState.isProcessing()) {
+          return;
+        }
         event.preventDefault();
+
         progressOverlay.style.display = "block";
         let currentBlock = 0;
         const intervalTime = progressDuration / blocks;
@@ -92,6 +107,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
           if (currentBlock >= blocks) {
             clearInterval(progressInterval);
             progressOverlay.style.display = "none";
+            progressBar.textContent = `[ ]`;
             eventBus.emit("game:reset");
           }
         }, intervalTime);
@@ -103,9 +119,13 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
     resetButton.addEventListener(
       "touchcancel",
       (event) => {
+        if (gameState.isProcessing()) {
+          return;
+        }
+        event.preventDefault();
         clearInterval(progressInterval);
         progressOverlay.style.display = "none";
-        progressBar.textContent = "[    ]";
+        progressBar.textContent = "[ ]";
         touchStartTime = null;
       },
       // { passive: true },
@@ -114,9 +134,13 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
     resetButton.addEventListener(
       "touchend",
       (event) => {
+        if (gameState.isProcessing()) {
+          return;
+        }
+        event.preventDefault();
         clearInterval(progressInterval);
         progressOverlay.style.display = "none";
-        progressBar.textContent = "[    ]";
+        progressBar.textContent = "[ ]";
       },
       // { passive: true },
     );
@@ -129,6 +153,9 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
       disabledLine.style.display = "none";
       musicButton.classList.add("generic-fadein");
       musicButton.addEventListener("click", (event) => {
+        if (gameState.isProcessing()) {
+          return;
+        }
         event.preventDefault();
         const newSoundState = !gameState.isSoundEnabled();
         gameState.setSoundEnabled(newSoundState);
@@ -172,11 +199,13 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
 
   const toggleModal = (show, text = "", options = {}) => {
     const modal = document.querySelector(".modal");
+    const resetButton = document.querySelector(".reset-button");
     if (modal) {
       if (show) {
         modal.style.display = "block";
         modal.classList.remove("modal-fadeout");
         gameState.setProcessing(true);
+        resetButton.classList.add("disabled-element");
         if (text) {
           const modalText = modal.querySelector(".modal-text");
           if (modalText) {
@@ -199,6 +228,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
           setTimeout(() => {
             modal.style.display = "none";
             modal.classList.remove("modal-fadeout");
+            resetButton.classList.remove("disabled-element");
             gameState.setProcessing(false);
             renderService.getControls().enabled = true;
           }, 2000);
@@ -208,6 +238,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
         setTimeout(() => {
           modal.style.display = "none";
           modal.classList.remove("modal-fadeout");
+          resetButton.classList.remove("disabled-element");
           gameState.setProcessing(false);
           renderService.getControls().enabled = true;
         }, 2000);

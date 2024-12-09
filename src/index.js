@@ -15,7 +15,6 @@ const eventBus = EventBus();
 const viewManager = ViewManager(eventBus);
 const gameState = GameState(eventBus);
 const audioService = AudioService(eventBus, gameState);
-gameState.setProcessing(true);
 const gameConfig = GameConfig;
 const gameContainer = document.getElementById("game-container");
 const nodeNetwork = NodeNetwork(gameState, eventBus);
@@ -88,11 +87,13 @@ const startGame = async () => {
       false,
     );
     eventBus.on("game:reset", async () => {
+      if (gameState.isProcessing()) {
+        return;
+      }
       newRandomGroundColor();
       if (gameState.getGameAlreadyInitialized() === true) {
         gameState.reset();
         renderService.setControls(false);
-        gameState.setProcessing(true);
         physicsService.clearConnectionLines(renderService.getScene());
         nodeNetwork.reset(renderService.getScene());
         renderService.resetCamera();
