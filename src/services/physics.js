@@ -172,7 +172,7 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
     }
     const startColor = new THREE.Color(GameConfig.colors.normalConnection);
     const endColor = new THREE.Color(GameConfig.colors.traceConnection);
-    const duration = 2000;
+    const duration = GameConfig.game.traceSpeed;
     const startTime = Date.now();
 
     const updateColor = () => {
@@ -190,7 +190,7 @@ export const PhysicsService = (gameState, nodeNetwork, eventBus) => {
         physicsState.connectionLines.shift();
         setTimeout(() => {
           triggerTraceAnimation();
-        }, 2000);
+        }, GameConfig.game.traceSpeed);
       }
     };
     updateColor();

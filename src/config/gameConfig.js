@@ -3,12 +3,13 @@ export const GameConfig = {
     nodeNetworkSize: 4,
     nodeNetworkSpacing: 4,
     nonClickableNodesCount: 8,
-    breakerNodesCount: 2,
+    breakerNodesCount: 3,
     scoreIncrement: {
       normal: 5,
       breaker: 5,
       breakable: 10,
     },
+    traceSpeed: 2000,
   },
   // -- for testing on a small scale
   // game: {
