@@ -212,11 +212,13 @@ export const NodeNetwork = (gameState, eventBus) => {
     const validNodesLeft = nodeNetwork.nodesArray.filter(
       (node) =>
         !node.isVisited() &&
-        !node.isBreakable() &&
+        (!node.isBreakable() || node.isBreaker()) &&
         gameState.getBreakerCount() === 0,
     );
 
-    if (validNodesLeft.length > 0) {
+    const breakersAllUsed = gameState.getBreakerCount() === 0;
+
+    if (validNodesLeft.length > 0 || !breakersAllUsed) {
       gameState.setValidNodesLeft(true);
     } else {
       gameState.setValidNodesLeft(false);

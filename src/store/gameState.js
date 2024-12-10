@@ -1,4 +1,6 @@
-export const GameState = (eventBus) => {
+import { GameConfig } from "../config/gameConfig.js";
+
+export const GameState = (eventBus, gameConfig) => {
   const state = {
     score: 0,
     highScore: parseInt(localStorage.getItem("nodebreaker_highscore")) || 0,

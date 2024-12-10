@@ -11,11 +11,11 @@ import { InputService } from "./services/input.js";
 import { GameConfig } from "./config/gameConfig.js";
 import { AudioService } from "./services/audio.js";
 
+const gameConfig = GameConfig;
 const eventBus = EventBus();
 const viewManager = ViewManager(eventBus);
-const gameState = GameState(eventBus);
+const gameState = GameState(eventBus, gameConfig);
 const audioService = AudioService(eventBus, gameState);
-const gameConfig = GameConfig;
 const gameContainer = document.getElementById("game-container");
 const nodeNetwork = NodeNetwork(gameState, eventBus);
 const physicsService = PhysicsService(gameState, nodeNetwork, eventBus);
