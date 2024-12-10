@@ -65,17 +65,51 @@ export const NodeNetwork = (gameState, eventBus) => {
       x * nodeNetwork.size * nodeNetwork.size + y * nodeNetwork.size + z
     ];
 
-  const setRandomBreakableNodes = () => {
-    const indices = [...Array(nodeNetwork.nodesArray.length).keys()];
-    for (let i = indices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [indices[i], indices[j]] = [indices[j], indices[i]];
+  const checkNetworkConnectivity = () => {
+    const startNode = nodeNetwork.nodesArray.find(
+      (node) => !node.isBreakable(),
+    );
+    if (!startNode) {
+      return false;
     }
 
-    // Set the first n nodes as breakable
-    for (let i = 0; i < nodeNetwork.nonClickableNodesCount; i++) {
-      const nodeIndex = indices[i];
-      nodeNetwork.nodesArray[nodeIndex].setBreakable(true);
+    const visited = new Set();
+    const queue = [startNode];
+    visited.add(startNode);
+
+    while (queue.length > 0) {
+      const currentNode = queue.shift();
+
+      for (const neighbor of currentNode.getConnections()) {
+        if (!visited.has(neighbor) && !neighbor.isBreakable()) {
+          visited.add(neighbor);
+          queue.push(neighbor);
+        }
+      }
+    }
+
+    const accessibleNodes = nodeNetwork.nodesArray.filter(
+      (node) => !node.isBreakable(),
+    ).length;
+
+    return visited.size === accessibleNodes;
+  };
+
+  const setRandomBreakableNodes = () => {
+    const indices = [...Array(nodeNetwork.nodesArray.length).keys()];
+
+    let validConfiguration = false;
+
+    while (!validConfiguration) {
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      nodeNetwork.nodesArray.forEach((node) => node.setBreakable(false));
+      for (let i = 0; i < nodeNetwork.nonClickableNodesCount; i++) {
+        nodeNetwork.nodesArray[indices[i]].setBreakable(true);
+      }
+      validConfiguration = checkNetworkConnectivity();
     }
   };
 

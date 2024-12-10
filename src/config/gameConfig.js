@@ -2,8 +2,8 @@ export const GameConfig = {
   game: {
     nodeNetworkSize: 4,
     nodeNetworkSpacing: 4,
-    nonClickableNodesCount: 8,
-    breakerNodesCount: 3,
+    nonClickableNodesCount: 24,
+    breakerNodesCount: 2,
     scoreIncrement: {
       normal: 5,
       breaker: 5,
