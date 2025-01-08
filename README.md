@@ -12,6 +12,7 @@ A 3D browser-based puzzle game where you strategically link nodes in a node netw
 
 ## 🌐 Live demo
 A live version can be found [here](https://sage-snickerdoodle-468d70.netlify.app/).
+NOTE: Netlify puts dormient sites to sleep after a certain period of inactivity, if you get an error on page load wait a few seconds and try reloading the page in the browser.
 
 # 🚦 Deploy status
 [![Netlify Status](https://api.netlify.com/api/v1/badges/8fcb2443-d677-478e-b208-0f37ea39f36b/deploy-status)](https://app.netlify.com/sites/sage-snickerdoodle-468d70/deploys)
