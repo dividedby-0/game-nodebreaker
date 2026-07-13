@@ -8,6 +8,8 @@ export const GameService = (
   lineManager,
   audioService,
 ) => {
+  let pendingTraceCallback = null;
+
   const initialize = async () => {
     gameState.setProcessing(true);
   };
@@ -17,6 +19,7 @@ export const GameService = (
     await eventBus.emit("breakers:initialize", gameState.getBreakerCount());
     await eventBus.emit("reset:initialize");
     await eventBus.emit("musicBtn:initialize");
+    await eventBus.emit("pauseBtn:initialize");
   };
 
   const buildModalScoreLines = (score, highScore, isNewHighScore) => {
@@ -32,6 +35,7 @@ export const GameService = (
   const handleGameOver = (reason) => {
     gameState.setProcessing(true);
     gameState.setTraced(false);
+    pendingTraceCallback = null;
 
     const score = gameState.getScore();
     const highScore = gameState.getHighScore();
@@ -56,6 +60,7 @@ export const GameService = (
   const handleGameWin = (reason) => {
     gameState.setProcessing(true);
     gameState.setTraced(false);
+    pendingTraceCallback = null;
 
     const score = gameState.getScore();
     const highScore = gameState.getHighScore();
@@ -85,6 +90,24 @@ export const GameService = (
       scene,
       (hiddenNode) => gameState.addHiddenNode(hiddenNode),
     );
+  });
+
+  eventBus.on("game:pause", () => {
+    if (pendingTraceCallback) {
+      lineManager.stop();
+    }
+    gameState.setPaused(true);
+  });
+
+  eventBus.on("game:unpause", () => {
+    if (pendingTraceCallback) {
+      lineManager.startTrace(pendingTraceCallback);
+    }
+    gameState.setPaused(false);
+  });
+
+  eventBus.on("game:reset", () => {
+    pendingTraceCallback = null;
   });
 
   eventBus.on("input:click", ({ raycaster }) => {
@@ -220,6 +243,7 @@ export const GameService = (
       visualService.animateNodeRemoval(clickedNode, () => {});
     } else {
       if (onTraceComplete) {
+        pendingTraceCallback = onTraceComplete;
         lineManager.startTrace(onTraceComplete);
       }
       visualService.animateNodeRemoval(clickedNode, () => {

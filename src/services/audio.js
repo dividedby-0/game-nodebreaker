@@ -7,6 +7,7 @@ export const AudioService = (eventBus, gameState) => {
     fadeTimeoutId: null,
     fadeIntervalId: null,
     currentlyPlayingEffect: null,
+    prePauseVolume: null,
   };
 
   const initialize = () => {
@@ -124,6 +125,20 @@ export const AudioService = (eventBus, gameState) => {
     }
   });
 
+  eventBus.on("game:pause", () => {
+    if (gameState.isSoundEnabled() && audioState.bgMusic) {
+      audioState.prePauseVolume = audioState.bgMusic.volume;
+      audioState.bgMusic.volume = GameConfig.game.audio.pauseVolume;
+    }
+  });
+
+  eventBus.on("game:unpause", () => {
+    if (audioState.prePauseVolume !== null && audioState.bgMusic) {
+      audioState.bgMusic.volume = audioState.prePauseVolume;
+      audioState.prePauseVolume = null;
+    }
+  });
+
   eventBus.on("game:reset", () => {
     if (audioState.fadeTimeoutId !== null) {
       clearTimeout(audioState.fadeTimeoutId);
@@ -132,6 +147,10 @@ export const AudioService = (eventBus, gameState) => {
     if (audioState.fadeIntervalId !== null) {
       clearInterval(audioState.fadeIntervalId);
       audioState.fadeIntervalId = null;
+    }
+    if (audioState.prePauseVolume !== null && audioState.bgMusic) {
+      audioState.bgMusic.volume = audioState.prePauseVolume;
+      audioState.prePauseVolume = null;
     }
   });
 

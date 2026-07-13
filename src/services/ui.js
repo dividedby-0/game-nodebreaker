@@ -92,6 +92,15 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
     progressBar.textContent = "[ ]";
   });
 
+  eventBus.on("game:reset", () => {
+    const pauseOverlay = document.querySelector(".pause-overlay");
+    if (pauseOverlay) {
+      pauseOverlay.classList.remove("active");
+    }
+    document.querySelector(".music-button")?.classList.remove("disabled-element");
+    document.querySelector(".reset-button")?.classList.remove("disabled-element");
+  });
+
   eventBus.on("musicBtn:initialize", () => {
     if (!gameState.getGameAlreadyInitialized()) {
       const musicButton = document.querySelector(".music-button");
@@ -107,6 +116,31 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
         gameState.setSoundEnabled(newSoundState);
         audioService.toggleSound();
         disabledLine.style.display = newSoundState ? "none" : "block";
+      });
+    }
+  });
+
+  eventBus.on("pauseBtn:initialize", () => {
+    if (!gameState.getGameAlreadyInitialized()) {
+      const pauseButton = document.querySelector(".pause-button");
+      const pauseOverlay = document.querySelector(".pause-overlay");
+      pauseButton.classList.add("generic-fadein");
+      pauseButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (gameState.isProcessing()) {
+          return;
+        }
+        if (gameState.isPaused()) {
+          pauseOverlay.classList.remove("active");
+          document.querySelector(".music-button")?.classList.remove("disabled-element");
+          document.querySelector(".reset-button")?.classList.remove("disabled-element");
+          eventBus.emit("game:unpause");
+        } else {
+          pauseOverlay.classList.add("active");
+          document.querySelector(".music-button")?.classList.add("disabled-element");
+          document.querySelector(".reset-button")?.classList.add("disabled-element");
+          eventBus.emit("game:pause");
+        }
       });
     }
   });
@@ -152,6 +186,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
         modal.classList.remove("modal-fadeout");
         gameState.setProcessing(true);
         resetButton.classList.add("disabled-element");
+        document.querySelector(".pause-button")?.classList.add("disabled-element");
         if (text) {
           const modalText = modal.querySelector(".modal-text");
           if (modalText) {
@@ -175,6 +210,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
             modal.style.display = "none";
             modal.classList.remove("modal-fadeout");
             resetButton.classList.remove("disabled-element");
+            document.querySelector(".pause-button")?.classList.remove("disabled-element");
             gameState.setProcessing(false);
             renderService.getControls().enabled = true;
           }, GameConfig.game.timing.modalFadeoutDuration);
@@ -185,6 +221,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
           modal.style.display = "none";
           modal.classList.remove("modal-fadeout");
           resetButton.classList.remove("disabled-element");
+          document.querySelector(".pause-button")?.classList.remove("disabled-element");
           gameState.setProcessing(false);
           renderService.getControls().enabled = true;
         }, GameConfig.game.timing.modalFadeoutDuration);

@@ -477,6 +477,115 @@ body {
   stroke-width: 2;
 }
 
+/*Pause button-specific*/
+.pause-button {
+  position: fixed;
+  top: 140px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  z-index: 1000;
+  background: transparent;
+  border: none;
+  padding: 0;
+  opacity: 0;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.pause-button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.pause-button:active {
+  outline: none;
+}
+
+.pause-button svg {
+  width: 100%;
+  height: 100%;
+  stroke: rgba(0, 255, 0, 0.9);
+  stroke-width: 2;
+  fill: transparent;
+  filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.7))
+  drop-shadow(0 0 10px rgba(0, 255, 0, 0.5));
+}
+
+.pause-button circle {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.pause-button .pause-icon {
+  fill: rgba(0, 255, 0, 0.9);
+  font-size: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.pause-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 998;
+}
+
+.pause-overlay.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pause-text {
+  font-family: "VT323", monospace;
+  font-size: clamp(6rem, 12vw, 12rem);
+  color: #00ff00;
+  text-align: center;
+  text-shadow:
+    0 0 5px rgba(0, 255, 0, 0.7),
+    0 0 10px rgba(0, 255, 0, 0.5),
+    0 0 20px rgba(0, 255, 0, 0.3);
+  z-index: 999;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  animation: pulseText 2s ease-in-out infinite;
+}
+
+.pause-text::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    transparent 50%,
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
+  animation: scanlines 1s steps(30) infinite;
+  pointer-events: none;
+}
+
+@keyframes pulseText {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
 
 /*LOADING SCREEN VIEW*/
 

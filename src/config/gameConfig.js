@@ -45,6 +45,7 @@ export const GameConfig = {
       fadeTargetVolume: 1.0,
       fadeDelay: 2000,
       fadeDuration: 2000,
+      pauseVolume: 0.05,
     },
   },
   colors: {
