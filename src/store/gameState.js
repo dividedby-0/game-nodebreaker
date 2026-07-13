@@ -16,7 +16,7 @@ export const GameState = (eventBus) => {
     hiddenNodes: new Set(),
     isBeingTraced: false,
     gameAlreadyInitialized: false,
-    isSoundEnabled: safeGetItem("nodebreaker_sound_enabled") !== "false",
+    isSoundEnabled: true,
     isPaused: false,
   };
 
@@ -55,7 +55,6 @@ export const GameState = (eventBus) => {
     },
     setSoundEnabled: (enabled) => {
       state.isSoundEnabled = enabled;
-      safeSetItem("nodebreaker_sound_enabled", enabled);
     },
     setPaused: (value) => {
       state.isPaused = value;

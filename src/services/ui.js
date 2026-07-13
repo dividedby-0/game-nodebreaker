@@ -105,7 +105,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
     if (!gameState.getGameAlreadyInitialized()) {
       const musicButton = document.querySelector(".music-button");
       const disabledLine = musicButton.querySelector(".disabled-line");
-      disabledLine.style.display = "none";
+      disabledLine.style.display = gameState.isSoundEnabled() ? "none" : "block";
       musicButton.classList.add("generic-fadein");
       musicButton.addEventListener("click", (event) => {
         if (gameState.isProcessing()) {

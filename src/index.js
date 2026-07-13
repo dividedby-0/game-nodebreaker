@@ -55,6 +55,14 @@ const initialize = async () => {
 
   const audioConsentBtn = document.querySelector(".consent-button");
   audioConsentBtn.addEventListener("click", () => {
+    gameState.setSoundEnabled(true);
+    viewManager.switchToView("gameView");
+    startGame();
+  });
+
+  const noAudioBtn = document.querySelector(".no-audio-button");
+  noAudioBtn.addEventListener("click", () => {
+    gameState.setSoundEnabled(false);
     viewManager.switchToView("gameView");
     startGame();
   });
