@@ -81,6 +81,8 @@ export const GameState = (eventBus) => {
       state.selectedNodes = [];
       state.breakerCount = 0;
       state.isProcessing = false;
+      state.isGameCompleted = false;
+      state.areValidNodesLeft = false;
       state.hiddenNodes.clear();
     },
 

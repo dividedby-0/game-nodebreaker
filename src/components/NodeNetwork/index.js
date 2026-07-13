@@ -160,22 +160,14 @@ export const NodeNetwork = (gameState) => {
     if (validMoves.length === 0) {
       checkGameCompleted();
 
-      if (
-        gameState &&
-        gameState.isGameCompleted() &&
-        gameState.areValidNodesLeft()
-      ) {
+      if (gameState.isGameCompleted() && gameState.areValidNodesLeft()) {
         gameState.setProcessing(true);
         gameState.setTraced(false);
         gameState.showGameOver("You got stuck ¯\\_(ツ)_/¯");
-      } else if (gameState && gameState.isGameCompleted()) {
+      } else if (gameState.isGameCompleted()) {
         gameState.setProcessing(true);
         gameState.setTraced(false);
         gameState.showWin("You linked all the nodes!");
-      } else {
-        gameState.setProcessing(true);
-        gameState.setTraced(false);
-        gameState.showGameOver("That's a dead end :(");
       }
     }
   };
@@ -202,21 +194,12 @@ export const NodeNetwork = (gameState) => {
   };
 
   const checkGameCompleted = () => {
-    const validNodesLeft = nodeNetwork.nodesArray.filter(
-      (node) =>
-        !node.isVisited() &&
-        (!node.isBreakable() || node.isBreaker()) &&
-        gameState.getBreakerCount() === 0,
+    const unvisitedNormalNodes = nodeNetwork.nodesArray.filter(
+      (node) => !node.isVisited() && !node.isBreakable(),
     );
 
-    const breakersAllUsed = gameState.getBreakerCount() === 0;
-
-    if (validNodesLeft.length > 0 || !breakersAllUsed) {
-      gameState.setValidNodesLeft(true);
-    } else {
-      gameState.setValidNodesLeft(false);
-      gameState.setGameCompleted(true);
-    }
+    gameState.setValidNodesLeft(unvisitedNormalNodes.length > 0);
+    gameState.setGameCompleted(true);
   };
 
   initializeNodes();

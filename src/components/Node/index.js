@@ -46,6 +46,7 @@ export const Node = (position) => {
   };
 
   const nodeMesh = createNodeMesh();
+  let fadeRafId;
 
   const updateNodeAppearance = () => {
     if (node.isBreakable) {
@@ -66,6 +67,7 @@ export const Node = (position) => {
   };
 
   const fadeToColor = (color) => {
+    cancelAnimationFrame(fadeRafId);
     const startTime = Date.now();
     const duration = 1000;
 
@@ -81,7 +83,7 @@ export const Node = (position) => {
       );
 
       if (progress < 1) {
-        requestAnimationFrame(fadeAnimation);
+        fadeRafId = requestAnimationFrame(fadeAnimation);
       }
     };
     fadeAnimation();
