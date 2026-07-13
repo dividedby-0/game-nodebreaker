@@ -16,7 +16,7 @@ export const GameState = (eventBus) => {
   return {
     // State getters
     getScore: () => state.score,
-    getSelectedNodes: () => state.selectedNodes,
+    getSelectedNodes: () => [...state.selectedNodes],
     getBreakerCount: () => state.breakerCount,
     getHiddenNodes: () => state.hiddenNodes,
     isProcessing: () => state.isProcessing,

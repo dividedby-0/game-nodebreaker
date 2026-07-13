@@ -120,7 +120,7 @@ export const GameService = (
     }
 
     renderService.focusCamOnNode(clickedNode);
-    gameState.getSelectedNodes().push(clickedNode);
+    gameState.addSelectedNode(clickedNode);
     updateGameState(clickedNode, previousNode);
   };
 
@@ -192,7 +192,6 @@ export const GameService = (
       );
     }
 
-    gameState.getSelectedNodes().push(clickedNode);
     nodeNetwork.findValidNextMoves(clickedNode);
     visualService.animateNodeRemoval(clickedNode, () => {
       gameState.setProcessing(false);
