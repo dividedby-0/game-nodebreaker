@@ -1,14 +1,22 @@
+const safeGetItem = (key, fallback = null) => {
+  try { return localStorage.getItem(key); } catch { return fallback; }
+};
+
+const safeSetItem = (key, value) => {
+  try { localStorage.setItem(key, value); } catch { /* storage unavailable */ }
+};
+
 export const GameState = (eventBus) => {
   const state = {
     score: 0,
-    highScore: parseInt(localStorage.getItem("nodebreaker_highscore")) || 0,
+    highScore: parseInt(safeGetItem("nodebreaker_highscore")) || 0,
     selectedNodes: [],
     breakerCount: 0,
     isProcessing: false,
     hiddenNodes: new Set(),
     isBeingTraced: false,
     gameAlreadyInitialized: false,
-    isSoundEnabled: true,
+    isSoundEnabled: safeGetItem("nodebreaker_sound_enabled") !== "false",
   };
 
   return {
@@ -45,6 +53,7 @@ export const GameState = (eventBus) => {
     },
     setSoundEnabled: (enabled) => {
       state.isSoundEnabled = enabled;
+      safeSetItem("nodebreaker_sound_enabled", enabled);
     },
 
     // Node-related
@@ -60,7 +69,7 @@ export const GameState = (eventBus) => {
 
     reset: () => {
       state.highScore =
-        parseInt(localStorage.getItem("nodebreaker_highscore")) || 0;
+        parseInt(safeGetItem("nodebreaker_highscore")) || 0;
       state.isBeingTraced = false;
       state.gameAlreadyInitialized = true;
       state.score = 0;
@@ -72,7 +81,7 @@ export const GameState = (eventBus) => {
 
     setHighScore: (score) => {
       state.highScore = score;
-      localStorage.setItem("nodebreaker_highscore", score);
+      safeSetItem("nodebreaker_highscore", score);
     },
     getHighScore: () => state.highScore,
   };

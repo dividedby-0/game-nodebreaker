@@ -48,12 +48,12 @@ export const RenderService = (
     const renderPass = new RenderPass(renderer.scene, renderer.camera);
     renderer.composer.addPass(renderPass);
 
-    const scanlinesPass = new ShaderPass(ScanlinesShader);
-    scanlinesPass.uniforms.resolution.value.set(
+    renderer.scanlinesPass = new ShaderPass(ScanlinesShader);
+    renderer.scanlinesPass.uniforms.resolution.value.set(
       window.innerWidth * 0.5,
       window.innerHeight * 0.5,
     );
-    renderer.composer.addPass(scanlinesPass);
+    renderer.composer.addPass(renderer.scanlinesPass);
 
     renderer.glitchPass = new GlitchPass();
     renderer.glitchPass.enabled = false;
@@ -76,6 +76,12 @@ export const RenderService = (
     renderer.camera.updateProjectionMatrix();
     renderer.renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.composer.setSize(window.innerWidth, window.innerHeight);
+    if (renderer.scanlinesPass) {
+      renderer.scanlinesPass.uniforms.resolution.value.set(
+        window.innerWidth * 0.5,
+        window.innerHeight * 0.5,
+      );
+    }
   };
 
   renderer.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -261,7 +267,6 @@ export const RenderService = (
     } else {
       renderer.renderer.render(renderer.scene, renderer.camera);
     }
-    renderer.renderer.state.reset();
   };
 
   return {

@@ -78,7 +78,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
   // Event listeners: initializers
 
   eventBus.on("score:initialize", (score) =>
-    terminalTextAnimation("score", `Score: ${score}`),
+    terminalTextAnimation("score", `Score: ${score}  Best: ${gameState.getHighScore()}`),
   );
 
   eventBus.on("breakers:initialize", (breakers) =>
@@ -122,7 +122,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
   // Event listeners: updaters
 
   eventBus.on("score:update", (score) =>
-    updateUiElement("score", `Score: ${score}`),
+    updateUiElement("score", `Score: ${score}  Best: ${gameState.getHighScore()}`),
   );
 
   eventBus.on("breakers:update", (count) =>

@@ -70,9 +70,11 @@ export const AudioService = (eventBus, gameState) => {
       consentButton.addEventListener(
         "click",
         () => {
-          audioState.bgMusic.play().catch((error) => {
-            console.log("Audio play failed:", error);
-          });
+          if (gameState.isSoundEnabled()) {
+            audioState.bgMusic.play().catch((error) => {
+              console.log("Audio play failed:", error);
+            });
+          }
         },
         { once: true },
       );
