@@ -5,12 +5,20 @@ import { GameConfig } from "../config/gameConfig.js";
 export const VisualService = () => {
   const activeIntervals = new Set();
   const nodeFadeRafIds = new Map();
+  const particleSystems = new Map();
 
   const cancelAllAnimations = () => {
     activeIntervals.forEach((id) => clearInterval(id));
     activeIntervals.clear();
     nodeFadeRafIds.forEach((id) => cancelAnimationFrame(id));
     nodeFadeRafIds.clear();
+    particleSystems.forEach((data, points) => {
+      if (data.rafId !== null) { cancelAnimationFrame(data.rafId); }
+      data.scene.remove(points);
+      data.geometry.dispose();
+      data.material.dispose();
+    });
+    particleSystems.clear();
   };
 
   const animateNodeRemoval = (node, onComplete) => {
@@ -162,10 +170,81 @@ export const VisualService = () => {
     }
   };
 
+  const emitParticles = (position, scene, { color = 0x87cefa, count = 12, spread = 0.6, lifetime = 500 } = {}) => {
+    const positions = new Float32Array(count * 3);
+    const velocities = [];
+
+    for (let i = 0; i < count; i++) {
+      positions[i * 3] = position.x + (Math.random() - 0.5) * spread;
+      positions[i * 3 + 1] = position.y + (Math.random() - 0.5) * spread;
+      positions[i * 3 + 2] = position.z + (Math.random() - 0.5) * spread;
+      velocities.push({
+        x: (Math.random() - 0.5) * 0.08,
+        y: Math.random() * 0.08,
+        z: (Math.random() - 0.5) * 0.08,
+      });
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+      color,
+      size: 0.15,
+      transparent: true,
+      opacity: 1,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    const system = { scene, points, geometry, material, rafId: null };
+    particleSystems.set(points, system);
+
+    const startTime = Date.now();
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / lifetime, 1);
+
+      const pos = points.geometry.attributes.position.array;
+      for (let i = 0; i < count; i++) {
+        pos[i * 3] += velocities[i].x;
+        pos[i * 3 + 1] += velocities[i].y;
+        pos[i * 3 + 2] += velocities[i].z;
+        velocities[i].y -= 0.001;
+      }
+      points.geometry.attributes.position.needsUpdate = true;
+      points.material.opacity = 1 - progress;
+
+      if (progress < 1) {
+        system.rafId = requestAnimationFrame(animate);
+      } else {
+        scene.remove(points);
+        geometry.dispose();
+        material.dispose();
+        particleSystems.delete(points);
+      }
+    };
+
+    system.rafId = requestAnimationFrame(animate);
+  };
+
+  const flashNodeInvalid = (node) => {
+    const mesh = node.getMesh();
+    mesh.material.color.setHex(GameConfig.colors.traceConnection);
+    setTimeout(() => {
+      node.updateAppearance();
+    }, 200);
+  };
+
   return {
     animateNodeRemoval,
     cancelAllAnimations,
     checkVisualObstructions,
+    emitParticles,
     unhideObstructingNodes,
+    flashNodeInvalid,
   };
 };

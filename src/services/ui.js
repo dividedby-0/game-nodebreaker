@@ -30,6 +30,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
     const startProgress = (event) => {
       if (gameState.isProcessing()) { return; }
       event.preventDefault();
+      document.getElementById("game-container")?.classList.add("modal-active");
       progressOverlay.style.display = "block";
       let currentBlock = 0;
       const intervalTime = progressDuration / blocks;
@@ -41,6 +42,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
 
         if (currentBlock >= blocks) {
           clearInterval(progressInterval);
+          document.getElementById("game-container")?.classList.remove("modal-active");
           progressOverlay.style.display = "none";
           progressBar.textContent = "[ ]";
           eventBus.emit("game:reset");
@@ -55,6 +57,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
     const cancelProgress = (event) => {
       if (gameState.isProcessing()) { return; }
       event.preventDefault();
+      document.getElementById("game-container")?.classList.remove("modal-active");
       clearInterval(progressInterval);
       clearTimeout(pressTimer);
       progressOverlay.style.display = "none";
@@ -99,6 +102,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
     }
     document.querySelector(".music-button")?.classList.remove("disabled-element");
     document.querySelector(".reset-button")?.classList.remove("disabled-element");
+    document.querySelector(".hint-text")?.classList.remove("visible");
   });
 
   eventBus.on("musicBtn:initialize", () => {
@@ -155,9 +159,16 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
 
   // Event listeners: updaters
 
-  eventBus.on("score:update", (score) =>
-    updateUiElement("score", `Score: ${score}  Best: ${gameState.getHighScore()}`),
-  );
+  eventBus.on("score:update", (score) => {
+    updateUiElement("score", `Score: ${score}  Best: ${gameState.getHighScore()}`);
+    const el = document.querySelector(".score-terminal-text");
+    if (el) {
+      el.classList.remove("pop");
+      el.offsetWidth;
+      el.classList.add("pop");
+      el.addEventListener("animationend", () => el.classList.remove("pop"), { once: true });
+    }
+  });
 
   eventBus.on("breakers:update", (count) =>
     updateUiElement("breakers", `Breakers: ${count}`),
@@ -175,13 +186,49 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
     toggleModal(true, message);
   });
 
+  eventBus.on("score:popup", ({ position, value, color }) => {
+    const vector = position.clone().project(renderService.getCamera());
+    const canvas = renderService.getRenderer().domElement;
+    const x = (vector.x * 0.5 + 0.5) * canvas.clientWidth;
+    const y = (-vector.y * 0.5 + 0.5) * canvas.clientHeight;
+
+    const el = document.createElement("div");
+    el.className = "score-popup";
+    el.textContent = `+${value}`;
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    el.style.color = `#${color}`;
+    el.style.textShadow = `0 0 5px #${color}, 0 0 10px #${color}`;
+    document.body.appendChild(el);
+
+    el.addEventListener("animationend", () => {
+      el.remove();
+    }, { once: true });
+  });
+
+  eventBus.on("trace:visuals:on", () => {
+    const container = document.getElementById("game-container");
+    if (container) {
+      container.classList.add("trace-active");
+    }
+  });
+
+  eventBus.on("trace:visuals:off", () => {
+    const container = document.getElementById("game-container");
+    if (container) {
+      container.classList.remove("trace-active");
+    }
+  });
+
   // UI update methods
 
   const toggleModal = (show, text = "", options = {}) => {
     const modal = document.querySelector(".modal");
     const resetButton = document.querySelector(".reset-button");
+    const gameContainer = document.getElementById("game-container");
     if (modal) {
       if (show) {
+        gameContainer?.classList.add("modal-active");
         modal.style.display = "block";
         modal.classList.remove("modal-fadeout");
         gameState.setProcessing(true);
@@ -207,6 +254,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
           }
           modal.classList.add("modal-fadeout");
           setTimeout(() => {
+            gameContainer?.classList.remove("modal-active");
             modal.style.display = "none";
             modal.classList.remove("modal-fadeout");
             resetButton.classList.remove("disabled-element");
@@ -218,6 +266,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
       } else {
         modal.classList.add("modal-fadeout");
         setTimeout(() => {
+          gameContainer?.classList.remove("modal-active");
           modal.style.display = "none";
           modal.classList.remove("modal-fadeout");
           resetButton.classList.remove("disabled-element");

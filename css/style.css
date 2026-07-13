@@ -133,6 +133,24 @@ body {
 #game-container {
   width: 100vw;
   height: 100vh;
+  transition: box-shadow 0.3s ease;
+}
+
+#game-container.modal-active {
+  filter: blur(3px);
+  transition: filter 0.4s ease;
+}
+
+#game-container.trace-active {
+  animation: screenShake 0.15s ease-in-out 6;
+}
+
+@keyframes screenShake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-3px, 2px); }
+  50% { transform: translate(3px, -2px); }
+  75% { transform: translate(-2px, -3px); }
+}
   background: linear-gradient(45deg, #1a001a, #2b002b);
   animation: gradientBG 3s ease infinite;
   background-size: 200% 200%;
@@ -177,6 +195,17 @@ body {
   color: var(--score-terminal-text-color);
   position: relative;
   display: inline-block;
+  transition: text-shadow 0.15s ease;
+}
+
+@keyframes scorePop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12); text-shadow: 0 0 10px rgba(0,255,0,1), 0 0 25px rgba(0,255,0,0.8); }
+  100% { transform: scale(1); }
+}
+
+.score-terminal-text.pop {
+  animation: scorePop 0.3s ease-out;
 }
 
 .score-terminal-caret {
@@ -415,6 +444,24 @@ body {
   font-size: clamp(2rem, 4vw, 3rem);
   margin-bottom: 1rem;
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.reset-message::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    transparent 50%,
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
+  animation: scanlines 1s steps(30) infinite;
+  pointer-events: none;
 }
 
 .reset-progress {
@@ -496,6 +543,23 @@ body {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+}
+
+.pause-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    transparent 50%,
+    rgba(0, 0, 0, 0.15) 50%
+  );
+  background-size: 100% 4px;
+  animation: scanlines 1s steps(30) infinite;
+  pointer-events: none;
+  border-radius: 50%;
 }
 
 .pause-button:focus {
@@ -750,4 +814,47 @@ body {
   .modal {
     width: 50%;
   }
+}
+
+/* Score popup */
+.score-popup {
+  position: fixed;
+  font-family: "VT323", monospace;
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  pointer-events: none;
+  user-select: none;
+  z-index: 999;
+  animation: scorePopupFloat 1.2s ease-out forwards;
+}
+
+@keyframes scorePopupFloat {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-60px); }
+}
+
+/* Camera drag hint */
+.hint-text {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "VT323", monospace;
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  color: rgba(0, 255, 0, 0.7);
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  z-index: 500;
+}
+
+.hint-text.visible {
+  animation: hintFadeOut 7s ease-out forwards;
+}
+
+@keyframes hintFadeOut {
+  0% { opacity: 0.7; }
+  60% { opacity: 0.7; }
+  100% { opacity: 0; }
 }

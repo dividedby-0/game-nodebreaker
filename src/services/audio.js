@@ -154,6 +154,23 @@ export const AudioService = (eventBus, gameState) => {
     }
   });
 
+  const playInvalidSound = () => {
+    if (!gameState.isSoundEnabled()) { return; }
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.value = 120;
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.2);
+    } catch (e) { /* audio not available */ }
+  };
+
   const playSoundEffect = (effectName) => {
     if (!gameState.isSoundEnabled()) { return; }
     const soundEffect = audioState.soundEffects.get(effectName);
@@ -192,5 +209,6 @@ export const AudioService = (eventBus, gameState) => {
     setVolume,
     toggleSound,
     playSoundEffect,
+    playInvalidSound,
   };
 };

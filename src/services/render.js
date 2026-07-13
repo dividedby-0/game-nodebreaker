@@ -15,6 +15,73 @@ export const RenderService = (
 ) => {
   let flashRafId = null;
   let cameraRafId = null;
+  const groundMeshes = [];
+  const dataStreams = [];
+  let dataStreamTimer = null;
+
+  const setGroundMeshes = (meshes) => {
+    dataStreams.forEach((s) => {
+      s.line.parent?.remove(s.line);
+      s.line.geometry.dispose();
+      s.line.material.dispose();
+    });
+    dataStreams.length = 0;
+    groundMeshes.length = 0;
+    meshes.forEach((m) => {
+      groundMeshes.push(m);
+    });
+    if (dataStreamTimer === null) {
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => spawnDataStream(), i * 800);
+      }
+      dataStreamTimer = setInterval(spawnDataStream, 2500);
+    }
+  };
+
+  const spawnDataStream = () => {
+    if (groundMeshes.length === 0) { return; }
+    const half = 350;
+    const edge = Math.floor(Math.random() * 4);
+    let x, y, dx, dy;
+    if (edge === 0) {
+      x = (Math.random() - 0.5) * 700;
+      y = half;
+      dx = 0; dy = -1;
+    } else if (edge === 1) {
+      x = (Math.random() - 0.5) * 700;
+      y = -half;
+      dx = 0; dy = 1;
+    } else if (edge === 2) {
+      x = -half;
+      y = (Math.random() - 0.5) * 700;
+      dx = 1; dy = 0;
+    } else {
+      x = half;
+      y = (Math.random() - 0.5) * 700;
+      dx = -1; dy = 0;
+    }
+    const segLen = 15;
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array([x, y, 1, x + dx * segLen, y + dy * segLen, 1]);
+    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    const mat = new THREE.LineBasicMaterial({
+      color: GameConfig.colors.normalConnection,
+      transparent: true,
+      opacity: 0.5 + Math.random() * 0.3,
+    });
+    const line = new THREE.Line(geo, mat);
+    groundMeshes[0].add(line);
+    dataStreams.push({
+      line,
+      progress: Math.random() * 0.5,
+      speed: 0.004 + Math.random() * 0.004,
+      startX: x,
+      startY: y,
+      dx,
+      dy,
+      segLen,
+    });
+  };
 
   const renderer = {
     scene: new THREE.Scene(),
@@ -64,6 +131,10 @@ export const RenderService = (
     // Event listeners
     eventBus.on("scene:flash", () => {
       flashScene();
+    });
+
+    eventBus.on("scene:celebrate", () => {
+      celebrateScene();
     });
 
     animate();
@@ -123,6 +194,35 @@ export const RenderService = (
       if (progress < 1) {
         renderer.scene.background = new THREE.Color(
           GameConfig.colors.flashColor,
+        ).multiplyScalar(1 - easeProgress);
+        renderer.renderer.setClearAlpha(1 - easeProgress);
+        flashRafId = requestAnimationFrame(fadeBack);
+      } else {
+        renderer.scene.background = null;
+        renderer.renderer.setClearAlpha(0);
+        flashRafId = null;
+      }
+    };
+    flashRafId = requestAnimationFrame(fadeBack);
+  };
+
+  const celebrateScene = () => {
+    if (flashRafId) {cancelAnimationFrame(flashRafId);}
+
+    renderer.scene.background = new THREE.Color(GameConfig.colors.validNode);
+    renderer.renderer.setClearAlpha(1);
+
+    const startTime = Date.now();
+    const duration = GameConfig.game.timing.flashDuration;
+
+    const fadeBack = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = easeOutCubic(progress);
+
+      if (progress < 1) {
+        renderer.scene.background = new THREE.Color(
+          GameConfig.colors.validNode,
         ).multiplyScalar(1 - easeProgress);
         renderer.renderer.setClearAlpha(1 - easeProgress);
         flashRafId = requestAnimationFrame(fadeBack);
@@ -262,6 +362,44 @@ export const RenderService = (
   const animate = () => {
     requestAnimationFrame(animate);
     renderer.controls.update();
+
+    // Color cycle
+    if (groundMeshes.length > 0) {
+      const t = Date.now() / 20000;
+      const colors = GameConfig.groundColors;
+      const idx = t % colors.length;
+      const i0 = Math.floor(idx);
+      const i1 = (i0 + 1) % colors.length;
+      const frac = idx - i0;
+      const c0 = new THREE.Color(colors[i0]);
+      const c1 = new THREE.Color(colors[i1]);
+      c0.lerp(c1, frac);
+      groundMeshes.forEach((m) => m.material.color.copy(c0));
+    }
+
+    // Data stream animation
+    for (let i = dataStreams.length - 1; i >= 0; i--) {
+      const s = dataStreams[i];
+      s.progress += s.speed;
+      if (s.progress >= 1) {
+        s.line.parent?.remove(s.line);
+        s.line.geometry.dispose();
+        s.line.material.dispose();
+        dataStreams.splice(i, 1);
+        continue;
+      }
+      const totalTravel = 750;
+      const offset = s.progress * totalTravel;
+      const p = s.line.geometry.attributes.position.array;
+      p[0] = s.startX + s.dx * offset;
+      p[1] = s.startY + s.dy * offset;
+      p[2] = 1;
+      p[3] = s.startX + s.dx * (offset + s.segLen);
+      p[4] = s.startY + s.dy * (offset + s.segLen);
+      p[5] = 1;
+      s.line.geometry.attributes.position.needsUpdate = true;
+    }
+
     if (renderer.composer) {
       renderer.composer.render();
     } else {
@@ -284,5 +422,6 @@ export const RenderService = (
     triggerGlitchEffect,
     flashScene,
     resetCamera,
+    setGroundMeshes,
   };
 };

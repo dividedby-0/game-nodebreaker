@@ -18,6 +18,9 @@ export const GameState = (eventBus) => {
     gameAlreadyInitialized: false,
     isSoundEnabled: true,
     isPaused: false,
+    normalNodes: 0,
+    breakableNodes: 0,
+    breakerNodes: 0,
   };
 
   return {
@@ -59,6 +62,12 @@ export const GameState = (eventBus) => {
     setPaused: (value) => {
       state.isPaused = value;
     },
+    getNormalNodes: () => state.normalNodes,
+    setNormalNodes: (val) => { state.normalNodes = val; },
+    getBreakableNodes: () => state.breakableNodes,
+    setBreakableNodes: (val) => { state.breakableNodes = val; },
+    getBreakerNodes: () => state.breakerNodes,
+    setBreakerNodes: (val) => { state.breakerNodes = val; },
 
     // Node-related
     addHiddenNode: (node) => {
@@ -82,6 +91,9 @@ export const GameState = (eventBus) => {
       state.isProcessing = false;
       state.isPaused = false;
       state.hiddenNodes.clear();
+      state.normalNodes = 0;
+      state.breakableNodes = 0;
+      state.breakerNodes = 0;
     },
 
     setHighScore: (score) => {

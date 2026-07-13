@@ -1,5 +1,6 @@
 import { Node } from "../Node/index.js";
 import { GameConfig } from "../../config/gameConfig.js";
+import { easeOutCubic } from "../../utils/easing.js";
 
 export const NodeNetwork = () => {
   const nodeNetwork = {
@@ -20,6 +21,12 @@ export const NodeNetwork = () => {
             z: (z - (nodeNetwork.size - 1) / 2) * nodeNetwork.spacing,
           };
           const createdNode = Node(position);
+          createdNode.setTargetPosition(position);
+          createdNode.setPosition({
+            x: position.x + (Math.random() - 0.5) * 60,
+            y: position.y + (Math.random() - 0.5) * 60,
+            z: position.z + (Math.random() - 0.5) * 60,
+          });
           nodeNetwork.nodesArray.push(createdNode);
         }
       }
@@ -174,6 +181,54 @@ export const NodeNetwork = () => {
 
   const getNodesArray = () => nodeNetwork.nodesArray;
 
+  const animateNodesToPosition = () => {
+    const nodes = nodeNetwork.nodesArray.map((node) => ({
+      node,
+      startPos: { ...node.getMesh().position },
+      targetPos: node.getTargetPosition(),
+      delay: Math.random() * 400,
+    }));
+
+    return new Promise((resolve) => {
+      const duration = 1500;
+      const startTime = Date.now();
+
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        let allDone = true;
+
+        for (const entry of nodes) {
+          const t = Math.max(
+            0,
+            Math.min((elapsed - entry.delay) / duration, 1),
+          );
+          if (t >= 1) {
+            entry.node.getMesh().position.set(
+              entry.targetPos.x,
+              entry.targetPos.y,
+              entry.targetPos.z,
+            );
+            continue;
+          }
+          allDone = false;
+          const easeT = easeOutCubic(t);
+          entry.node.getMesh().position.set(
+            entry.startPos.x + (entry.targetPos.x - entry.startPos.x) * easeT,
+            entry.startPos.y + (entry.targetPos.y - entry.startPos.y) * easeT,
+            entry.startPos.z + (entry.targetPos.z - entry.startPos.z) * easeT,
+          );
+        }
+
+        if (!allDone) {
+          requestAnimationFrame(animate);
+        } else {
+          resolve();
+        }
+      };
+      requestAnimationFrame(animate);
+    });
+  };
+
   const reset = (scene) => {
     nodeNetwork.nodesArray.forEach((node) => {
       scene.remove(node.getMesh());
@@ -196,5 +251,6 @@ export const NodeNetwork = () => {
     addToScene,
     findValidNextMoves,
     getNodesArray,
+    animateNodesToPosition,
   };
 };

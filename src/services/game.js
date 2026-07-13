@@ -30,12 +30,27 @@ export const GameService = (
     return `${scoreLine}<br>${highScoreLine}<br><br>(Tap to dismiss)`;
   };
 
+  const buildRecapTable = () => {
+    const normal = gameState.getNormalNodes();
+    const breakable = gameState.getBreakableNodes();
+    const breaker = gameState.getBreakerNodes();
+    const pad = (s, w) => String(s).padStart(w);
+    const nc = (c) => `style='color:#${c.toString(16).padStart(6, "0")}'`;
+    return `<br><span style='font-family: VT323, monospace; font-size: 0.85em; color: #00ff00; white-space: pre;'>NODES COLLECTED
++---------+------+
+| Normal  | <span ${nc(gameConfig.colors.validNode)}>${pad(normal, 4)}</span> |
+| Red     | <span ${nc(gameConfig.colors.breakableNode)}>${pad(breakable, 4)}</span> |
+| Breaker | <span ${nc(gameConfig.colors.breakerNode)}>${pad(breaker, 4)}</span> |
++---------+------+</span>`;
+  };
+
   // Game-over / win (domain logic — former GameState concern)
 
   const handleGameOver = (reason) => {
     gameState.setProcessing(true);
     gameState.setTraced(false);
     pendingTraceCallback = null;
+    eventBus.emit("trace:visuals:off");
 
     const score = gameState.getScore();
     const highScore = gameState.getHighScore();
@@ -49,7 +64,8 @@ export const GameService = (
     eventBus.emit("scene:flash");
     eventBus.emit("modal:show", {
       message:
-        `<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>GAME OVER${reason ? `<br><br>${reason}` : ""}</span><br><br>` +
+        `<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>GAME OVER${reason ? `<br><br>${reason}` : ""}</span><br>` +
+        buildRecapTable() + "<br><br>" +
         buildModalScoreLines(score, highScore, isNewHighScore),
       enforceDelay: true,
     });
@@ -61,6 +77,7 @@ export const GameService = (
     gameState.setProcessing(true);
     gameState.setTraced(false);
     pendingTraceCallback = null;
+    eventBus.emit("trace:visuals:off");
 
     const score = gameState.getScore();
     const highScore = gameState.getHighScore();
@@ -71,10 +88,22 @@ export const GameService = (
 
     lineManager.stop();
     eventBus.emit("message:hide");
-    eventBus.emit("scene:flash");
+    eventBus.emit("scene:celebrate");
+
+    const lastNode = gameState.getSelectedNodes().at(-1);
+    if (lastNode) {
+      visualService.emitParticles(lastNode.getMesh().position, renderService.getScene(), {
+        color: gameConfig.colors.validNode,
+        count: 80,
+        spread: 2.0,
+        lifetime: 1500,
+      });
+    }
+
     eventBus.emit("modal:show", {
       message:
-        `<span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>GOOD JOB!${reason ? `<br><br>${reason}` : ""}</span><br><br>` +
+        `<span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>GOOD JOB!${reason ? `<br><br>${reason}` : ""}</span><br>` +
+        buildRecapTable() + "<br><br>" +
         buildModalScoreLines(score, highScore, isNewHighScore),
       enforceDelay: true,
     });
@@ -108,6 +137,7 @@ export const GameService = (
 
   eventBus.on("game:reset", () => {
     pendingTraceCallback = null;
+    eventBus.emit("trace:visuals:off");
   });
 
   eventBus.on("input:click", ({ raycaster }) => {
@@ -136,7 +166,11 @@ export const GameService = (
   // Event methods
 
   const handleNodeClick = (clickedNode) => {
-    if (gameState.isProcessing() || !isValidMove(clickedNode)) {
+    if (gameState.isProcessing()) { return; }
+
+    if (!isValidMove(clickedNode)) {
+      visualService.flashNodeInvalid(clickedNode);
+      audioService.playInvalidSound();
       return;
     }
 
@@ -151,6 +185,7 @@ export const GameService = (
     const previousNode =
       gameState.getSelectedNodes()[gameState.getSelectedNodes().length - 1];
 
+    const nodePosition = clickedNode.getMesh().position;
     let traceCallback = null;
     if (clickedNode.isBreakable()) {
       if (gameState.getBreakerCount() <= 0) {
@@ -159,14 +194,14 @@ export const GameService = (
       }
       clickedNode.setValid(true);
       const wasBeingTraced = gameState.isBeingTraced();
-      handleBreakableNode();
+      handleBreakableNode(nodePosition);
       if (!wasBeingTraced) {
         traceCallback = () => handleGameOver("You have been traced :/");
       }
     } else if (clickedNode.isBreaker()) {
-      handleBreakerNode();
+      handleBreakerNode(nodePosition);
     } else {
-      handleNormalNode();
+      handleNormalNode(nodePosition);
     }
 
     renderService.focusCamOnNode(clickedNode);
@@ -176,18 +211,25 @@ export const GameService = (
 
   // Node click handlers
 
-  const handleNormalNode = () => {
+  const emitScorePopup = (position, value, color) => {
+    eventBus.emit("score:popup", { position: position.clone(), value, color });
+  };
+
+  const handleNormalNode = (position) => {
     gameState.setScore(
       gameState.getScore() + gameConfig.game.scoreIncrement.normal,
     );
+    gameState.setNormalNodes(gameState.getNormalNodes() + 1);
     audioService.playSoundEffect("normalNode");
+    emitScorePopup(position, gameConfig.game.scoreIncrement.normal, "87cefa");
   };
 
-  const handleBreakableNode = () => {
+  const handleBreakableNode = (position) => {
     gameState.setBreakerCount(gameState.getBreakerCount() - 1);
     gameState.setScore(
       gameState.getScore() + gameConfig.game.scoreIncrement.breakable,
     );
+    gameState.setBreakableNodes(gameState.getBreakableNodes() + 1);
     audioService.playSoundEffect("dataNode");
 
     if (!gameState.isBeingTraced()) {
@@ -195,16 +237,20 @@ export const GameService = (
       gameState.setTraced(true);
       eventBus.emit("scene:flash");
       renderService.triggerGlitchEffect();
-      eventBus.emit("message:show", "YOU'RE BEING TRACED");
+      eventBus.emit("message:show", "RUN. YOU'RE BEING TRACED.");
+      eventBus.emit("trace:visuals:on");
     }
+    emitScorePopup(position, gameConfig.game.scoreIncrement.breakable, "ff4500");
   };
 
-  const handleBreakerNode = () => {
+  const handleBreakerNode = (position) => {
     gameState.setBreakerCount(gameState.getBreakerCount() + 1);
     gameState.setScore(
       gameState.getScore() + gameConfig.game.scoreIncrement.breaker,
     );
+    gameState.setBreakerNodes(gameState.getBreakerNodes() + 1);
     audioService.playSoundEffect("breakerNode");
+    emitScorePopup(position, gameConfig.game.scoreIncrement.breaker, "7799cc");
   };
 
   // Auxiliary methods

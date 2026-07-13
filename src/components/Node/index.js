@@ -5,6 +5,7 @@ import { easeOutCubic } from "../../utils/easing.js";
 export const Node = (position) => {
   const node = {
     position,
+    targetPosition: null,
     isVisited: false,
     isSelected: false,
     isValid: false,
@@ -48,6 +49,7 @@ export const Node = (position) => {
 
   const nodeMesh = createNodeMesh();
   let fadeRafId;
+  let validPulseRafId;
 
   const updateNodeAppearance = () => {
     if (node.isBreakable) {
@@ -90,6 +92,26 @@ export const Node = (position) => {
     fadeAnimation();
   };
 
+  const stopValidPulse = () => {
+    if (validPulseRafId !== undefined) {
+      cancelAnimationFrame(validPulseRafId);
+      validPulseRafId = undefined;
+    }
+  };
+
+  const startValidPulse = () => {
+    stopValidPulse();
+    const baseColor = new THREE.Color(GameConfig.colors.validNode);
+
+    const pulse = () => {
+      const t = Math.sin(Date.now() / 400) * 0.06 + 0.94;
+      nodeMesh.material.color.copy(baseColor);
+      nodeMesh.material.color.multiplyScalar(t);
+      validPulseRafId = requestAnimationFrame(pulse);
+    };
+    pulse();
+  };
+
   return {
     getMesh: () => nodeMesh,
     getPosition: () => node.position,
@@ -107,11 +129,17 @@ export const Node = (position) => {
     updateAppearance: updateNodeAppearance,
     setSelected: (value) => {
       node.isSelected = value;
+      stopValidPulse();
       updateNodeAppearance();
     },
     setValid: (value) => {
       node.isValid = value;
       updateNodeAppearance();
+      if (value && !node.isBreaker) {
+        startValidPulse();
+      } else {
+        stopValidPulse();
+      }
     },
     setBreakable: (value) => {
       node.isBreakable = value;
@@ -128,5 +156,9 @@ export const Node = (position) => {
       node.position = newPosition;
       nodeMesh.position.set(newPosition.x, newPosition.y, newPosition.z);
     },
+    setTargetPosition: (pos) => {
+      node.targetPosition = { x: pos.x, y: pos.y, z: pos.z };
+    },
+    getTargetPosition: () => node.targetPosition,
   };
 };

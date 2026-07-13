@@ -10,7 +10,7 @@ export const GameConfig = {
       breakable: 10,
     },
     timing: {
-      traceSpeed: 2000,
+      traceSpeed: 1000,
       flashDuration: 2000,
       cameraAnimDuration: 2000,
       focusAnimDuration: 1000,

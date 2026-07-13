@@ -20,7 +20,7 @@ const audioService = AudioService(eventBus, gameState);
 const gameContainer = document.getElementById("game-container");
 const nodeNetwork = NodeNetwork();
 const visualService = VisualService();
-const lineManager = LineManager();
+const lineManager = LineManager(eventBus);
 const renderService = RenderService(
   gameContainer,
   gameState,
@@ -88,8 +88,9 @@ const startGame = async () => {
     renderService.initialize();
     await Promise.all([uiService.initialize(), gameService.initialize()]);
     const randomGroundColor = pickRandomGroundColor();
-    addGroundToScene(-30, randomGroundColor);
-    addGroundToScene(30, randomGroundColor);
+    const groundA = addGroundToScene(-30, randomGroundColor);
+    const groundB = addGroundToScene(30, randomGroundColor);
+    renderService.setGroundMeshes([groundA, groundB]);
     nodeNetwork.addToScene(renderService.getScene());
     inputService.setupEventListeners(renderService.getRenderer().domElement);
 
@@ -113,7 +114,10 @@ const startGame = async () => {
         );
         eventBus.emit("message:hide");
 
-        await renderService.startGameAnimations();
+        await Promise.all([
+          renderService.startGameAnimations(),
+          nodeNetwork.animateNodesToPosition(),
+        ]);
         await gameService.initializeUI();
         gameState.setProcessing(false);
         renderService.setControls(true);
@@ -123,7 +127,10 @@ const startGame = async () => {
     viewManager.switchToView("gameView");
 
     if (gameState.getGameAlreadyInitialized() === false) {
-      await renderService.startGameAnimations();
+      await Promise.all([
+        renderService.startGameAnimations(),
+        nodeNetwork.animateNodesToPosition(),
+      ]);
       await gameService.initializeUI();
       gameState.setGameAlreadyInitialized(true);
       gameState.setProcessing(false);
@@ -145,6 +152,15 @@ const startGame = async () => {
         "Good luck! ;)<br><br>" +
         "(Tap to dismiss)<br>",
     );
+
+    const modal = document.querySelector(".modal");
+    const origOnClick = modal.onclick;
+    modal.onclick = (e) => {
+      origOnClick(e);
+      setTimeout(() => {
+        document.querySelector(".hint-text")?.classList.add("visible");
+      }, GameConfig.game.timing.modalFadeoutDuration + 200);
+    };
   } catch (error) {
     console.error("Failed to initialize game screen:", error);
     const loadingText = document.querySelector(".loading-text");
@@ -170,6 +186,7 @@ const addGroundToScene = (positionY, randomColor) => {
   groundMesh.position.set(0, positionY, 0);
   groundMesh.rotation.x = -Math.PI / 4;
   renderService.getScene().add(groundMesh);
+  return groundMesh;
 };
 
 window.addEventListener("load", initialize);
