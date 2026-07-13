@@ -58,10 +58,6 @@ export const RenderService = (
     renderer.composer.setPixelRatio(window.devicePixelRatio * 0.5);
 
     // Event listeners
-    eventBus.on("glitch:trigger", () => {
-      triggerGlitchEffect();
-    });
-
     eventBus.on("scene:flash", () => {
       flashScene();
     });

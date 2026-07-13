@@ -1,7 +1,7 @@
 import * as THREE from "../../lib/three.module.js";
 import { GameConfig } from "../config/gameConfig.js";
 
-export const LineManager = (eventBus) => {
+export const LineManager = () => {
   const lines = [];
   const redLines = new Map();
   let traceTimeoutId = null;
@@ -50,8 +50,6 @@ export const LineManager = (eventBus) => {
     if (traceStopped) { return; }
 
     if (lines.length === 0) {
-      eventBus.emit("scene:flash");
-      eventBus.emit("message:hide");
       if (onTraceGameOver) { onTraceGameOver(); }
       return;
     }

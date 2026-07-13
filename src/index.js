@@ -14,13 +14,13 @@ import { AudioService } from "./services/audio.js";
 
 const gameConfig = GameConfig;
 const eventBus = EventBus();
-const viewManager = ViewManager(eventBus);
-const gameState = GameState(eventBus, gameConfig);
+const viewManager = ViewManager();
+const gameState = GameState(eventBus);
 const audioService = AudioService(eventBus, gameState);
 const gameContainer = document.getElementById("game-container");
-const nodeNetwork = NodeNetwork(gameState, eventBus);
+const nodeNetwork = NodeNetwork(gameState);
 const visualService = VisualService();
-const lineManager = LineManager(eventBus);
+const lineManager = LineManager();
 const renderService = RenderService(
   gameContainer,
   gameState,

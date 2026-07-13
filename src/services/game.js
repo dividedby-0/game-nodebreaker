@@ -10,7 +10,6 @@ export const GameService = (
 ) => {
   const initialize = async () => {
     gameState.setProcessing(true);
-    eventBus.emit("game:initialized");
   };
 
   const initializeUI = async () => {
@@ -22,12 +21,36 @@ export const GameService = (
 
   // Event listeners
 
-  eventBus.on("game:over", () => {
+  const buildModalScoreLines = (score, highScore, isNewHighScore) => {
+    const scoreLine = `Final Score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${score}</span>`;
+    const highScoreLine = isNewHighScore
+      ? "<span style='color: #ffff00'>New High Score! :O</span>"
+      : `Your highest score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${highScore}</span>`;
+    return `${scoreLine}<br>${highScoreLine}<br><br>(Tap to dismiss)`;
+  };
+
+  eventBus.on("game:over", ({ reason, score, highScore, isNewHighScore } = {}) => {
     lineManager.stop();
+    eventBus.emit("message:hide");
+    eventBus.emit("scene:flash");
+    eventBus.emit("modal:show", {
+      message:
+        `<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>GAME OVER${reason ? `<br><br>${reason}` : ""}</span><br><br>` +
+        buildModalScoreLines(score, highScore, isNewHighScore),
+      enforceDelay: true,
+    });
   });
 
-  eventBus.on("game:win", () => {
+  eventBus.on("game:win", ({ reason, score, highScore, isNewHighScore } = {}) => {
     lineManager.stop();
+    eventBus.emit("message:hide");
+    eventBus.emit("scene:flash");
+    eventBus.emit("modal:show", {
+      message:
+        `<span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>GOOD JOB!${reason ? `<br><br>${reason}` : ""}</span><br><br>` +
+        buildModalScoreLines(score, highScore, isNewHighScore),
+      enforceDelay: true,
+    });
   });
 
   eventBus.on("camera:focused", ({ node, camera, scene }) => {

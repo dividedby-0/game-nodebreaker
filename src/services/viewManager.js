@@ -1,4 +1,4 @@
-export const ViewManager = (eventBus) => {
+export const ViewManager = () => {
   const views = {
     loadingView: document.getElementById("loading-view"),
     audioConsentView: document.getElementById("audio-consent-view"),
@@ -14,7 +14,6 @@ export const ViewManager = (eventBus) => {
 
     if (views[viewName]) {
       views[viewName].style.display = "flex";
-      eventBus.emit("view:changed", viewName);
     }
   };
 

@@ -1,8 +1,7 @@
 import { Node } from "../Node/index.js";
 import { GameConfig } from "../../config/gameConfig.js";
-import { GameState } from "../../store/gameState.js";
 
-export const NodeNetwork = (gameState, eventBus) => {
+export const NodeNetwork = (gameState) => {
   const nodeNetwork = {
     nodesArray: [],
     size: GameConfig.game.nodeNetworkSize,
@@ -167,20 +166,14 @@ export const NodeNetwork = (gameState, eventBus) => {
         gameState.areValidNodesLeft()
       ) {
         gameState.setProcessing(true);
-        eventBus.emit("scene:flash");
-        eventBus.emit("message:hide");
         gameState.setTraced(false);
         gameState.showGameOver("You got stuck ¯\\_(ツ)_/¯");
       } else if (gameState && gameState.isGameCompleted()) {
         gameState.setProcessing(true);
-        eventBus.emit("scene:flash");
-        eventBus.emit("message:hide");
         gameState.setTraced(false);
         gameState.showWin("You linked all the nodes!");
       } else {
         gameState.setProcessing(true);
-        eventBus.emit("scene:flash");
-        eventBus.emit("message:hide");
         gameState.setTraced(false);
         gameState.showGameOver("That's a dead end :(");
       }
