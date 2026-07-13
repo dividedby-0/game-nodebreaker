@@ -10,7 +10,6 @@ import { GameConfig } from "../config/gameConfig.js";
 export const RenderService = (
   gameContainer,
   gameState,
-  physicsService,
   eventBus,
 ) => {
   const renderer = {
@@ -175,7 +174,6 @@ export const RenderService = (
   };
 
   const focusCamOnNode = (node) => {
-    gameState.setProcessing(true);
     renderer.controls.enabled = false;
 
     const cubeCenter = new THREE.Vector3(0, 0, 0);
@@ -220,14 +218,11 @@ export const RenderService = (
       renderer.controls.update();
 
       if (progress >= 1) {
-        physicsService.checkVisualObstructions(
-          renderer.camera,
+        eventBus.emit("camera:focused", {
           node,
-          gameState.getSelectedNodes(),
-          renderer.scene,
-        );
-
-        gameState.setProcessing(false);
+          camera: renderer.camera,
+          scene: renderer.scene,
+        });
         renderer.controls.enabled = true;
         return;
       }

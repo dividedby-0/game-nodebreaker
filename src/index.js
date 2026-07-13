@@ -2,7 +2,8 @@ import * as THREE from "../lib/three.module.js";
 import { ViewManager } from "./services/viewManager.js";
 import { GameState } from "./store/gameState.js";
 import { NodeNetwork } from "./components/NodeNetwork/index.js";
-import { PhysicsService } from "./services/physics.js";
+import { VisualService } from "./services/visualService.js";
+import { LineManager } from "./services/lineManager.js";
 import { GameService } from "./services/game.js";
 import { RenderService } from "./services/render.js";
 import { UIService } from "./services/ui.js";
@@ -18,11 +19,11 @@ const gameState = GameState(eventBus, gameConfig);
 const audioService = AudioService(eventBus, gameState);
 const gameContainer = document.getElementById("game-container");
 const nodeNetwork = NodeNetwork(gameState, eventBus);
-const physicsService = PhysicsService(gameState, nodeNetwork, eventBus);
+const visualService = VisualService();
+const lineManager = LineManager(eventBus);
 const renderService = RenderService(
   gameContainer,
   gameState,
-  physicsService,
   eventBus,
 );
 const gameService = GameService(
@@ -31,7 +32,8 @@ const gameService = GameService(
   eventBus,
   gameState,
   gameConfig,
-  physicsService,
+  visualService,
+  lineManager,
   audioService,
 );
 const uiService = UIService(eventBus, gameState, renderService, audioService);
@@ -95,7 +97,8 @@ const startGame = async () => {
       if (gameState.getGameAlreadyInitialized() === true) {
         gameState.reset();
         renderService.setControls(false);
-        physicsService.clearConnectionLines(renderService.getScene());
+        lineManager.stop();
+        lineManager.clearConnectionLines(renderService.getScene());
         nodeNetwork.reset(renderService.getScene());
         renderService.resetCamera();
         inputService.setupEventListeners(

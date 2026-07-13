@@ -4,7 +4,8 @@ export const GameService = (
   eventBus,
   gameState,
   gameConfig,
-  physicsService,
+  visualService,
+  lineManager,
   audioService,
 ) => {
   const initialize = async () => {
@@ -20,6 +21,24 @@ export const GameService = (
   };
 
   // Event listeners
+
+  eventBus.on("game:over", () => {
+    lineManager.stop();
+  });
+
+  eventBus.on("game:win", () => {
+    lineManager.stop();
+  });
+
+  eventBus.on("camera:focused", ({ node, camera, scene }) => {
+    visualService.checkVisualObstructions(
+      camera,
+      node,
+      nodeNetwork.getNodesArray(),
+      scene,
+      (hiddenNode) => gameState.addHiddenNode(hiddenNode),
+    );
+  });
 
   eventBus.on("input:click", ({ raycaster }) => {
     if (gameState.isProcessing()) {
@@ -56,18 +75,17 @@ export const GameService = (
     if (isValidMove(clickedNode)) {
       const hiddenNodes = gameState.getHiddenNodes();
       hiddenNodes.forEach((node) => {
-        physicsService.unhideObstructingNodes(node);
+        visualService.unhideObstructingNodes(node);
       });
       gameState.clearHiddenNodes();
     }
-
-    gameState.setProcessing(false);
 
     const previousNode =
       gameState.getSelectedNodes()[gameState.getSelectedNodes().length - 1];
 
     if (clickedNode.isBreakable()) {
       if (gameState.getBreakerCount() <= 0) {
+        gameState.setProcessing(false);
         return;
       }
       clickedNode.setValid(true);
@@ -108,7 +126,10 @@ export const GameService = (
       eventBus.emit("scene:flash");
       renderService.triggerGlitchEffect();
       eventBus.emit("message:show", "YOU'RE BEING TRACED");
-      physicsService.triggerTraceAnimation();
+      lineManager.startTrace(() => {
+        gameState.setProcessing(true);
+        gameState.showGameOver("You have been traced :/");
+      });
     }
   };
 
@@ -141,7 +162,7 @@ export const GameService = (
     clickedNode.setVisited(true);
 
     if (previousNode) {
-      physicsService.drawConnectionLine(
+      lineManager.drawConnectionLine(
         renderService.getScene(),
         previousNode,
         clickedNode,
@@ -150,7 +171,9 @@ export const GameService = (
 
     gameState.getSelectedNodes().push(clickedNode);
     nodeNetwork.findValidNextMoves(clickedNode);
-    physicsService.animateNodeRemoval(clickedNode);
+    visualService.animateNodeRemoval(clickedNode, () => {
+      gameState.setProcessing(false);
+    });
   };
 
   return {
