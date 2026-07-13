@@ -8,11 +8,6 @@ export const EventBus = () => {
       }
       listeners.get(event).add(callback);
     },
-    off: (event, callback) => {
-      if (listeners.has(event)) {
-        listeners.get(event).delete(callback);
-      }
-    },
     emit: async (event, data) => {
       if (listeners.has(event)) {
         const callbacks = Array.from(listeners.get(event));

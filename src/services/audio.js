@@ -1,8 +1,11 @@
+import { GameConfig } from "../config/gameConfig.js";
+
 export const AudioService = (eventBus, gameState) => {
   const audioState = {
     bgMusic: null,
     soundEffects: new Map(),
-    fadeInterval: null,
+    fadeTimeoutId: null,
+    fadeIntervalId: null,
     currentlyPlayingEffect: null,
   };
 
@@ -76,57 +79,57 @@ export const AudioService = (eventBus, gameState) => {
     }
   };
 
+  const fadeInMusic = (startVolume, targetVolume, duration) => {
+    const stepMs = GameConfig.game.timing.fadeStepMs;
+    const volumeStep = (targetVolume - startVolume) / (duration / stepMs);
+    let currentVolume = startVolume;
+
+    audioState.fadeIntervalId = setInterval(() => {
+      currentVolume = Math.min(currentVolume + volumeStep, targetVolume);
+      audioState.bgMusic.volume = currentVolume;
+
+      if (currentVolume >= targetVolume) {
+        clearInterval(audioState.fadeIntervalId);
+        audioState.fadeIntervalId = null;
+      }
+    }, stepMs);
+  };
+
+  const scheduleFadeIn = (delay) => {
+    audioState.fadeTimeoutId = setTimeout(() => {
+      audioState.fadeTimeoutId = null;
+      fadeInMusic(
+        GameConfig.game.audio.fadeStartVolume,
+        GameConfig.game.audio.fadeTargetVolume,
+        GameConfig.game.audio.fadeDuration,
+      );
+    }, delay);
+  };
+
   eventBus.on("game:over", () => {
     if (audioState.bgMusic) {
-      audioState.bgMusic.volume = 0.4;
+      audioState.bgMusic.volume = GameConfig.game.audio.bgVolumeAfterEvent;
       playSoundEffect("gameOver");
-
-      setTimeout(() => {
-        const fadeDuration = 2000;
-        const fadeInterval = 50;
-        const startVolume = 0.5;
-        const targetVolume = 1.0;
-        const volumeStep =
-          (targetVolume - startVolume) / (fadeDuration / fadeInterval);
-
-        let currentVolume = startVolume;
-
-        const fadeIn = setInterval(() => {
-          currentVolume = Math.min(currentVolume + volumeStep, targetVolume);
-          audioState.bgMusic.volume = currentVolume;
-
-          if (currentVolume >= targetVolume) {
-            clearInterval(fadeIn);
-          }
-        }, fadeInterval);
-      }, 2000);
+      scheduleFadeIn(GameConfig.game.audio.fadeDelay);
     }
   });
 
   eventBus.on("game:win", () => {
     if (audioState.bgMusic) {
-      audioState.bgMusic.volume = 0.4;
+      audioState.bgMusic.volume = GameConfig.game.audio.bgVolumeAfterEvent;
       playSoundEffect("win");
+      scheduleFadeIn(GameConfig.game.audio.fadeDelay);
+    }
+  });
 
-      setTimeout(() => {
-        const fadeDuration = 2000;
-        const fadeInterval = 50;
-        const startVolume = 0.5;
-        const targetVolume = 1.0;
-        const volumeStep =
-          (targetVolume - startVolume) / (fadeDuration / fadeInterval);
-
-        let currentVolume = startVolume;
-
-        const fadeIn = setInterval(() => {
-          currentVolume = Math.min(currentVolume + volumeStep, targetVolume);
-          audioState.bgMusic.volume = currentVolume;
-
-          if (currentVolume >= targetVolume) {
-            clearInterval(fadeIn);
-          }
-        }, fadeInterval);
-      }, 2000);
+  eventBus.on("game:reset", () => {
+    if (audioState.fadeTimeoutId !== null) {
+      clearTimeout(audioState.fadeTimeoutId);
+      audioState.fadeTimeoutId = null;
+    }
+    if (audioState.fadeIntervalId !== null) {
+      clearInterval(audioState.fadeIntervalId);
+      audioState.fadeIntervalId = null;
     }
   });
 
@@ -162,13 +165,10 @@ export const AudioService = (eventBus, gameState) => {
     }
   };
 
-  const getSoundEffects = () => audioState.soundEffects;
-
   return {
     initialize,
     setVolume,
     toggleSound,
     playSoundEffect,
-    getSoundEffects,
   };
 };

@@ -119,13 +119,11 @@ export const GameService = (
 
     gameState.setProcessing(true);
 
-    if (isValidMove(clickedNode)) {
-      const hiddenNodes = gameState.getHiddenNodes();
-      hiddenNodes.forEach((node) => {
-        visualService.unhideObstructingNodes(node);
-      });
-      gameState.clearHiddenNodes();
-    }
+    const hiddenNodes = gameState.getHiddenNodes();
+    hiddenNodes.forEach((node) => {
+      visualService.unhideObstructingNodes(node);
+    });
+    gameState.clearHiddenNodes();
 
     const previousNode =
       gameState.getSelectedNodes()[gameState.getSelectedNodes().length - 1];
@@ -212,10 +210,6 @@ export const GameService = (
       );
     }
 
-    if (onTraceComplete) {
-      lineManager.startTrace(onTraceComplete);
-    }
-
     const result = nodeNetwork.findValidNextMoves(clickedNode, gameState.getBreakerCount());
     if (result.completed) {
       if (result.notAllVisited) {
@@ -225,6 +219,9 @@ export const GameService = (
       }
       visualService.animateNodeRemoval(clickedNode, () => {});
     } else {
+      if (onTraceComplete) {
+        lineManager.startTrace(onTraceComplete);
+      }
       visualService.animateNodeRemoval(clickedNode, () => {
         gameState.setProcessing(false);
       });
@@ -234,9 +231,5 @@ export const GameService = (
   return {
     initialize,
     initializeUI,
-    handleNodeClick,
-    getNodeNetwork: () => nodeNetwork,
-    on: eventBus.on,
-    off: eventBus.off,
   };
 };

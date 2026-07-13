@@ -8,8 +8,8 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
   };
 
   const uiState = {
-    typingSpeed: 15,
-    randomCharHoldTime: 20,
+    typingSpeed: GameConfig.game.timing.typingSpeed,
+    randomCharHoldTime: GameConfig.game.timing.randomCharHoldTime,
     textColor: GameConfig.colors.textColor,
     caretColor: GameConfig.colors.caretColor,
     randomChars:
@@ -21,8 +21,8 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
     const resetButton = document.querySelector(".reset-button");
     const progressOverlay = document.querySelector(".reset-progress-overlay");
     const progressBar = progressOverlay.querySelector(".reset-progress");
-    const progressDuration = 2000;
-    const blocks = 4;
+    const progressDuration = GameConfig.game.timing.progressDuration;
+    const blocks = GameConfig.game.timing.progressBlocks;
     const blockChar = "█";
     let progressInterval;
     let pressTimer;
@@ -49,7 +49,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
 
       pressTimer = setTimeout(() => {
         eventBus.emit("game:reset");
-      }, 2000);
+      }, progressDuration);
     };
 
     const cancelProgress = (event) => {
@@ -159,11 +159,11 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
           }
         }
 
-        let canDismiss = !options.enforceDelay && !text.includes("GAME OVER");
+        let canDismiss = !options.enforceDelay;
         if (!canDismiss) {
           setTimeout(() => {
             canDismiss = true;
-          }, 3000);
+          }, GameConfig.game.timing.modalDismissDelay);
         }
 
         modal.onclick = () => {
@@ -177,7 +177,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
             resetButton.classList.remove("disabled-element");
             gameState.setProcessing(false);
             renderService.getControls().enabled = true;
-          }, 2000);
+          }, GameConfig.game.timing.modalFadeoutDuration);
         };
       } else {
         modal.classList.add("modal-fadeout");
@@ -187,7 +187,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
           resetButton.classList.remove("disabled-element");
           gameState.setProcessing(false);
           renderService.getControls().enabled = true;
-        }, 2000);
+        }, GameConfig.game.timing.modalFadeoutDuration);
       }
     }
   };

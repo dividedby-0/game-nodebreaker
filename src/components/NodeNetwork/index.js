@@ -142,6 +142,16 @@ export const NodeNetwork = () => {
     });
   };
 
+  const updateValidNodes = (validMoves) => {
+    nodeNetwork.nodesArray.forEach((eachNode) => {
+      eachNode.setValid(false);
+    });
+
+    validMoves.forEach((validNode) => {
+      validNode.setValid(true);
+    });
+  };
+
   const findValidNextMoves = (node, breakerCount) => {
     const validMoves = Array.from(node.getConnections()).filter(
       (connectedNode) =>
@@ -149,13 +159,7 @@ export const NodeNetwork = () => {
         (!connectedNode.isBreakable() || breakerCount > 0),
     );
 
-    nodeNetwork.nodesArray.forEach((node) => {
-      node.setValid(false);
-    });
-
-    validMoves.forEach((validNode) => {
-      validNode.setValid(true);
-    });
+    updateValidNodes(validMoves);
 
     if (validMoves.length === 0) {
       const unvisitedNormalNodes = nodeNetwork.nodesArray.filter(
@@ -192,21 +196,5 @@ export const NodeNetwork = () => {
     addToScene,
     findValidNextMoves,
     getNodesArray,
-    getSize: () => nodeNetwork.size,
-    getSpacing: () => nodeNetwork.spacing,
-    getNonClickableNodesCount: () => nodeNetwork.nonClickableNodesCount,
-    getBreakerNodesCount: () => nodeNetwork.breakerNodesCount,
-    setSize: (newSize) => {
-      nodeNetwork.size = newSize;
-    },
-    setSpacing: (newSpacing) => {
-      nodeNetwork.spacing = newSpacing;
-    },
-    setNonClickableNodesCount: (newNonClickableNodesCount) => {
-      nodeNetwork.nonClickableNodesCount = newNonClickableNodesCount;
-    },
-    setBreakerNodesCount: (newBreakerNodesCount) => {
-      nodeNetwork.breakerNodesCount = newBreakerNodesCount;
-    },
   };
 };

@@ -55,7 +55,7 @@ export const LineManager = () => {
     }
     const startColor = new THREE.Color(GameConfig.colors.normalConnection);
     const endColor = new THREE.Color(GameConfig.colors.traceConnection);
-    const duration = GameConfig.game.traceSpeed;
+    const duration = GameConfig.game.timing.traceSpeed;
     const startTime = Date.now();
 
     const updateColor = () => {
@@ -75,7 +75,7 @@ export const LineManager = () => {
         lines.shift();
         traceTimeoutId = setTimeout(() => {
           triggerTraceAnimation(onTraceGameOver);
-        }, GameConfig.game.traceSpeed);
+        }, GameConfig.game.timing.traceSpeed);
       }
     };
     traceRafId = requestAnimationFrame(updateColor);
@@ -100,15 +100,10 @@ export const LineManager = () => {
     }
   };
 
-  const getLines = () => lines;
-  const getRedLines = () => redLines;
-
   return {
     drawConnectionLine,
     clearConnectionLines,
     startTrace,
     stop,
-    getLines,
-    getRedLines,
   };
 };

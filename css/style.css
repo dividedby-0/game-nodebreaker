@@ -106,6 +106,11 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
+  background: linear-gradient(
+          transparent 50%,
+          rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
   animation: scanlines 1s steps(30) infinite;
   pointer-events: none;
 }
@@ -235,9 +240,6 @@ body {
   100% {
     opacity: 0;
   }
-}
-
-.message-terminal-text {
 }
 
 /*Modal-specific*/
@@ -501,7 +503,7 @@ body {
 }
 
 /*Audio consent message-specific*/
-#consent-view {
+#audio-consent-view {
   width: 100vw;
   height: 100vh;
   background-color: #1a001a;

@@ -16,7 +16,7 @@ export const GameState = (eventBus) => {
     getScore: () => state.score,
     getSelectedNodes: () => [...state.selectedNodes],
     getBreakerCount: () => state.breakerCount,
-    getHiddenNodes: () => state.hiddenNodes,
+    getHiddenNodes: () => new Set(state.hiddenNodes),
     isProcessing: () => state.isProcessing,
     isBeingTraced: () => state.isBeingTraced,
     getGameAlreadyInitialized: () => state.gameAlreadyInitialized,
@@ -57,10 +57,6 @@ export const GameState = (eventBus) => {
     clearHiddenNodes: () => {
       state.hiddenNodes.clear();
     },
-
-    // Event subscription
-    on: eventBus.on,
-    off: eventBus.off,
 
     reset: () => {
       state.highScore =

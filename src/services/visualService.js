@@ -1,23 +1,20 @@
 import * as THREE from "../../lib/three.module.js";
 import { easeOutCubic } from "../utils/easing.js";
+import { GameConfig } from "../config/gameConfig.js";
 
 export const VisualService = () => {
-  const state = {
-    shrinkDuration: 500,
-    blinkDuration: 100,
-    showVisualObstructionRaycaster: false,
-    debugRaycasterLine: null,
-  };
-
   const activeIntervals = new Set();
+  const nodeFadeRafIds = new Map();
 
   const cancelAllAnimations = () => {
     activeIntervals.forEach((id) => clearInterval(id));
     activeIntervals.clear();
+    nodeFadeRafIds.forEach((id) => cancelAnimationFrame(id));
+    nodeFadeRafIds.clear();
   };
 
   const animateNodeRemoval = (node, onComplete) => {
-    const blinkCount = 3;
+    const blinkCount = GameConfig.game.timing.blinkCount;
     let currentBlink = 0;
     const mesh = node.getMesh();
 
@@ -31,12 +28,12 @@ export const VisualService = () => {
         mesh.visible = true;
 
         const startScale = mesh.scale.x;
-        const targetScale = 0.3;
+        const targetScale = GameConfig.game.timing.targetScale;
         const startTime = Date.now();
 
         const shrinkInterval = setInterval(() => {
           const elapsed = Date.now() - startTime;
-          const progress = Math.min(elapsed / state.shrinkDuration, 1);
+          const progress = Math.min(elapsed / GameConfig.game.timing.shrinkDuration, 1);
 
           const easeProgress = easeOutCubic(progress);
 
@@ -51,10 +48,10 @@ export const VisualService = () => {
               onComplete();
             }
           }
-        }, 16);
+        }, GameConfig.game.timing.shrinkInterval);
         activeIntervals.add(shrinkInterval);
       }
-    }, state.blinkDuration);
+    }, GameConfig.game.timing.blinkDuration);
     activeIntervals.add(blinkInterval);
   };
 
@@ -65,10 +62,13 @@ export const VisualService = () => {
     nodesToHide.forEach((nodeToHide) => {
       const nodeToHideMesh = nodeToHide.getMesh();
 
-      const fadeOutDuration = 500;
+      const existingRaf = nodeFadeRafIds.get(nodeToHideMesh);
+      if (existingRaf) {cancelAnimationFrame(existingRaf);}
+
+      const fadeOutDuration = GameConfig.game.timing.nodeFadeDuration;
       const startFadeOutTime = Date.now();
       const startOpacity = 1;
-      const targetOpacity = 0.3;
+      const targetOpacity = GameConfig.game.timing.targetOpacity;
       nodeToHideMesh.material.transparent = true;
       nodeToHideMesh.layers.disable(0);
 
@@ -88,18 +88,24 @@ export const VisualService = () => {
         }
 
         if (progress < 1) {
-          requestAnimationFrame(fadeAnimation);
+          nodeFadeRafIds.set(nodeToHideMesh, requestAnimationFrame(fadeAnimation));
+        } else {
+          nodeFadeRafIds.delete(nodeToHideMesh);
         }
       };
-      fadeAnimation();
+      nodeFadeRafIds.set(nodeToHideMesh, requestAnimationFrame(fadeAnimation));
     });
   };
 
   const unhideObstructingNodes = (node) => {
     const nodeMesh = node.getMesh();
-    const fadeInDuration = 500;
+
+    const existingRaf = nodeFadeRafIds.get(nodeMesh);
+    if (existingRaf) {cancelAnimationFrame(existingRaf);}
+
+    const fadeInDuration = GameConfig.game.timing.nodeFadeDuration;
     const startFadeInTime = Date.now();
-    const startOpacity = 0.3;
+    const startOpacity = GameConfig.game.timing.targetOpacity;
     const targetOpacity = 1;
 
     nodeMesh.material.transparent = true;
@@ -122,12 +128,13 @@ export const VisualService = () => {
       }
 
       if (progress < 1) {
-        requestAnimationFrame(fadeInAnimation);
+        nodeFadeRafIds.set(nodeMesh, requestAnimationFrame(fadeInAnimation));
       } else {
+        nodeFadeRafIds.delete(nodeMesh);
         nodeMesh.material.transparent = false;
       }
     };
-    fadeInAnimation();
+    nodeFadeRafIds.set(nodeMesh, requestAnimationFrame(fadeInAnimation));
   };
 
   const rayTarget = new THREE.Vector3();
@@ -139,21 +146,6 @@ export const VisualService = () => {
       .normalize();
     const raycaster = new THREE.Raycaster();
     raycaster.set(camera.position, rayTarget);
-
-    if (state.showVisualObstructionRaycaster) {
-      if (state.debugRaycasterLine) {
-        scene.remove(state.debugRaycasterLine);
-      }
-
-      const points = [camera.position, targetNode.getMesh().position];
-      const geometry = new THREE.BufferGeometry().setFromPoints(points);
-      const material = new THREE.LineBasicMaterial({ color: 0xff00ff });
-      state.debugRaycasterLine = new THREE.Line(geometry, material);
-      scene.add(state.debugRaycasterLine);
-    } else if (state.debugRaycasterLine) {
-      scene.remove(state.debugRaycasterLine);
-      state.debugRaycasterLine = null;
-    }
 
     const intersectedByRaycaster = raycaster.intersectObjects(scene.children);
     if (intersectedByRaycaster.length === 0) { return; }
@@ -175,6 +167,5 @@ export const VisualService = () => {
     cancelAllAnimations,
     checkVisualObstructions,
     unhideObstructingNodes,
-    getState: () => ({ ...state }),
   };
 };

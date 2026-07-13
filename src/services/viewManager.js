@@ -24,7 +24,5 @@ export const ViewManager = () => {
   return {
     initialize,
     switchToView,
-    getCurrentView: () =>
-      Object.keys(views).find((key) => views[key]?.style.display === "flex"),
   };
 };

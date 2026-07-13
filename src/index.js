@@ -107,8 +107,8 @@ const startGame = async () => {
 
         await renderService.startGameAnimations();
         await gameService.initializeUI();
-        await gameState.setProcessing(false);
-        await renderService.setControls(true);
+        gameState.setProcessing(false);
+        renderService.setControls(true);
       }
     });
 
@@ -117,8 +117,8 @@ const startGame = async () => {
     if (gameState.getGameAlreadyInitialized() === false) {
       await renderService.startGameAnimations();
       await gameService.initializeUI();
-      await gameState.setGameAlreadyInitialized(true);
-      await gameState.setProcessing(false);
+      gameState.setGameAlreadyInitialized(true);
+      gameState.setProcessing(false);
     }
 
     uiService.toggleModal(

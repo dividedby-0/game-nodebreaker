@@ -13,6 +13,9 @@ export const RenderService = (
   gameState,
   eventBus,
 ) => {
+  let flashRafId = null;
+  let cameraRafId = null;
+
   const renderer = {
     scene: new THREE.Scene(),
     camera: new THREE.PerspectiveCamera(
@@ -84,25 +87,27 @@ export const RenderService = (
   );
   renderer.controls.enabled = false;
   renderer.controls.enableDamping = true;
-  renderer.controls.dampingFactor = 0.05;
-  renderer.controls.rotateSpeed = 0.6;
+  renderer.controls.dampingFactor = GameConfig.game.camera.dampingFactor;
+  renderer.controls.rotateSpeed = GameConfig.game.camera.rotateSpeed;
   renderer.controls.enablePan = false;
-  renderer.controls.minDistance = 5;
-  renderer.controls.maxDistance = 15;
+  renderer.controls.minDistance = GameConfig.game.camera.minDistance;
+  renderer.controls.maxDistance = GameConfig.game.camera.maxDistance;
 
   const triggerGlitchEffect = () => {
     renderer.glitchPass.enabled = true;
     setTimeout(() => {
       renderer.glitchPass.enabled = false;
-    }, 1000); // Disable after 1 second
+    }, GameConfig.game.timing.glitchDuration);
   };
 
   const flashScene = () => {
+    if (flashRafId) {cancelAnimationFrame(flashRafId);}
+
     renderer.scene.background = new THREE.Color(GameConfig.colors.flashColor);
     renderer.renderer.setClearAlpha(1);
 
     const startTime = Date.now();
-    const duration = 2000;
+    const duration = GameConfig.game.timing.flashDuration;
 
     const fadeBack = () => {
       const elapsed = Date.now() - startTime;
@@ -114,13 +119,14 @@ export const RenderService = (
           GameConfig.colors.flashColor,
         ).multiplyScalar(1 - easeProgress);
         renderer.renderer.setClearAlpha(1 - easeProgress);
-        requestAnimationFrame(fadeBack);
+        flashRafId = requestAnimationFrame(fadeBack);
       } else {
         renderer.scene.background = null;
         renderer.renderer.setClearAlpha(0);
+        flashRafId = null;
       }
     };
-    requestAnimationFrame(fadeBack);
+    flashRafId = requestAnimationFrame(fadeBack);
   };
 
   // Camera-related
@@ -134,13 +140,15 @@ export const RenderService = (
     });
 
   const animateInitialCamera = (onComplete) => {
+    if (cameraRafId) {cancelAnimationFrame(cameraRafId);}
+
     const startPosition = {
       x: Math.random() * 5,
       y: Math.random() * 5,
       z: Math.random() * 5,
     };
-    const endPosition = { x: 10, y: 10, z: 10 };
-    const duration = 2000;
+    const endPosition = { x: GameConfig.game.camera.defaultDistance, y: GameConfig.game.camera.defaultDistance, z: GameConfig.game.camera.defaultDistance };
+    const duration = GameConfig.game.timing.cameraAnimDuration;
     const startTime = Date.now();
 
     const animateCamera = () => {
@@ -159,18 +167,21 @@ export const RenderService = (
       renderer.controls.update();
 
       if (progress < 1) {
-        requestAnimationFrame(animateCamera);
+        cameraRafId = requestAnimationFrame(animateCamera);
       } else {
+        cameraRafId = null;
         if (onComplete) {
           onComplete();
         }
       }
     };
 
-    animateCamera();
+    cameraRafId = requestAnimationFrame(animateCamera);
   };
 
   const focusCamOnNode = (node) => {
+    if (cameraRafId) {cancelAnimationFrame(cameraRafId);}
+
     renderer.controls.enabled = false;
 
     const cubeCenter = new THREE.Vector3(0, 0, 0);
@@ -184,13 +195,13 @@ export const RenderService = (
     direction.normalize();
 
     const distance = currentOffset.length();
-    const minDistance = 12;
+    const minDistance = GameConfig.game.camera.focusMinDistance;
     const adjustedDistance = distance < minDistance ? minDistance : distance;
     const endCameraPos = newCamFocusPoint
       .clone()
-      .add(direction.multiplyScalar(adjustedDistance * 0.9));
+      .add(direction.multiplyScalar(adjustedDistance * GameConfig.game.camera.focusDistanceMultiplier));
 
-    const duration = 1000;
+    const duration = GameConfig.game.timing.focusAnimDuration;
     const startTime = Date.now();
 
     const animate = () => {
@@ -215,6 +226,7 @@ export const RenderService = (
       renderer.controls.update();
 
       if (progress >= 1) {
+        cameraRafId = null;
         eventBus.emit("camera:focused", {
           node,
           camera: renderer.camera,
@@ -223,13 +235,17 @@ export const RenderService = (
         renderer.controls.enabled = true;
         return;
       }
-      requestAnimationFrame(animate);
+      cameraRafId = requestAnimationFrame(animate);
     };
-    animate();
+    cameraRafId = requestAnimationFrame(animate);
   };
 
   const resetCamera = () => {
-    renderer.camera.position.set(10, 10, 10);
+    renderer.camera.position.set(
+      GameConfig.game.camera.defaultDistance,
+      GameConfig.game.camera.defaultDistance,
+      GameConfig.game.camera.defaultDistance,
+    );
     renderer.camera.lookAt(0, 0, 0);
     if (renderer.controls) {
       renderer.controls.target.set(0, 0, 0);
