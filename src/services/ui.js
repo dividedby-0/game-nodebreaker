@@ -17,10 +17,62 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
     isAnimating: false,
   };
 
+  const setupResetButton = () => {
+    const resetButton = document.querySelector(".reset-button");
+    const progressOverlay = document.querySelector(".reset-progress-overlay");
+    const progressBar = progressOverlay.querySelector(".reset-progress");
+    const progressDuration = 2000;
+    const blocks = 4;
+    const blockChar = "█";
+    let progressInterval;
+    let pressTimer;
+
+    const startProgress = (event) => {
+      if (gameState.isProcessing()) { return; }
+      event.preventDefault();
+      progressOverlay.style.display = "block";
+      let currentBlock = 0;
+      const intervalTime = progressDuration / blocks;
+
+      progressInterval = setInterval(() => {
+        currentBlock++;
+        const progress = blockChar.repeat(currentBlock);
+        progressBar.textContent = `[${progress}]`;
+
+        if (currentBlock >= blocks) {
+          clearInterval(progressInterval);
+          progressOverlay.style.display = "none";
+          progressBar.textContent = "[ ]";
+          eventBus.emit("game:reset");
+        }
+      }, intervalTime);
+
+      pressTimer = setTimeout(() => {
+        eventBus.emit("game:reset");
+      }, 2000);
+    };
+
+    const cancelProgress = (event) => {
+      if (gameState.isProcessing()) { return; }
+      event.preventDefault();
+      clearInterval(progressInterval);
+      clearTimeout(pressTimer);
+      progressOverlay.style.display = "none";
+      progressBar.textContent = "[ ]";
+    };
+
+    resetButton.addEventListener("mousedown", startProgress);
+    resetButton.addEventListener("mouseup", cancelProgress);
+    resetButton.addEventListener("touchstart", startProgress);
+    resetButton.addEventListener("touchcancel", cancelProgress);
+    resetButton.addEventListener("touchend", cancelProgress);
+  };
+
   const initialize = () => {
     Object.keys(htmlElements).forEach((elementId) => {
       applyElementStyles(elementId);
     });
+    setupResetButton();
   };
 
   // Event listeners: initializers
@@ -35,115 +87,9 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
 
   eventBus.on("reset:initialize", () => {
     const resetButton = document.querySelector(".reset-button");
-    const progressOverlay = document.querySelector(".reset-progress-overlay");
-    const progressBar = progressOverlay.querySelector(".reset-progress");
-    let progressInterval;
-    const progressDuration = 2000;
-    const blocks = 4;
-    const blockChar = "█";
-
+    const progressBar = document.querySelector(".reset-progress");
     resetButton.classList.add("generic-fadein");
-
-    let pressTimer;
-
-    resetButton.addEventListener("mousedown", (event) => {
-      if (gameState.isProcessing()) {
-        return;
-      }
-      event.preventDefault();
-
-      progressOverlay.style.display = "block";
-      let currentBlock = 0;
-      const intervalTime = progressDuration / blocks;
-
-      progressInterval = setInterval(() => {
-        currentBlock++;
-        const progress = blockChar.repeat(currentBlock);
-        progressBar.textContent = `[${progress}]`;
-
-        if (currentBlock >= blocks) {
-          clearInterval(progressInterval);
-          progressOverlay.style.display = "none";
-          progressBar.textContent = `[ ]`;
-          eventBus.emit("game:reset");
-        }
-      }, intervalTime);
-
-      pressTimer = setTimeout(() => {
-        eventBus.emit("game:reset");
-      }, 2000);
-    });
-
-    resetButton.addEventListener("mouseup", (event) => {
-      if (gameState.isProcessing()) {
-        return;
-      }
-      event.preventDefault();
-      clearInterval(progressInterval);
-      progressOverlay.style.display = "none";
-      progressBar.textContent = "[ ]";
-      clearTimeout(pressTimer);
-    });
-
-    let touchStartTime;
-
-    resetButton.addEventListener(
-      "touchstart",
-      (event) => {
-        if (gameState.isProcessing()) {
-          return;
-        }
-        event.preventDefault();
-
-        progressOverlay.style.display = "block";
-        let currentBlock = 0;
-        const intervalTime = progressDuration / blocks;
-
-        progressInterval = setInterval(() => {
-          currentBlock++;
-          const progress = blockChar.repeat(currentBlock);
-          progressBar.textContent = `[${progress}]`;
-
-          if (currentBlock >= blocks) {
-            clearInterval(progressInterval);
-            progressOverlay.style.display = "none";
-            progressBar.textContent = `[ ]`;
-            eventBus.emit("game:reset");
-          }
-        }, intervalTime);
-        touchStartTime = Date.now();
-      },
-      // { passive: true },
-    );
-
-    resetButton.addEventListener(
-      "touchcancel",
-      (event) => {
-        if (gameState.isProcessing()) {
-          return;
-        }
-        event.preventDefault();
-        clearInterval(progressInterval);
-        progressOverlay.style.display = "none";
-        progressBar.textContent = "[ ]";
-        touchStartTime = null;
-      },
-      // { passive: true },
-    );
-
-    resetButton.addEventListener(
-      "touchend",
-      (event) => {
-        if (gameState.isProcessing()) {
-          return;
-        }
-        event.preventDefault();
-        clearInterval(progressInterval);
-        progressOverlay.style.display = "none";
-        progressBar.textContent = "[ ]";
-      },
-      // { passive: true },
-    );
+    progressBar.textContent = "[ ]";
   });
 
   eventBus.on("musicBtn:initialize", () => {

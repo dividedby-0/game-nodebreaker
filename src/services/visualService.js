@@ -1,4 +1,5 @@
 import * as THREE from "../../lib/three.module.js";
+import { easeOutCubic } from "../utils/easing.js";
 
 export const VisualService = () => {
   const state = {
@@ -6,6 +7,13 @@ export const VisualService = () => {
     blinkDuration: 100,
     showVisualObstructionRaycaster: false,
     debugRaycasterLine: null,
+  };
+
+  const activeIntervals = new Set();
+
+  const cancelAllAnimations = () => {
+    activeIntervals.forEach((id) => clearInterval(id));
+    activeIntervals.clear();
   };
 
   const animateNodeRemoval = (node, onComplete) => {
@@ -19,6 +27,7 @@ export const VisualService = () => {
 
       if (currentBlink >= blinkCount * 2) {
         clearInterval(blinkInterval);
+        activeIntervals.delete(blinkInterval);
         mesh.visible = true;
 
         const startScale = mesh.scale.x;
@@ -29,7 +38,7 @@ export const VisualService = () => {
           const elapsed = Date.now() - startTime;
           const progress = Math.min(elapsed / state.shrinkDuration, 1);
 
-          const easeProgress = 1 - Math.pow(1 - progress, 3);
+          const easeProgress = easeOutCubic(progress);
 
           const currentScale =
             startScale + (targetScale - startScale) * easeProgress;
@@ -37,13 +46,16 @@ export const VisualService = () => {
 
           if (progress === 1) {
             clearInterval(shrinkInterval);
+            activeIntervals.delete(shrinkInterval);
             if (onComplete) {
               onComplete();
             }
           }
         }, 16);
+        activeIntervals.add(shrinkInterval);
       }
     }, state.blinkDuration);
+    activeIntervals.add(blinkInterval);
   };
 
   const hideObstructingNodes = (obstructingNodeObj, onNodeHidden) => {
@@ -160,6 +172,7 @@ export const VisualService = () => {
 
   return {
     animateNodeRemoval,
+    cancelAllAnimations,
     checkVisualObstructions,
     unhideObstructingNodes,
     getState: () => ({ ...state }),

@@ -162,9 +162,7 @@ export const AudioService = (eventBus, gameState) => {
     }
   };
 
-  const getSoundEffects = () => {
-    return audioState.soundEffects;
-  };
+  const getSoundEffects = () => audioState.soundEffects;
 
   return {
     initialize,

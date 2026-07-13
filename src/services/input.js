@@ -1,6 +1,6 @@
 import * as THREE from "../../lib/three.module.js";
 
-export const InputService = (camera, eventBus, gameState) => {
+export const InputService = (camera, eventBus) => {
   const inputState = {
     isPointerDown: false,
     pointerMoved: false,

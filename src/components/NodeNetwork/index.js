@@ -1,7 +1,7 @@
 import { Node } from "../Node/index.js";
 import { GameConfig } from "../../config/gameConfig.js";
 
-export const NodeNetwork = (gameState) => {
+export const NodeNetwork = () => {
   const nodeNetwork = {
     nodesArray: [],
     size: GameConfig.game.nodeNetworkSize,
@@ -142,11 +142,11 @@ export const NodeNetwork = (gameState) => {
     });
   };
 
-  const findValidNextMoves = (node) => {
+  const findValidNextMoves = (node, breakerCount) => {
     const validMoves = Array.from(node.getConnections()).filter(
       (connectedNode) =>
         !connectedNode.isSelected() &&
-        (!connectedNode.isBreakable() || gameState.getBreakerCount() > 0),
+        (!connectedNode.isBreakable() || breakerCount > 0),
     );
 
     nodeNetwork.nodesArray.forEach((node) => {
@@ -166,13 +166,6 @@ export const NodeNetwork = (gameState) => {
     }
 
     return { completed: false };
-  };
-
-  const removeNode = (node) => {
-    const index = nodeNetwork.nodesArray.indexOf(node);
-    if (index > -1) {
-      nodeNetwork.nodesArray.splice(index, 1);
-    }
   };
 
   const getNodesArray = () => nodeNetwork.nodesArray;
@@ -199,13 +192,12 @@ export const NodeNetwork = (gameState) => {
     addToScene,
     findValidNextMoves,
     getNodesArray,
-    removeNode,
     getSize: () => nodeNetwork.size,
     getSpacing: () => nodeNetwork.spacing,
     getNonClickableNodesCount: () => nodeNetwork.nonClickableNodesCount,
     getBreakerNodesCount: () => nodeNetwork.breakerNodesCount,
     setSize: (newSize) => {
-      nodeNetwork.setSize = newSize;
+      nodeNetwork.size = newSize;
     },
     setSpacing: (newSpacing) => {
       nodeNetwork.spacing = newSpacing;

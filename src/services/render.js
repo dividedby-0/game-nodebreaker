@@ -6,6 +6,7 @@ import { GlitchPass } from "../../lib/postprocessing/GlitchPass.js";
 import { ScanlinesShader } from "../../lib/shaders/scanlines.js";
 import { ShaderPass } from "../../lib/postprocessing/ShaderPass.js";
 import { GameConfig } from "../config/gameConfig.js";
+import { easeOutCubic } from "../utils/easing.js";
 
 export const RenderService = (
   gameContainer,
@@ -106,7 +107,7 @@ export const RenderService = (
     const fadeBack = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const easeProgress = easeOutCubic(progress);
 
       if (progress < 1) {
         renderer.scene.background = new THREE.Color(
@@ -145,7 +146,7 @@ export const RenderService = (
     const animateCamera = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const easeProgress = easeOutCubic(progress);
 
       renderer.camera.position.set(
         startPosition.x + (endPosition.x - startPosition.x) * easeProgress,
@@ -195,7 +196,7 @@ export const RenderService = (
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const easeProgress = easeOutCubic(progress);
 
       const newCameraPos = new THREE.Vector3().lerpVectors(
         startCameraPos,

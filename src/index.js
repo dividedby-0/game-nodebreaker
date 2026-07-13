@@ -18,7 +18,7 @@ const viewManager = ViewManager();
 const gameState = GameState(eventBus);
 const audioService = AudioService(eventBus, gameState);
 const gameContainer = document.getElementById("game-container");
-const nodeNetwork = NodeNetwork(gameState);
+const nodeNetwork = NodeNetwork();
 const visualService = VisualService();
 const lineManager = LineManager();
 const renderService = RenderService(
@@ -40,8 +40,9 @@ const uiService = UIService(eventBus, gameState, renderService, audioService);
 const inputService = InputService(
   renderService.getCamera(),
   eventBus,
-  gameState,
 );
+
+const onWindowResize = () => renderService.onWindowResize();
 
 const loadAssets = async () => {
   audioService.initialize();
@@ -84,11 +85,8 @@ const startGame = async () => {
     nodeNetwork.addToScene(renderService.getScene());
     inputService.setupEventListeners(renderService.getRenderer().domElement);
 
-    window.addEventListener(
-      "resize",
-      () => renderService.onWindowResize(),
-      false,
-    );
+    window.removeEventListener("resize", onWindowResize, false);
+    window.addEventListener("resize", onWindowResize, false);
     eventBus.on("game:reset", async () => {
       if (gameState.isProcessing()) {
         return;
@@ -97,6 +95,7 @@ const startGame = async () => {
       if (gameState.getGameAlreadyInitialized() === true) {
         gameState.reset();
         renderService.setControls(false);
+        visualService.cancelAllAnimations();
         lineManager.stop();
         lineManager.clearConnectionLines(renderService.getScene());
         nodeNetwork.reset(renderService.getScene());

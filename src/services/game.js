@@ -130,13 +130,18 @@ export const GameService = (
     const previousNode =
       gameState.getSelectedNodes()[gameState.getSelectedNodes().length - 1];
 
+    let traceCallback = null;
     if (clickedNode.isBreakable()) {
       if (gameState.getBreakerCount() <= 0) {
         gameState.setProcessing(false);
         return;
       }
       clickedNode.setValid(true);
+      const wasBeingTraced = gameState.isBeingTraced();
       handleBreakableNode();
+      if (!wasBeingTraced) {
+        traceCallback = () => handleGameOver("You have been traced :/");
+      }
     } else if (clickedNode.isBreaker()) {
       handleBreakerNode();
     } else {
@@ -145,7 +150,7 @@ export const GameService = (
 
     renderService.focusCamOnNode(clickedNode);
     gameState.addSelectedNode(clickedNode);
-    updateGameState(clickedNode, previousNode);
+    updateGameState(clickedNode, previousNode, traceCallback);
   };
 
   // Node click handlers
@@ -170,9 +175,6 @@ export const GameService = (
       eventBus.emit("scene:flash");
       renderService.triggerGlitchEffect();
       eventBus.emit("message:show", "YOU'RE BEING TRACED");
-      lineManager.startTrace(() => {
-        handleGameOver("You have been traced :/");
-      });
     }
   };
 
@@ -198,7 +200,7 @@ export const GameService = (
     return gameState.getSelectedNodes().length === 0 || clickedNode.isValid();
   };
 
-  const updateGameState = (clickedNode, previousNode) => {
+  const updateGameState = (clickedNode, previousNode, onTraceComplete = null) => {
     clickedNode.setSelected(true);
     clickedNode.setVisited(true);
 
@@ -210,7 +212,11 @@ export const GameService = (
       );
     }
 
-    const result = nodeNetwork.findValidNextMoves(clickedNode);
+    if (onTraceComplete) {
+      lineManager.startTrace(onTraceComplete);
+    }
+
+    const result = nodeNetwork.findValidNextMoves(clickedNode, gameState.getBreakerCount());
     if (result.completed) {
       if (result.notAllVisited) {
         handleGameOver("You got stuck ¯\\_(ツ)_/¯");
@@ -230,7 +236,6 @@ export const GameService = (
     initializeUI,
     handleNodeClick,
     getNodeNetwork: () => nodeNetwork,
-    getGameState: () => ({ ...gameState }),
     on: eventBus.on,
     off: eventBus.off,
   };

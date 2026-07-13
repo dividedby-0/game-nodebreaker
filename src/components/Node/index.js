@@ -1,5 +1,6 @@
 import * as THREE from "../../../lib/three.module.js";
 import { GameConfig } from "../../config/gameConfig.js";
+import { easeOutCubic } from "../../utils/easing.js";
 
 export const Node = (position) => {
   const node = {
@@ -74,7 +75,7 @@ export const Node = (position) => {
     const fadeAnimation = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const easeProgress = easeOutCubic(progress);
 
       nodeMesh.material.color.lerpColors(
         nodeMesh.material.color,
