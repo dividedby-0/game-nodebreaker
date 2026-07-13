@@ -1,7 +1,7 @@
 export const Events = {
   // ── Domain Events (emitted by game logic, consumed by controller) ──
-  GAME_OVER: "game:over",       // emitter: gameState     | listeners: game, audio
-  GAME_WIN: "game:win",        // emitter: gameState     | listeners: game, audio
+  GAME_OVER: "game:over",       // emitter: game          | listeners: audio
+  GAME_WIN: "game:win",        // emitter: game          | listeners: audio
   GAME_RESET: "game:reset",    // emitter: ui            | listeners: index
   INPUT_CLICK: "input:click",  // emitter: input         | listeners: game
 

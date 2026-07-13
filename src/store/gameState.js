@@ -8,8 +8,6 @@ export const GameState = (eventBus) => {
     hiddenNodes: new Set(),
     isBeingTraced: false,
     gameAlreadyInitialized: false,
-    isGameCompleted: false,
-    areValidNodesLeft: false,
     isSoundEnabled: true,
   };
 
@@ -22,19 +20,11 @@ export const GameState = (eventBus) => {
     isProcessing: () => state.isProcessing,
     isBeingTraced: () => state.isBeingTraced,
     getGameAlreadyInitialized: () => state.gameAlreadyInitialized,
-    isGameCompleted: () => state.isGameCompleted,
-    areValidNodesLeft: () => state.areValidNodesLeft,
     isSoundEnabled: () => state.isSoundEnabled,
 
     // State setters
     setGameAlreadyInitialized: () => {
       state.gameAlreadyInitialized = true;
-    },
-    setGameCompleted: (completed) => {
-      state.isGameCompleted = completed;
-    },
-    setValidNodesLeft: (areValidNodesLeft) => {
-      state.areValidNodesLeft = areValidNodesLeft;
     },
     setScore: (score) => {
       state.score = score;
@@ -81,28 +71,12 @@ export const GameState = (eventBus) => {
       state.selectedNodes = [];
       state.breakerCount = 0;
       state.isProcessing = false;
-      state.isGameCompleted = false;
-      state.areValidNodesLeft = false;
       state.hiddenNodes.clear();
     },
 
-    showGameOver: (reason = "") => {
-      state.isProcessing = true;
-      const isNewHighScore = state.score > state.highScore;
-      if (isNewHighScore) {
-        state.highScore = state.score;
-        localStorage.setItem("nodebreaker_highscore", state.highScore);
-      }
-      eventBus.emit("game:over", { reason, score: state.score, highScore: state.highScore, isNewHighScore });
-    },
-    showWin: (reason = "") => {
-      state.isProcessing = true;
-      const isNewHighScore = state.score > state.highScore;
-      if (isNewHighScore) {
-        state.highScore = state.score;
-        localStorage.setItem("nodebreaker_highscore", state.highScore);
-      }
-      eventBus.emit("game:win", { reason, score: state.score, highScore: state.highScore, isNewHighScore });
+    setHighScore: (score) => {
+      state.highScore = score;
+      localStorage.setItem("nodebreaker_highscore", score);
     },
     getHighScore: () => state.highScore,
   };

@@ -158,18 +158,14 @@ export const NodeNetwork = (gameState) => {
     });
 
     if (validMoves.length === 0) {
-      checkGameCompleted();
+      const unvisitedNormalNodes = nodeNetwork.nodesArray.filter(
+        (node) => !node.isVisited() && !node.isBreakable(),
+      );
 
-      if (gameState.isGameCompleted() && gameState.areValidNodesLeft()) {
-        gameState.setProcessing(true);
-        gameState.setTraced(false);
-        gameState.showGameOver("You got stuck ¯\\_(ツ)_/¯");
-      } else if (gameState.isGameCompleted()) {
-        gameState.setProcessing(true);
-        gameState.setTraced(false);
-        gameState.showWin("You linked all the nodes!");
-      }
+      return { completed: true, notAllVisited: unvisitedNormalNodes.length > 0 };
     }
+
+    return { completed: false };
   };
 
   const removeNode = (node) => {
@@ -193,15 +189,6 @@ export const NodeNetwork = (gameState) => {
     addToScene(scene);
   };
 
-  const checkGameCompleted = () => {
-    const unvisitedNormalNodes = nodeNetwork.nodesArray.filter(
-      (node) => !node.isVisited() && !node.isBreakable(),
-    );
-
-    gameState.setValidNodesLeft(unvisitedNormalNodes.length > 0);
-    gameState.setGameCompleted(true);
-  };
-
   initializeNodes();
   setupNodesConnections();
   setRandomBreakableNodes();
@@ -213,7 +200,6 @@ export const NodeNetwork = (gameState) => {
     findValidNextMoves,
     getNodesArray,
     removeNode,
-    checkGameCompleted,
     getSize: () => nodeNetwork.size,
     getSpacing: () => nodeNetwork.spacing,
     getNonClickableNodesCount: () => nodeNetwork.nonClickableNodesCount,

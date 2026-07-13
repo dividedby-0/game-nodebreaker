@@ -19,8 +19,6 @@ export const GameService = (
     await eventBus.emit("musicBtn:initialize");
   };
 
-  // Event listeners
-
   const buildModalScoreLines = (score, highScore, isNewHighScore) => {
     const scoreLine = `Final Score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${score}</span>`;
     const highScoreLine = isNewHighScore
@@ -29,7 +27,19 @@ export const GameService = (
     return `${scoreLine}<br>${highScoreLine}<br><br>(Tap to dismiss)`;
   };
 
-  eventBus.on("game:over", ({ reason, score, highScore, isNewHighScore } = {}) => {
+  // Game-over / win (domain logic — former GameState concern)
+
+  const handleGameOver = (reason) => {
+    gameState.setProcessing(true);
+    gameState.setTraced(false);
+
+    const score = gameState.getScore();
+    const highScore = gameState.getHighScore();
+    const isNewHighScore = score > highScore;
+    if (isNewHighScore) {
+      gameState.setHighScore(score);
+    }
+
     lineManager.stop();
     eventBus.emit("message:hide");
     eventBus.emit("scene:flash");
@@ -39,9 +49,21 @@ export const GameService = (
         buildModalScoreLines(score, highScore, isNewHighScore),
       enforceDelay: true,
     });
-  });
 
-  eventBus.on("game:win", ({ reason, score, highScore, isNewHighScore } = {}) => {
+    eventBus.emit("game:over", { reason, score, highScore: isNewHighScore ? score : highScore, isNewHighScore });
+  };
+
+  const handleGameWin = (reason) => {
+    gameState.setProcessing(true);
+    gameState.setTraced(false);
+
+    const score = gameState.getScore();
+    const highScore = gameState.getHighScore();
+    const isNewHighScore = score > highScore;
+    if (isNewHighScore) {
+      gameState.setHighScore(score);
+    }
+
     lineManager.stop();
     eventBus.emit("message:hide");
     eventBus.emit("scene:flash");
@@ -51,7 +73,9 @@ export const GameService = (
         buildModalScoreLines(score, highScore, isNewHighScore),
       enforceDelay: true,
     });
-  });
+
+    eventBus.emit("game:win", { reason, score, highScore: isNewHighScore ? score : highScore, isNewHighScore });
+  };
 
   eventBus.on("camera:focused", ({ node, camera, scene }) => {
     visualService.checkVisualObstructions(
@@ -112,11 +136,11 @@ export const GameService = (
         return;
       }
       clickedNode.setValid(true);
-      handleBreakableNode(clickedNode, previousNode);
+      handleBreakableNode();
     } else if (clickedNode.isBreaker()) {
-      handleBreakerNode(clickedNode, previousNode);
+      handleBreakerNode();
     } else {
-      handleNormalNode(clickedNode, previousNode);
+      handleNormalNode();
     }
 
     renderService.focusCamOnNode(clickedNode);
@@ -126,21 +150,18 @@ export const GameService = (
 
   // Node click handlers
 
-  const handleNormalNode = (clickedNode, previousNode) => {
+  const handleNormalNode = () => {
     gameState.setScore(
       gameState.getScore() + gameConfig.game.scoreIncrement.normal,
     );
-    eventBus.emit("score:update", gameState.getScore());
     audioService.playSoundEffect("normalNode");
   };
 
-  const handleBreakableNode = (clickedNode, previousNode) => {
+  const handleBreakableNode = () => {
     gameState.setBreakerCount(gameState.getBreakerCount() - 1);
     gameState.setScore(
       gameState.getScore() + gameConfig.game.scoreIncrement.breakable,
     );
-    eventBus.emit("score:update", gameState.getScore());
-    eventBus.emit("breakers:update", gameState.getBreakerCount());
     audioService.playSoundEffect("dataNode");
 
     if (!gameState.isBeingTraced()) {
@@ -150,19 +171,16 @@ export const GameService = (
       renderService.triggerGlitchEffect();
       eventBus.emit("message:show", "YOU'RE BEING TRACED");
       lineManager.startTrace(() => {
-        gameState.setProcessing(true);
-        gameState.showGameOver("You have been traced :/");
+        handleGameOver("You have been traced :/");
       });
     }
   };
 
-  const handleBreakerNode = (clickedNode, previousNode) => {
+  const handleBreakerNode = () => {
     gameState.setBreakerCount(gameState.getBreakerCount() + 1);
     gameState.setScore(
       gameState.getScore() + gameConfig.game.scoreIncrement.breaker,
     );
-    eventBus.emit("score:update", gameState.getScore());
-    eventBus.emit("breakers:update", gameState.getBreakerCount());
     audioService.playSoundEffect("breakerNode");
   };
 
@@ -192,10 +210,19 @@ export const GameService = (
       );
     }
 
-    nodeNetwork.findValidNextMoves(clickedNode);
-    visualService.animateNodeRemoval(clickedNode, () => {
-      gameState.setProcessing(false);
-    });
+    const result = nodeNetwork.findValidNextMoves(clickedNode);
+    if (result.completed) {
+      if (result.notAllVisited) {
+        handleGameOver("You got stuck ¯\\_(ツ)_/¯");
+      } else {
+        handleGameWin("You linked all the nodes!");
+      }
+      visualService.animateNodeRemoval(clickedNode, () => {});
+    } else {
+      visualService.animateNodeRemoval(clickedNode, () => {
+        gameState.setProcessing(false);
+      });
+    }
   };
 
   return {
