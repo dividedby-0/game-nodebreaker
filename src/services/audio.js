@@ -155,6 +155,7 @@ export const AudioService = (eventBus, gameState) => {
   });
 
   const playSoundEffect = (effectName) => {
+    if (!gameState.isSoundEnabled()) { return; }
     const soundEffect = audioState.soundEffects.get(effectName);
     if (soundEffect) {
       if (audioState.currentlyPlayingEffect) {
