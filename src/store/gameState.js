@@ -26,6 +26,12 @@ export const GameState = (eventBus) => {
     bonusNodes: 0,
     bonusNode: null,
     bonusTimerId: null,
+    elapsedTime: 0,
+    timerRunning: false,
+    normalScore: 0,
+    breakableScore: 0,
+    breakerScore: 0,
+    bonusScore: 0,
   };
 
   return {
@@ -84,8 +90,20 @@ export const GameState = (eventBus) => {
     setBreakerNodes: (val) => { state.breakerNodes = val; },
     getBonusNodes: () => state.bonusNodes,
     setBonusNodes: (val) => { state.bonusNodes = val; },
+    getElapsedTime: () => state.elapsedTime,
+    setElapsedTime: (val) => { state.elapsedTime = val; },
+    isTimerRunning: () => state.timerRunning,
+    setTimerRunning: (val) => { state.timerRunning = val; },
     getBonusNode: () => state.bonusNode,
     setBonusNode: (node) => { state.bonusNode = node; },
+    getNormalScore: () => state.normalScore,
+    setNormalScore: (val) => { state.normalScore = val; },
+    getBreakableScore: () => state.breakableScore,
+    setBreakableScore: (val) => { state.breakableScore = val; },
+    getBreakerScore: () => state.breakerScore,
+    setBreakerScore: (val) => { state.breakerScore = val; },
+    getBonusScore: () => state.bonusScore,
+    setBonusScore: (val) => { state.bonusScore = val; },
     getBonusTimerId: () => state.bonusTimerId,
     setBonusTimerId: (id) => { state.bonusTimerId = id; },
 
@@ -119,6 +137,12 @@ export const GameState = (eventBus) => {
       state.bonusNodes = 0;
       state.bonusNode = null;
       state.bonusTimerId = null;
+      state.elapsedTime = 0;
+      state.timerRunning = false;
+      state.normalScore = 0;
+      state.breakableScore = 0;
+      state.breakerScore = 0;
+      state.bonusScore = 0;
     },
 
     setHighScore: (score) => {

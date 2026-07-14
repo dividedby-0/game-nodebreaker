@@ -35,6 +35,10 @@ export const GameConfig = {
       bonusRespawnMinDelay: 5000,
       bonusRespawnMaxDelay: 10000,
     },
+    timer: {
+      maxTime: 180,
+      displayInterval: 10,
+    },
     camera: {
       defaultDistance: 10,
       minDistance: 5,

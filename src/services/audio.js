@@ -188,6 +188,32 @@ export const AudioService = (eventBus, gameState) => {
     } catch (e) { /* audio not available */ }
   };
 
+  const playCountdownSound = (phase) => {
+    if (!gameState.isSoundEnabled()) { return; }
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      if (phase === "go") {
+        osc.type = "sine";
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.4);
+      } else {
+        osc.type = "square";
+        osc.frequency.value = 300 + (5 - phase) * 80;
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+      }
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+    } catch { /* audio not available */ }
+  };
+
   const playSoundEffect = (effectName) => {
     if (!gameState.isSoundEnabled()) { return; }
     const soundEffect = audioState.soundEffects.get(effectName);
@@ -228,5 +254,6 @@ export const AudioService = (eventBus, gameState) => {
     playSoundEffect,
     playInvalidSound,
     playBonusSound,
+    playCountdownSound,
   };
 };

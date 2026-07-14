@@ -24,12 +24,13 @@ export const LeaderboardService = () => {
     }
   };
 
-  const submitScore = async ({ name, score, normalNodes, breakableNodes, breakerNodes }) => {
+  const submitScore = async ({ name, score, time, normalNodes, breakableNodes, breakerNodes }) => {
     if (!ready) { return null; }
     try {
       const docRef = await addDoc(collection(db, "scores"), {
         name,
         score,
+        time,
         normalNodes,
         breakableNodes,
         breakerNodes,
@@ -57,6 +58,7 @@ export const LeaderboardService = () => {
           id: doc.id,
           name: data.name || "ANONYMOUS",
           score: data.score,
+          time: data.time,
           normalNodes: data.normalNodes,
           breakableNodes: data.breakableNodes,
           breakerNodes: data.breakerNodes,

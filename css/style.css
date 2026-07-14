@@ -273,6 +273,17 @@ body {
   -webkit-user-select: none;
 }
 
+#timer {
+  font-family: "VT323", monospace;
+  font-size: clamp(2rem, 3vw, 2.2rem);
+  color: #00ff00;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5);
+  margin-top: 5px;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 #combo {
   position: fixed;
   width: 100vw;
@@ -1113,4 +1124,44 @@ body {
   background: rgba(255, 68, 68, 0.1);
   border-color: rgba(255, 68, 68, 1);
   box-shadow: 0 0 12px rgba(255, 68, 68, 0.3);
+}
+
+.countdown-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+
+.countdown-overlay.active {
+  display: flex;
+}
+
+.countdown-text {
+  font-family: "VT323", monospace;
+  font-size: clamp(8rem, 16vw, 16rem);
+  color: #00ff00;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.7), 0 0 20px rgba(0, 255, 0, 0.5);
+  animation: countPulse 0.8s ease-out;
+}
+
+@keyframes countPulse {
+  0% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
 }

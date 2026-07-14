@@ -151,8 +151,7 @@ const startGame = async () => {
           nodeNetwork.animateNodesToPosition(),
         ]);
         await gameService.initializeUI();
-        gameState.setProcessing(false);
-        renderService.setControls(true);
+        eventBus.emit("countdown:start", { seconds: 5, onComplete: null });
       }
     });
 
@@ -190,7 +189,10 @@ const startGame = async () => {
     modal.onclick = (e) => {
       origOnClick(e);
       setTimeout(() => {
-        document.querySelector(".hint-text")?.classList.add("visible");
+        eventBus.emit("countdown:start", {
+          seconds: 5,
+          onComplete: () => document.querySelector(".hint-text")?.classList.add("visible"),
+        });
       }, GameConfig.game.timing.modalFadeoutDuration + 200);
     };
   } catch (error) {

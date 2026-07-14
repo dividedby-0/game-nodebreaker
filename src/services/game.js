@@ -11,6 +11,7 @@ export const GameService = (
   let pendingTraceCallback = null;
   let bonusSpawnTimer = null;
   let hasTriggeredFirstBonus = false;
+  let timerInterval = null;
 
   const initialize = async () => {
     gameState.setProcessing(true);
@@ -26,27 +27,44 @@ export const GameService = (
   };
 
   const buildModalScoreLines = (score, highScore, isNewHighScore) => {
-    const scoreLine = `Final Score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${score}</span>`;
     const highScoreLine = isNewHighScore
       ? "<span style='color: #ffff00'>New High Score! :O</span>"
       : `Your highest score: <span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>${highScore}</span>`;
-    return `${scoreLine}<br>${highScoreLine}<br><br>(Tap to dismiss)`;
+    return `${highScoreLine}<br><br>(Tap to dismiss)`;
   };
 
-  const buildRecapTable = () => {
+  const buildRecapTable = (elapsedMs = null, timeBonus = null) => {
     const normal = gameState.getNormalNodes();
     const breakable = gameState.getBreakableNodes();
     const breaker = gameState.getBreakerNodes();
     const bonus = gameState.getBonusNodes();
+    const normalScore = gameState.getNormalScore();
+    const breakableScore = gameState.getBreakableScore();
+    const breakerScore = gameState.getBreakerScore();
+    const bonusScore = gameState.getBonusScore();
     const pad = (s, w) => String(s).padStart(w);
-    const nc = (c) => `style='color:#${c.toString(16).padStart(6, "0")}'`;
+    const pp = (v) => pad("+" + v, 6);
+    let timeRow = "";
+    if (elapsedMs !== null) {
+      const totalSec = Math.floor(elapsedMs / 1000);
+      const min = Math.floor(totalSec / 60);
+      const sec = totalSec % 60;
+      const timeStr = `${min}:${String(sec).padStart(2, "0")}`;
+      const timePts = timeBonus !== null ? pp(timeBonus) : "      ";
+      timeRow = `| Time    | ${pad(timeStr, 5)} | ${timePts} |\n`;
+    }
+    const total = gameState.getScore();
     return `<br><span style='font-family: VT323, monospace; font-size: 0.85em; color: #00ff00; white-space: pre;'>NODES COLLECTED
-+---------+------+
-| Normal  | <span ${nc(gameConfig.colors.validNode)}>${pad(normal, 4)}</span> |
-| Red     | <span ${nc(gameConfig.colors.breakableNode)}>${pad(breakable, 4)}</span> |
-| Breaker | <span ${nc(gameConfig.colors.breakerNode)}>${pad(breaker, 4)}</span> |
-| Golden  | <span ${nc(gameConfig.colors.bonusNode)}>${pad(bonus, 4)}</span> |
-+---------+------+</span>`;
++---------+-------+--------+
+| Type    | Qty   | Points |
++---------+-------+--------+
+| Normal  | ${pad(normal, 5)} | ${pp(normalScore)} |
+| Red     | ${pad(breakable, 5)} | ${pp(breakableScore)} |
+| Breaker | ${pad(breaker, 5)} | ${pp(breakerScore)} |
+| Golden  | ${pad(bonus, 5)} | ${pp(bonusScore)} |
+${timeRow}+---------+-------+--------+
+| Total   |       | ${pad(total, 6)} |
++---------+-------+--------+</span>`;
   };
 
   // Bonus node helpers
@@ -86,6 +104,16 @@ export const GameService = (
     clearBonusState();
     eventBus.emit("trace:visuals:off");
 
+    clearInterval(timerInterval);
+    timerInterval = null;
+    gameState.setTimerRunning(false);
+    const elapsed = gameState.getElapsedTime();
+    const elapsedSec = elapsed / 1000;
+    const maxTime = gameConfig.game.timer.maxTime;
+    const mult = Math.max(0, Math.sqrt((maxTime - elapsedSec) / maxTime));
+    const timeBonus = Math.floor(gameState.getScore() * mult);
+    gameState.setScore(gameState.getScore() + timeBonus);
+
     const score = gameState.getScore();
     const highScore = gameState.getHighScore();
     const isNewHighScore = score > highScore;
@@ -98,6 +126,7 @@ export const GameService = (
     eventBus.emit("scene:flash");
     const scoreData = {
       score,
+      time: elapsedSec,
       normalNodes: gameState.getNormalNodes(),
       breakableNodes: gameState.getBreakableNodes(),
       breakerNodes: gameState.getBreakerNodes(),
@@ -105,7 +134,7 @@ export const GameService = (
     eventBus.emit("modal:show", {
       message:
         `<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>GAME OVER${reason ? `<br><br>${reason}` : ""}</span><br>` +
-        buildRecapTable() + "<br><br>" +
+        buildRecapTable(elapsed, timeBonus) + "<br><br>" +
         buildModalScoreLines(score, highScore, isNewHighScore),
       enforceDelay: true,
       onDismiss: () => eventBus.emit("leaderboard:prompt", scoreData),
@@ -123,6 +152,16 @@ export const GameService = (
     clearBonusState();
     eventBus.emit("trace:visuals:off");
 
+    clearInterval(timerInterval);
+    timerInterval = null;
+    gameState.setTimerRunning(false);
+    const elapsed = gameState.getElapsedTime();
+    const elapsedSec = elapsed / 1000;
+    const maxTime = gameConfig.game.timer.maxTime;
+    const mult = Math.max(0, Math.sqrt((maxTime - elapsedSec) / maxTime));
+    const timeBonus = Math.floor(gameState.getScore() * mult);
+    gameState.setScore(gameState.getScore() + timeBonus);
+
     const score = gameState.getScore();
     const highScore = gameState.getHighScore();
     const isNewHighScore = score > highScore;
@@ -135,6 +174,7 @@ export const GameService = (
     eventBus.emit("scene:celebrate");
     const scoreData = {
       score,
+      time: elapsedSec,
       normalNodes: gameState.getNormalNodes(),
       breakableNodes: gameState.getBreakableNodes(),
       breakerNodes: gameState.getBreakerNodes(),
@@ -152,7 +192,7 @@ export const GameService = (
     eventBus.emit("modal:show", {
       message:
         `<span style='color: #00ff00; text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>GOOD JOB!${reason ? `<br><br>${reason}` : ""}</span><br>` +
-        buildRecapTable() + "<br><br>" +
+        buildRecapTable(elapsed, timeBonus) + "<br><br>" +
         buildModalScoreLines(score, highScore, isNewHighScore),
       enforceDelay: true,
       onDismiss: () => eventBus.emit("leaderboard:prompt", scoreData),
@@ -177,12 +217,24 @@ export const GameService = (
     if (pendingTraceCallback) {
       lineManager.stop();
     }
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
     gameState.setPaused(true);
   });
 
   eventBus.on("game:unpause", () => {
     if (pendingTraceCallback) {
       lineManager.startTrace(pendingTraceCallback);
+    }
+    if (gameState.isTimerRunning() && !timerInterval) {
+      const timerIntervalMs = gameConfig.game.timer.displayInterval;
+      timerInterval = setInterval(() => {
+        const elapsed = gameState.getElapsedTime() + timerIntervalMs;
+        gameState.setElapsedTime(elapsed);
+        eventBus.emit("timer:update", elapsed);
+      }, timerIntervalMs);
     }
     gameState.setPaused(false);
   });
@@ -191,7 +243,25 @@ export const GameService = (
     pendingTraceCallback = null;
     clearBonusState();
     hasTriggeredFirstBonus = false;
+    clearInterval(timerInterval);
+    timerInterval = null;
+    gameState.setTimerRunning(false);
     eventBus.emit("trace:visuals:off");
+  });
+
+  eventBus.on("game:start", () => {
+    if (hasTriggeredFirstBonus) { return; }
+    hasTriggeredFirstBonus = true;
+    const { bonusInitialMinDelay, bonusInitialMaxDelay } = gameConfig.game.timing;
+    const delay = bonusInitialMinDelay + Math.random() * (bonusInitialMaxDelay - bonusInitialMinDelay);
+    scheduleBonusSpawn(delay);
+    const timerIntervalMs = gameConfig.game.timer.displayInterval;
+    timerInterval = setInterval(() => {
+      const elapsed = gameState.getElapsedTime() + timerIntervalMs;
+      gameState.setElapsedTime(elapsed);
+      eventBus.emit("timer:update", elapsed);
+    }, timerIntervalMs);
+    gameState.setTimerRunning(true);
   });
 
   eventBus.on("input:click", ({ raycaster }) => {
@@ -236,14 +306,6 @@ export const GameService = (
 
     gameState.setProcessing(true);
 
-    // First node click — start initial bonus spawn timer
-    if (!hasTriggeredFirstBonus) {
-      hasTriggeredFirstBonus = true;
-      const { bonusInitialMinDelay, bonusInitialMaxDelay } = gameConfig.game.timing;
-      const delay = bonusInitialMinDelay + Math.random() * (bonusInitialMaxDelay - bonusInitialMinDelay);
-      scheduleBonusSpawn(delay);
-    }
-
     if (isBonusClick) {
       clearBonusState();
     }
@@ -280,6 +342,7 @@ export const GameService = (
       gameState.setBonusNodes(gameState.getBonusNodes() + 1);
       const bonusScore = gameConfig.game.scoreIncrement.bonus;
       gameState.setScore(gameState.getScore() + bonusScore);
+      gameState.setBonusScore(gameState.getBonusScore() + bonusScore);
       audioService.playBonusSound();
       emitScorePopup(nodePosition, bonusScore, "ffd700");
       const { bonusRespawnMinDelay, bonusRespawnMaxDelay } = gameConfig.game.timing;
@@ -300,21 +363,21 @@ export const GameService = (
 
   const handleNormalNode = (position) => {
     gameState.setComboMultiplier(0);
-    gameState.setScore(
-      gameState.getScore() + gameConfig.game.scoreIncrement.normal,
-    );
+    const pts = gameConfig.game.scoreIncrement.normal;
+    gameState.setScore(gameState.getScore() + pts);
+    gameState.setNormalScore(gameState.getNormalScore() + pts);
     gameState.setNormalNodes(gameState.getNormalNodes() + 1);
     audioService.playSoundEffect("normalNode");
-    emitScorePopup(position, gameConfig.game.scoreIncrement.normal, "87cefa");
+    emitScorePopup(position, pts, "87cefa");
   };
 
   const handleBreakableNode = (position) => {
     const combo = gameState.getComboMultiplier() + 1;
     gameState.setComboMultiplier(combo);
     gameState.setBreakerCount(gameState.getBreakerCount() - 1);
-    gameState.setScore(
-      gameState.getScore() + gameConfig.game.scoreIncrement.breakable * combo,
-    );
+    const pts = gameConfig.game.scoreIncrement.breakable * combo;
+    gameState.setScore(gameState.getScore() + pts);
+    gameState.setBreakableScore(gameState.getBreakableScore() + pts);
     gameState.setBreakableNodes(gameState.getBreakableNodes() + 1);
     audioService.playSoundEffect("dataNode");
 
@@ -332,9 +395,9 @@ export const GameService = (
   const handleBreakerNode = (position) => {
     gameState.setComboMultiplier(0);
     gameState.setBreakerCount(gameState.getBreakerCount() + 1);
-    gameState.setScore(
-      gameState.getScore() + gameConfig.game.scoreIncrement.breaker,
-    );
+    const pts = gameConfig.game.scoreIncrement.breaker;
+    gameState.setScore(gameState.getScore() + pts);
+    gameState.setBreakerScore(gameState.getBreakerScore() + pts);
     gameState.setBreakerNodes(gameState.getBreakerNodes() + 1);
     audioService.playSoundEffect("breakerNode");
     emitScorePopup(position, gameConfig.game.scoreIncrement.breaker, "7799cc");

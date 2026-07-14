@@ -15,6 +15,7 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
     breakers: document.getElementById("breakers"),
     message: document.getElementById("message"),
     combo: document.getElementById("combo"),
+    timer: document.getElementById("timer"),
   };
 
   const uiState = {
@@ -127,6 +128,10 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
     const comboElement = htmlElements.combo;
     if (comboElement) {
       comboElement.classList.remove("visible");
+    }
+    const timerEl = htmlElements.timer;
+    if (timerEl) {
+      timerEl.textContent = "";
     }
   });
 
@@ -381,6 +386,59 @@ ${rows}+------+----------+---------+</span><br><br>` +
 
   eventBus.on("modal:show", ({ message, onDismiss }) => {
     toggleModal(true, message, { onDismiss });
+  });
+
+  eventBus.on("timer:update", (elapsedMs) => {
+    const totalMs = Math.floor(elapsedMs);
+    const totalSec = Math.floor(totalMs / 1000);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    const cs = Math.floor((totalMs % 1000) / 10);
+    const el = htmlElements.timer;
+    if (el) {
+      el.textContent = `${min}:${String(sec).padStart(2, "0")}.${String(cs).padStart(2, "0")}`;
+    }
+  });
+
+  eventBus.on("countdown:start", ({ seconds, onComplete }) => {
+    const overlay = document.querySelector(".countdown-overlay");
+    const textEl = overlay?.querySelector(".countdown-text");
+    if (!overlay || !textEl) { return; }
+
+    gameState.setProcessing(true);
+    renderService.getControls().enabled = false;
+
+    let count = seconds;
+    overlay.classList.add("active");
+    const showNumber = (n) => {
+      textEl.textContent = String(n);
+      textEl.style.animation = "none";
+      textEl.offsetWidth;
+      textEl.style.animation = "countPulse 0.8s ease-out";
+      audioService.playCountdownSound(n);
+    };
+    showNumber(count);
+
+    const interval = setInterval(() => {
+      count--;
+      if (count > 0) {
+        showNumber(count);
+      } else {
+        clearInterval(interval);
+        textEl.textContent = "GO!";
+        textEl.style.animation = "none";
+        textEl.offsetWidth;
+        textEl.style.animation = "countPulse 0.8s ease-out";
+        audioService.playCountdownSound("go");
+        setTimeout(() => {
+          overlay.classList.remove("active");
+          eventBus.emit("game:start");
+          gameState.setProcessing(false);
+          renderService.getControls().enabled = true;
+          onComplete?.();
+        }, 600);
+      }
+    }, 1000);
   });
 
   eventBus.on("score:popup", ({ position, value, color }) => {
