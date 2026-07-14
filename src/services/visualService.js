@@ -78,7 +78,6 @@ export const VisualService = () => {
       const startOpacity = 1;
       const targetOpacity = GameConfig.game.timing.targetOpacity;
       nodeToHideMesh.material.transparent = true;
-      nodeToHideMesh.layers.disable(0);
 
       if (onNodeHidden) { onNodeHidden(nodeToHide); }
 
@@ -90,10 +89,12 @@ export const VisualService = () => {
         const newOpacity =
           startOpacity + (targetOpacity - startOpacity) * easeProgress;
         nodeToHideMesh.material.opacity = newOpacity;
-        if (nodeToHideMesh.children[0]) {
-          nodeToHideMesh.children[0].material.opacity = newOpacity;
-          nodeToHideMesh.children[0].material.transparent = true;
-        }
+        nodeToHideMesh.children.forEach((child) => {
+          if (child.isLineSegments) {
+            child.material.opacity = newOpacity;
+            child.material.transparent = true;
+          }
+        });
 
         if (progress < 1) {
           nodeFadeRafIds.set(nodeToHideMesh, requestAnimationFrame(fadeAnimation));
@@ -117,10 +118,11 @@ export const VisualService = () => {
     const targetOpacity = 1;
 
     nodeMesh.material.transparent = true;
-    nodeMesh.layers.enable(0);
-    if (nodeMesh.children[0]) {
-      nodeMesh.children[0].visible = true;
-    }
+    nodeMesh.children.forEach((child) => {
+      if (child.isLineSegments) {
+        child.visible = true;
+      }
+    });
 
     const fadeInAnimation = () => {
       const elapsed = Date.now() - startFadeInTime;
@@ -130,16 +132,23 @@ export const VisualService = () => {
       const newOpacity =
         startOpacity + (targetOpacity - startOpacity) * easeProgress;
       nodeMesh.material.opacity = newOpacity;
-      if (nodeMesh.children[0]) {
-        nodeMesh.children[0].material.opacity = newOpacity;
-        nodeMesh.children[0].material.transparent = true;
-      }
+      nodeMesh.children.forEach((child) => {
+        if (child.isLineSegments) {
+          child.material.opacity = newOpacity;
+          child.material.transparent = true;
+        }
+      });
 
       if (progress < 1) {
         nodeFadeRafIds.set(nodeMesh, requestAnimationFrame(fadeInAnimation));
       } else {
         nodeFadeRafIds.delete(nodeMesh);
         nodeMesh.material.transparent = false;
+        nodeMesh.children.forEach((child) => {
+          if (child.isLineSegments) {
+            child.material.transparent = false;
+          }
+        });
       }
     };
     nodeFadeRafIds.set(nodeMesh, requestAnimationFrame(fadeInAnimation));

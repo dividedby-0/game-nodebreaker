@@ -338,7 +338,10 @@ export const RenderService = (
           camera: renderer.camera,
           scene: renderer.scene,
         });
-        renderer.controls.enabled = true;
+        const modalEl = document.querySelector(".modal");
+        if (!modalEl || modalEl.style.display !== "block") {
+          renderer.controls.enabled = true;
+        }
         return;
       }
       cameraRafId = requestAnimationFrame(animate);

@@ -29,7 +29,7 @@ export const GameConfig = {
       fadeStepMs: 50,
       shrinkInterval: 16,
       targetScale: 0.3,
-      targetOpacity: 0.3,
+      targetOpacity: 0.2,
       bonusInitialMinDelay: 3000,
       bonusInitialMaxDelay: 7000,
       bonusRespawnMinDelay: 5000,

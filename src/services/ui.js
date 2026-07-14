@@ -152,11 +152,13 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
           pauseOverlay.classList.remove("active");
           document.querySelector(".music-button")?.classList.remove("disabled-element");
           document.querySelector(".reset-button")?.classList.remove("disabled-element");
+          renderService.getControls().enabled = true;
           eventBus.emit("game:unpause");
         } else {
           pauseOverlay.classList.add("active");
           document.querySelector(".music-button")?.classList.add("disabled-element");
           document.querySelector(".reset-button")?.classList.add("disabled-element");
+          renderService.getControls().enabled = false;
           eventBus.emit("game:pause");
         }
       });
@@ -267,6 +269,7 @@ ${rows}+------+----------+---------+</span><br><br>` +
     input.value = "";
     overlay.classList.add("active");
     gameState.setProcessing(true);
+    renderService.getControls().enabled = false;
     buttonsToDisable.forEach((b) => b?.classList.add("disabled-element"));
     setTimeout(() => input.focus(), 100);
 
@@ -274,6 +277,7 @@ ${rows}+------+----------+---------+</span><br><br>` +
       overlay.classList.remove("active");
       buttonsToDisable.forEach((b) => b?.classList.remove("disabled-element"));
       gameState.setProcessing(false);
+      renderService.getControls().enabled = true;
       let docId = null;
       try {
         docId = await leaderboardService.submitScore({ name, ...scoreData });
@@ -414,6 +418,7 @@ ${rows}+------+----------+---------+</span><br><br>` +
         modal.style.display = "block";
         modal.classList.remove("modal-fadeout");
         gameState.setProcessing(true);
+        renderService.getControls().enabled = false;
         resetButton.classList.add("disabled-element");
         document.querySelector(".pause-button")?.classList.add("disabled-element");
         document.querySelector(".leaderboard-button")?.classList.add("disabled-element");
