@@ -216,6 +216,10 @@ body {
   animation: scorePop 0.3s ease-out;
 }
 
+.breakers-terminal-text.pop {
+  animation: scorePop 0.3s ease-out;
+}
+
 .score-terminal-caret {
   display: inline-block;
   background-color: var(--score-terminal-caret-color);

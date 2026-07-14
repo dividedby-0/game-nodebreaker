@@ -284,9 +284,16 @@ ${rows}+------+----------+---------+</span><br><br>` +
     }
   });
 
-  eventBus.on("breakers:update", (count) =>
-    updateUiElement("breakers", `Breakers: ${count}`),
-  );
+  eventBus.on("breakers:update", (count) => {
+    updateUiElement("breakers", `Breakers: ${count}`);
+    const el = document.querySelector(".breakers-terminal-text");
+    if (el) {
+      el.classList.remove("pop");
+      el.offsetWidth;
+      el.classList.add("pop");
+      el.addEventListener("animationend", () => el.classList.remove("pop"), { once: true });
+    }
+  });
 
   eventBus.on("message:hide", () => {
     const messageElement = htmlElements.message;
