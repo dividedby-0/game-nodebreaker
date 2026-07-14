@@ -11,12 +11,14 @@ import { EventBus } from "./events/eventBus.js";
 import { InputService } from "./services/input.js";
 import { GameConfig } from "./config/gameConfig.js";
 import { AudioService } from "./services/audio.js";
+import { LeaderboardService } from "./services/leaderboard.js";
 
 const gameConfig = GameConfig;
 const eventBus = EventBus();
 const viewManager = ViewManager();
 const gameState = GameState(eventBus);
 const audioService = AudioService(eventBus, gameState);
+const leaderboardService = LeaderboardService();
 const gameContainer = document.getElementById("game-container");
 const nodeNetwork = NodeNetwork();
 const visualService = VisualService();
@@ -36,7 +38,7 @@ const gameService = GameService(
   lineManager,
   audioService,
 );
-const uiService = UIService(eventBus, gameState, renderService, audioService);
+const uiService = UIService(eventBus, gameState, renderService, audioService, leaderboardService);
 const inputService = InputService(
   renderService.getCamera(),
   eventBus,
@@ -46,6 +48,7 @@ const onWindowResize = () => renderService.onWindowResize();
 
 const loadAssets = async () => {
   audioService.initialize();
+  leaderboardService.initialize();
 };
 
 const initialize = async () => {
@@ -151,7 +154,7 @@ const startGame = async () => {
         "Tap and hold the <span style='color: rgba(0, 255, 0, 0.9); text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5)'>(R)</span> button to reset the game any moment.<br><br>" +
         "Good luck! ;)<br><br>" +
         "(Tap to dismiss)<br>",
-    );
+);
 
     const modal = document.querySelector(".modal");
     const origOnClick = modal.onclick;

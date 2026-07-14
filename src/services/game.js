@@ -20,6 +20,7 @@ export const GameService = (
     await eventBus.emit("reset:initialize");
     await eventBus.emit("musicBtn:initialize");
     await eventBus.emit("pauseBtn:initialize");
+    await eventBus.emit("leaderboardBtn:initialize");
   };
 
   const buildModalScoreLines = (score, highScore, isNewHighScore) => {
@@ -62,12 +63,19 @@ export const GameService = (
     lineManager.stop();
     eventBus.emit("message:hide");
     eventBus.emit("scene:flash");
+    const scoreData = {
+      score,
+      normalNodes: gameState.getNormalNodes(),
+      breakableNodes: gameState.getBreakableNodes(),
+      breakerNodes: gameState.getBreakerNodes(),
+    };
     eventBus.emit("modal:show", {
       message:
         `<span style='color: #ff0000; text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5)'>GAME OVER${reason ? `<br><br>${reason}` : ""}</span><br>` +
         buildRecapTable() + "<br><br>" +
         buildModalScoreLines(score, highScore, isNewHighScore),
       enforceDelay: true,
+      onDismiss: () => eventBus.emit("leaderboard:prompt", scoreData),
     });
 
     eventBus.emit("game:over", { reason, score, highScore: isNewHighScore ? score : highScore, isNewHighScore });
@@ -89,7 +97,12 @@ export const GameService = (
     lineManager.stop();
     eventBus.emit("message:hide");
     eventBus.emit("scene:celebrate");
-
+    const scoreData = {
+      score,
+      normalNodes: gameState.getNormalNodes(),
+      breakableNodes: gameState.getBreakableNodes(),
+      breakerNodes: gameState.getBreakerNodes(),
+    };
     const lastNode = gameState.getSelectedNodes().at(-1);
     if (lastNode) {
       visualService.emitParticles(lastNode.getMesh().position, renderService.getScene(), {
@@ -106,6 +119,7 @@ export const GameService = (
         buildRecapTable() + "<br><br>" +
         buildModalScoreLines(score, highScore, isNewHighScore),
       enforceDelay: true,
+      onDismiss: () => eventBus.emit("leaderboard:prompt", scoreData),
     });
 
     eventBus.emit("game:win", { reason, score, highScore: isNewHighScore ? score : highScore, isNewHighScore });

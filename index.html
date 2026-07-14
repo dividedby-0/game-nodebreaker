@@ -11,6 +11,14 @@
     <title>NodeBreaker</title>
     <link rel="preload" href="./css/style.css" as="style" />
     <link rel="stylesheet" href="./css/style.css" />
+    <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
+      }
+    }
+    </script>
   </head>
   <body>
   <div id="loading-view" class="view">
@@ -52,6 +60,12 @@
         <text x="25" y="32" class="pause-icon" text-anchor="middle">❚❚</text>
       </svg>
     </button>
+    <button class="leaderboard-button">
+      <svg viewBox="0 0 50 50">
+        <circle cx="25" cy="25" r="23"/>
+        <path d="M16 14 L16 22 C16 27 20 29 25 29 C30 29 34 27 34 22 L34 14 Z M20 29 L20 36 L30 36 L30 29" fill="none" stroke="#00ff00" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+    </button>
     <div class="hint-text">Drag to rotate the camera</div>
   </div>
   <div class="pause-overlay"><div class="pause-text">PAUSE</div></div>
@@ -61,6 +75,16 @@
   <div class="reset-progress-overlay">
     <div class="reset-message">Hold to reset</div>
     <div class="reset-progress">[ ]</div>
+  </div>
+  <div class="name-overlay">
+    <div class="name-prompt">
+      <div class="name-title">YOU MADE IT TO THE<br>TOP 10!<br>HOW SHALL WE<br>REMEMBER YOU?</div>
+      <input class="name-input" type="text" maxlength="8" placeholder="PLAYER" autocomplete="off">
+      <div class="name-buttons">
+        <button class="name-save-btn">SAVE</button>
+        <button class="name-skip-btn">STAY ANONYMOUS</button>
+      </div>
+    </div>
   </div>
   <script type="module" src="./src/index.js"></script>
   </body>

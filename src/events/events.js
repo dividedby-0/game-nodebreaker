@@ -12,6 +12,7 @@ export const Events = {
   BREAKERS_INITIALIZE: "breakers:initialize", // emitter: game | listeners: ui
   RESET_INITIALIZE: "reset:initialize",       // emitter: game | listeners: ui
   MUSIC_BTN_INITIALIZE: "musicBtn:initialize",// emitter: game | listeners: ui
+  LEADERBOARD_BTN_INITIALIZE: "leaderboardBtn:initialize",// emitter: game | listeners: ui
 
   // ── View Events (emitted by controller, consumed by render/ui) ──
   SCENE_FLASH: "scene:flash",   // emitter: game         | listeners: render

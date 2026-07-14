@@ -1,6 +1,15 @@
 import { GameConfig } from "../config/gameConfig.js";
 
-export const UIService = (eventBus, gameState, renderService, audioService) => {
+export const UIService = (eventBus, gameState, renderService, audioService, leaderboardService) => {
+  let currentPlayerName = null;
+
+  const hexToRgba = (hex, alpha) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   const htmlElements = {
     score: document.getElementById("score"),
     breakers: document.getElementById("breakers"),
@@ -149,10 +158,115 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
     }
   });
 
-  eventBus.on("message:show", (text) => {
+  const showLeaderboardModal = async (onDismiss) => {
+    const entries = await leaderboardService.getLeaderboard();
+    if (entries === null) {
+      toggleModal(true, `<span style='color: #00ff00;'>Leaderboard unavailable at this moment.<br><br>(Tap to dismiss)</span>`, { onDismiss });
+      return;
+    }
+    if (entries.length === 0) {
+      toggleModal(true, `<span style='color: #00ff00;'>No scores yet.<br><br>(Tap to dismiss)</span>`, { onDismiss });
+      return;
+    }
+
+    const pad = (s, w) => String(s).padStart(w);
+    const padName = (s, w) => String(s).slice(0, w).padEnd(w);
+    let rows = "";
+    entries.forEach((e, i) => {
+      const rank = i + 1;
+      const isYou = e.name === currentPlayerName;
+      const nameCell = isYou
+        ? `<span style='color: #ffff00'>${padName(e.name, 8)}</span>`
+        : padName(e.name, 8);
+      rows += `| ${pad(rank, 4)} | ${nameCell} | ${pad(e.score, 7)} |\n`;
+    });
+    currentPlayerName = null;
+
+    toggleModal(true,
+      `<span style='font-family: VT323, monospace; font-size: 1em; color: #00ff00; white-space: pre;'>LEADERBOARD
++------+----------+---------+
+| Rank | Name     | Score   |
++------+----------+---------+
+${rows}+------+----------+---------+</span><br><br>` +
+      `<span style='color: rgba(0, 255, 0, 0.6); font-size: 0.8em;'>(Tap to dismiss)</span>`,
+      { onDismiss },
+    );
+  };
+
+  eventBus.on("leaderboardBtn:initialize", () => {
+    if (!gameState.getGameAlreadyInitialized()) {
+      const lbButton = document.querySelector(".leaderboard-button");
+      lbButton.classList.add("generic-fadein");
+      lbButton.addEventListener("click", async (event) => {
+        event.preventDefault();
+        if (gameState.isProcessing()) { return; }
+        eventBus.emit("game:pause");
+        showLeaderboardModal(() => eventBus.emit("game:unpause"));
+      });
+    }
+  });
+
+  eventBus.on("leaderboard:prompt", async (scoreData) => {
+    const entries = await leaderboardService.getLeaderboard(10);
+    const qualifies = entries === null || entries.length < 10 || scoreData.score > entries[entries.length - 1].score;
+
+    if (!qualifies) {
+      leaderboardService.submitScore({ name: "ANONYMOUS", ...scoreData });
+      showLeaderboardModal(() => eventBus.emit("message:show", { text: "Press &amp; hold R to restart", color: "#00ff00" }));
+      return;
+    }
+
+    const overlay = document.querySelector(".name-overlay");
+    const input = overlay.querySelector(".name-input");
+    const saveBtn = overlay.querySelector(".name-save-btn");
+    const skipBtn = overlay.querySelector(".name-skip-btn");
+    const buttonsToDisable = [
+      document.querySelector(".reset-button"),
+      document.querySelector(".music-button"),
+      document.querySelector(".pause-button"),
+      document.querySelector(".leaderboard-button"),
+    ];
+
+    input.value = "";
+    overlay.classList.add("active");
+    gameState.setProcessing(true);
+    buttonsToDisable.forEach((b) => b?.classList.add("disabled-element"));
+    setTimeout(() => input.focus(), 100);
+
+    const submit = (name) => {
+      overlay.classList.remove("active");
+      buttonsToDisable.forEach((b) => b?.classList.remove("disabled-element"));
+      gameState.setProcessing(false);
+      currentPlayerName = name;
+      leaderboardService.submitScore({ name, ...scoreData });
+      showLeaderboardModal(() => eventBus.emit("message:show", { text: "Press &amp; hold R to restart", color: "#00ff00" }));
+    };
+
+    saveBtn.onclick = () => {
+      const name = input.value.trim().toUpperCase().slice(0, 8) || "PLAYER";
+      submit(name);
+    };
+
+    skipBtn.onclick = () => {
+      submit("ANONYMOUS");
+    };
+
+    input.onkeydown = (e) => {
+      if (e.key === "Enter") {
+        saveBtn.click();
+      }
+    };
+  });
+
+  eventBus.on("message:show", (payload) => {
     const messageElement = htmlElements.message;
     if (messageElement) {
-      messageElement.innerHTML = `<span class="message-terminal-text">${text}</span>`;
+      const text = typeof payload === "string" ? payload : payload.text;
+      const color = typeof payload === "object" ? payload.color : null;
+      const style = color
+        ? `color: ${color}; text-shadow: 0 0 5px ${hexToRgba(color, 0.7)}, 0 0 10px ${hexToRgba(color, 0.5)};`
+        : "";
+      messageElement.innerHTML = `<span class="message-terminal-text" style="${style}">${text}</span>`;
       messageElement.style.animation = "fadeInOut 2s ease-in-out infinite";
     }
   });
@@ -182,8 +296,8 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
     }
   });
 
-  eventBus.on("modal:show", ({ message }) => {
-    toggleModal(true, message);
+  eventBus.on("modal:show", ({ message, onDismiss }) => {
+    toggleModal(true, message, { onDismiss });
   });
 
   eventBus.on("score:popup", ({ position, value, color }) => {
@@ -234,6 +348,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
         gameState.setProcessing(true);
         resetButton.classList.add("disabled-element");
         document.querySelector(".pause-button")?.classList.add("disabled-element");
+        document.querySelector(".leaderboard-button")?.classList.add("disabled-element");
         if (text) {
           const modalText = modal.querySelector(".modal-text");
           if (modalText) {
@@ -259,8 +374,10 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
             modal.classList.remove("modal-fadeout");
             resetButton.classList.remove("disabled-element");
             document.querySelector(".pause-button")?.classList.remove("disabled-element");
+            document.querySelector(".leaderboard-button")?.classList.remove("disabled-element");
             gameState.setProcessing(false);
             renderService.getControls().enabled = true;
+            options.onDismiss?.();
           }, GameConfig.game.timing.modalFadeoutDuration);
         };
       } else {
@@ -271,6 +388,7 @@ export const UIService = (eventBus, gameState, renderService, audioService) => {
           modal.classList.remove("modal-fadeout");
           resetButton.classList.remove("disabled-element");
           document.querySelector(".pause-button")?.classList.remove("disabled-element");
+          document.querySelector(".leaderboard-button")?.classList.remove("disabled-element");
           gameState.setProcessing(false);
           renderService.getControls().enabled = true;
         }, GameConfig.game.timing.modalFadeoutDuration);

@@ -363,20 +363,6 @@ export const RenderService = (
     requestAnimationFrame(animate);
     renderer.controls.update();
 
-    // Color cycle
-    if (groundMeshes.length > 0) {
-      const t = Date.now() / 20000;
-      const colors = GameConfig.groundColors;
-      const idx = t % colors.length;
-      const i0 = Math.floor(idx);
-      const i1 = (i0 + 1) % colors.length;
-      const frac = idx - i0;
-      const c0 = new THREE.Color(colors[i0]);
-      const c1 = new THREE.Color(colors[i1]);
-      c0.lerp(c1, frac);
-      groundMeshes.forEach((m) => m.material.color.copy(c0));
-    }
-
     // Data stream animation
     for (let i = dataStreams.length - 1; i >= 0; i--) {
       const s = dataStreams[i];
