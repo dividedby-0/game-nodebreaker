@@ -14,6 +14,7 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
     score: document.getElementById("score"),
     breakers: document.getElementById("breakers"),
     message: document.getElementById("message"),
+    combo: document.getElementById("combo"),
   };
 
   const uiState = {
@@ -112,6 +113,10 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
     document.querySelector(".music-button")?.classList.remove("disabled-element");
     document.querySelector(".reset-button")?.classList.remove("disabled-element");
     document.querySelector(".hint-text")?.classList.remove("visible");
+    const comboElement = htmlElements.combo;
+    if (comboElement) {
+      comboElement.classList.remove("visible");
+    }
   });
 
   eventBus.on("musicBtn:initialize", () => {
@@ -285,6 +290,22 @@ ${rows}+------+----------+---------+</span><br><br>` +
       el.offsetWidth;
       el.classList.add("pop");
       el.addEventListener("animationend", () => el.classList.remove("pop"), { once: true });
+    }
+  });
+
+  eventBus.on("combo:update", (combo) => {
+    const comboElement = htmlElements.combo;
+    if (!comboElement) { return; }
+    if (combo > 1) {
+      comboElement.innerHTML = `<span class="combo-text">COMBO x${combo}</span>`;
+      comboElement.classList.add("visible");
+      const textEl = comboElement.querySelector(".combo-text");
+      textEl.classList.remove("pop");
+      textEl.offsetWidth;
+      textEl.classList.add("pop");
+      textEl.addEventListener("animationend", () => textEl.classList.remove("pop"), { once: true });
+    } else {
+      comboElement.classList.remove("visible");
     }
   });
 

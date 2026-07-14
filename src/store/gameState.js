@@ -19,6 +19,7 @@ export const GameState = (eventBus) => {
     isSoundEnabled: true,
     isPaused: false,
     isGameOver: false,
+    comboMultiplier: 0,
     normalNodes: 0,
     breakableNodes: 0,
     breakerNodes: 0,
@@ -67,6 +68,11 @@ export const GameState = (eventBus) => {
     setGameOver: (value) => {
       state.isGameOver = value;
     },
+    getComboMultiplier: () => state.comboMultiplier,
+    setComboMultiplier: (val) => {
+      state.comboMultiplier = val;
+      eventBus.emit("combo:update", val);
+    },
     getNormalNodes: () => state.normalNodes,
     setNormalNodes: (val) => { state.normalNodes = val; },
     getBreakableNodes: () => state.breakableNodes,
@@ -96,6 +102,7 @@ export const GameState = (eventBus) => {
       state.isProcessing = false;
       state.isPaused = false;
       state.isGameOver = false;
+      state.comboMultiplier = 0;
       state.hiddenNodes.clear();
       state.normalNodes = 0;
       state.breakableNodes = 0;

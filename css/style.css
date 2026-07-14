@@ -273,6 +273,42 @@ body {
   -webkit-user-select: none;
 }
 
+#combo {
+  position: fixed;
+  width: 100vw;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "VT323", monospace;
+  font-size: clamp(1.8rem, 3vw, 2.2rem);
+  color: #ffd700;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.7), 0 0 10px rgba(255, 215, 0, 0.5);
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#combo.visible {
+  opacity: 1;
+}
+
+.combo-text {
+  position: relative;
+  overflow: hidden;
+}
+
+.combo-text.pop {
+  animation: comboPop 0.3s ease-out;
+}
+
+@keyframes comboPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.3); text-shadow: 0 0 15px rgba(255, 215, 0, 1), 0 0 30px rgba(255, 215, 0, 0.8); }
+  100% { transform: scale(1); }
+}
+
 @keyframes fadeInOut {
   0% {
     opacity: 0;

@@ -79,6 +79,7 @@ export const GameService = (
     });
 
     eventBus.emit("game:over", { reason, score, highScore: isNewHighScore ? score : highScore, isNewHighScore });
+    gameState.setComboMultiplier(0);
     gameState.setGameOver(true);
   };
 
@@ -124,6 +125,7 @@ export const GameService = (
     });
 
     eventBus.emit("game:win", { reason, score, highScore: isNewHighScore ? score : highScore, isNewHighScore });
+    gameState.setComboMultiplier(0);
     gameState.setGameOver(true);
   };
 
@@ -232,6 +234,7 @@ export const GameService = (
   };
 
   const handleNormalNode = (position) => {
+    gameState.setComboMultiplier(0);
     gameState.setScore(
       gameState.getScore() + gameConfig.game.scoreIncrement.normal,
     );
@@ -241,9 +244,11 @@ export const GameService = (
   };
 
   const handleBreakableNode = (position) => {
+    const combo = gameState.getComboMultiplier() + 1;
+    gameState.setComboMultiplier(combo);
     gameState.setBreakerCount(gameState.getBreakerCount() - 1);
     gameState.setScore(
-      gameState.getScore() + gameConfig.game.scoreIncrement.breakable,
+      gameState.getScore() + gameConfig.game.scoreIncrement.breakable * combo,
     );
     gameState.setBreakableNodes(gameState.getBreakableNodes() + 1);
     audioService.playSoundEffect("dataNode");
@@ -256,10 +261,11 @@ export const GameService = (
       eventBus.emit("message:show", "RUN. YOU'RE BEING TRACED.");
       eventBus.emit("trace:visuals:on");
     }
-    emitScorePopup(position, gameConfig.game.scoreIncrement.breakable, "ff4500");
+    emitScorePopup(position, gameConfig.game.scoreIncrement.breakable * combo, "ff4500");
   };
 
   const handleBreakerNode = (position) => {
+    gameState.setComboMultiplier(0);
     gameState.setBreakerCount(gameState.getBreakerCount() + 1);
     gameState.setScore(
       gameState.getScore() + gameConfig.game.scoreIncrement.breaker,
