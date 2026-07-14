@@ -29,7 +29,9 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
 
   const setupResetButton = () => {
     const resetButton = document.querySelector(".reset-button");
+    const progressBackdrop = document.querySelector(".reset-progress-backdrop");
     const progressOverlay = document.querySelector(".reset-progress-overlay");
+    const resetMsg = progressOverlay.querySelector(".reset-message");
     const progressBar = progressOverlay.querySelector(".reset-progress");
     const progressDuration = GameConfig.game.timing.progressDuration;
     const blocks = GameConfig.game.timing.progressBlocks;
@@ -40,6 +42,8 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
     const startProgress = (event) => {
       if (gameState.isProcessing()) { return; }
       event.preventDefault();
+      renderService.getControls().enabled = false;
+      eventBus.emit("game:pause");
       document.getElementById("game-container")?.classList.add("modal-active");
       progressOverlay.style.display = "block";
       let currentBlock = 0;
@@ -52,9 +56,11 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
 
         if (currentBlock >= blocks) {
           clearInterval(progressInterval);
+          clearTimeout(pressTimer);
           document.getElementById("game-container")?.classList.remove("modal-active");
-          progressOverlay.style.display = "none";
-          progressBar.textContent = "[ ]";
+          progressBackdrop.style.display = "block";
+          resetMsg.textContent = "Generating new grid";
+          progressBar.textContent = "";
           eventBus.emit("game:reset");
         }
       }, intervalTime);
@@ -70,8 +76,11 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
       document.getElementById("game-container")?.classList.remove("modal-active");
       clearInterval(progressInterval);
       clearTimeout(pressTimer);
+      progressBackdrop.style.display = "none";
       progressOverlay.style.display = "none";
       progressBar.textContent = "[ ]";
+      renderService.getControls().enabled = true;
+      eventBus.emit("game:unpause");
     };
 
     resetButton.addEventListener("mousedown", startProgress);
@@ -112,6 +121,8 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
     }
     document.querySelector(".music-button")?.classList.remove("disabled-element");
     document.querySelector(".reset-button")?.classList.remove("disabled-element");
+    renderService.getControls().enabled = true;
+    eventBus.emit("game:unpause");
     document.querySelector(".hint-text")?.classList.remove("visible");
     const comboElement = htmlElements.combo;
     if (comboElement) {

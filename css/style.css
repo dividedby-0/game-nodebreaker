@@ -474,28 +474,39 @@ body {
   }
 }
 
+.reset-progress-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 1000;
+}
+
 .reset-progress-overlay {
+  display: none;
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1001;
   text-align: center;
-  font-family: "VT323", monospace;
-  color: #00ff00;
-  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7),
-  0 0 10px rgba(0, 255, 0, 0.5);
-  display: none;
-  width: 300px;
-  height: 100px;
+  width: 500px;
 }
 
 .reset-message {
+  font-family: "VT323", monospace;
   font-size: clamp(2rem, 4vw, 3rem);
+  color: #00ff00;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7),
+  0 0 10px rgba(0, 255, 0, 0.5);
   margin-bottom: 1rem;
   white-space: nowrap;
   position: relative;
-  overflow: hidden;
 }
 
 .reset-message::after {
@@ -515,7 +526,9 @@ body {
 }
 
 .reset-progress {
+  font-family: "VT323", monospace;
   font-size: clamp(2rem, 4vw, 3rem);
+  color: #00ff00;
   letter-spacing: -2px;
   position: relative;
   overflow: hidden;
@@ -796,6 +809,7 @@ body {
   height: 100vh;
   background-color: #1a001a;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   z-index: 9999;

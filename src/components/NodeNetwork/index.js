@@ -101,10 +101,52 @@ export const NodeNetwork = () => {
     return visited.size === accessibleNodes;
   };
 
-  const setRandomBreakableNodes = () => {
+  const hasHamiltonianPath = () => {
+    const startTime = Date.now();
+    const TIMEOUT = 100;
+    const targetNodes = nodeNetwork.nodesArray.filter((node) => !node.isBreakable());
+    const targetSet = new Set(targetNodes);
+    const total = targetNodes.length;
+
+    const countUnvisited = (node, visited) =>
+      Array.from(node.getConnections()).filter(
+        (n) => targetSet.has(n) && !visited.has(n),
+      ).length;
+
+    const getCandidates = (node, visited) =>
+      Array.from(node.getConnections())
+        .filter((n) => targetSet.has(n) && !visited.has(n))
+        .sort((a, b) => countUnvisited(a, visited) - countUnvisited(b, visited));
+
+    const dfs = (node, visited, path) => {
+      if (Date.now() - startTime > TIMEOUT) { return false; }
+      if (path.length === total) { return true; }
+      for (const next of getCandidates(node, visited)) {
+        visited.add(next);
+        path.push(next);
+        if (dfs(next, visited, path)) { return true; }
+        path.pop();
+        visited.delete(next);
+      }
+      return false;
+    };
+
+    const starts = [...targetNodes].sort(
+      (a, b) => countUnvisited(a, new Set()) - countUnvisited(b, new Set()),
+    );
+
+    for (const start of starts) {
+      const visited = new Set([start]);
+      if (dfs(start, visited, [start])) { return true; }
+    }
+    return false;
+  };
+
+  const setRandomBreakableNodes = async (onProgress) => {
     const indices = [...Array(nodeNetwork.nodesArray.length).keys()];
 
     let validConfiguration = false;
+    let attempts = 0;
 
     while (!validConfiguration) {
       for (let i = indices.length - 1; i > 0; i--) {
@@ -115,7 +157,15 @@ export const NodeNetwork = () => {
       for (let i = 0; i < nodeNetwork.nonClickableNodesCount; i++) {
         nodeNetwork.nodesArray[indices[i]].setBreakable(true);
       }
-      validConfiguration = checkNetworkConnectivity();
+      attempts++;
+      if (onProgress) {
+        onProgress(`Searching for valid path layout... (attempt ${attempts})`);
+      }
+      validConfiguration = checkNetworkConnectivity()
+        && (attempts > 200 || hasHamiltonianPath());
+      if (!validConfiguration) {
+        await new Promise((r) => setTimeout(r, 0));
+      }
     }
   };
 
@@ -237,24 +287,25 @@ export const NodeNetwork = () => {
     });
   };
 
-  const reset = (scene) => {
-    nodeNetwork.nodesArray.forEach((node) => {
-      scene.remove(node.getMesh());
-    });
-    nodeNetwork.nodesArray = [];
+  const initialize = async (scene, onProgress) => {
     initializeNodes();
     setupNodesConnections();
-    setRandomBreakableNodes();
+    if (onProgress) { onProgress("Checking connectivity..."); }
+    await setRandomBreakableNodes(onProgress);
     setRandomBreakerNodes();
     addToScene(scene);
   };
 
-  initializeNodes();
-  setupNodesConnections();
-  setRandomBreakableNodes();
-  setRandomBreakerNodes();
+  const reset = async (scene, onProgress) => {
+    nodeNetwork.nodesArray.forEach((node) => {
+      scene.remove(node.getMesh());
+    });
+    nodeNetwork.nodesArray = [];
+    await initialize(scene, onProgress);
+  };
 
   return {
+    initialize,
     reset,
     addToScene,
     findValidNextMoves,

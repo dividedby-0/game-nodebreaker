@@ -53,6 +53,16 @@ const loadAssets = async () => {
 
 const initialize = async () => {
   viewManager.initialize();
+  const loadingEl = document.querySelector(".loading-text");
+  const spinFrames = ["|", "/", "-", "\\"];
+  let spinIdx = 0;
+  const spinner = setInterval(() => {
+    spinIdx = (spinIdx + 1) % spinFrames.length;
+    loadingEl.textContent = "Loading " + spinFrames[spinIdx];
+  }, 200);
+  await nodeNetwork.initialize(renderService.getScene());
+  clearInterval(spinner);
+  loadingEl.textContent = "Loading";
   await loadAssets();
   viewManager.switchToView("audioConsentView");
 
@@ -94,7 +104,6 @@ const startGame = async () => {
     const groundA = addGroundToScene(-30, randomGroundColor);
     const groundB = addGroundToScene(30, randomGroundColor);
     renderService.setGroundMeshes([groundA, groundB]);
-    nodeNetwork.addToScene(renderService.getScene());
     inputService.setupEventListeners(renderService.getRenderer().domElement);
 
     window.removeEventListener("resize", onWindowResize, false);
@@ -110,7 +119,27 @@ const startGame = async () => {
         visualService.cancelAllAnimations();
         lineManager.stop();
         lineManager.clearConnectionLines(renderService.getScene());
-        nodeNetwork.reset(renderService.getScene());
+        const progressBackdrop = document.querySelector(".reset-progress-backdrop");
+        const progressOverlay = document.querySelector(".reset-progress-overlay");
+        const resetMsg = progressOverlay.querySelector(".reset-message");
+        const resetProgressBar = progressOverlay.querySelector(".reset-progress");
+        gameState.setProcessing(true);
+        const frames = ["|", "/", "-", "\\"];
+        let spinnerIdx = 0;
+        resetMsg.textContent = "Generating new grid " + frames[spinnerIdx];
+        const spinner = setInterval(() => {
+          spinnerIdx = (spinnerIdx + 1) % frames.length;
+          resetMsg.textContent = "Generating new grid " + frames[spinnerIdx];
+        }, 200);
+        await Promise.all([
+          nodeNetwork.reset(renderService.getScene()),
+          new Promise((r) => setTimeout(r, 600)),
+        ]);
+        clearInterval(spinner);
+        resetMsg.textContent = "Hold to reset";
+        resetProgressBar.textContent = "[ ]";
+        progressBackdrop.style.display = "none";
+        progressOverlay.style.display = "none";
         renderService.resetCamera();
         inputService.setupEventListeners(
           renderService.getRenderer().domElement,
