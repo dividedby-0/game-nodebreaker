@@ -37,6 +37,7 @@ export const GameService = (
     const normal = gameState.getNormalNodes();
     const breakable = gameState.getBreakableNodes();
     const breaker = gameState.getBreakerNodes();
+    const bonus = gameState.getBonusNodes();
     const pad = (s, w) => String(s).padStart(w);
     const nc = (c) => `style='color:#${c.toString(16).padStart(6, "0")}'`;
     return `<br><span style='font-family: VT323, monospace; font-size: 0.85em; color: #00ff00; white-space: pre;'>NODES COLLECTED
@@ -44,6 +45,7 @@ export const GameService = (
 | Normal  | <span ${nc(gameConfig.colors.validNode)}>${pad(normal, 4)}</span> |
 | Red     | <span ${nc(gameConfig.colors.breakableNode)}>${pad(breakable, 4)}</span> |
 | Breaker | <span ${nc(gameConfig.colors.breakerNode)}>${pad(breaker, 4)}</span> |
+| Golden  | <span ${nc(gameConfig.colors.bonusNode)}>${pad(bonus, 4)}</span> |
 +---------+------+</span>`;
   };
 
@@ -66,6 +68,7 @@ export const GameService = (
     const candidate = nodeNetwork.getRandomUnvisitedNormalNode();
     if (!candidate) { return; }
     candidate.setBonus(true);
+    visualService.emitBonusSpawnEffect(candidate.getMesh().position, renderService.getScene());
     gameState.setBonusNode(candidate);
   };
 
@@ -274,6 +277,7 @@ export const GameService = (
     }
 
     if (isBonusClick) {
+      gameState.setBonusNodes(gameState.getBonusNodes() + 1);
       const bonusScore = gameConfig.game.scoreIncrement.bonus;
       gameState.setScore(gameState.getScore() + bonusScore);
       audioService.playBonusSound();

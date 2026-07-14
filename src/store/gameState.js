@@ -23,6 +23,7 @@ export const GameState = (eventBus) => {
     normalNodes: 0,
     breakableNodes: 0,
     breakerNodes: 0,
+    bonusNodes: 0,
     bonusNode: null,
     bonusTimerId: null,
   };
@@ -81,6 +82,8 @@ export const GameState = (eventBus) => {
     setBreakableNodes: (val) => { state.breakableNodes = val; },
     getBreakerNodes: () => state.breakerNodes,
     setBreakerNodes: (val) => { state.breakerNodes = val; },
+    getBonusNodes: () => state.bonusNodes,
+    setBonusNodes: (val) => { state.bonusNodes = val; },
     getBonusNode: () => state.bonusNode,
     setBonusNode: (node) => { state.bonusNode = node; },
     getBonusTimerId: () => state.bonusTimerId,
@@ -113,6 +116,7 @@ export const GameState = (eventBus) => {
       state.normalNodes = 0;
       state.breakableNodes = 0;
       state.breakerNodes = 0;
+      state.bonusNodes = 0;
       state.bonusNode = null;
       state.bonusTimerId = null;
     },

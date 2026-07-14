@@ -29,6 +29,9 @@ export const Node = (position) => {
     opacity: 1,
   });
 
+  let bonusGeometry = null;
+  let bonusEdgesGeometry = null;
+
   const createNodeMesh = () => {
     const nodeMesh = new THREE.Mesh(sharedGeometry, sharedMaterial.clone());
     nodeMesh.position.set(position.x, position.y, position.z);
@@ -49,9 +52,33 @@ export const Node = (position) => {
   };
 
   const nodeMesh = createNodeMesh();
+
+  const switchToBonusMesh = () => {
+    if (!bonusGeometry) {
+      bonusGeometry = new THREE.IcosahedronGeometry(0.65);
+      bonusEdgesGeometry = new THREE.EdgesGeometry(bonusGeometry);
+    }
+    nodeMesh.geometry = bonusGeometry;
+    nodeMesh.children.forEach((child) => {
+      if (child.isLineSegments) {
+        child.geometry = bonusEdgesGeometry;
+      }
+    });
+  };
+
+  const restoreNormalMesh = () => {
+    nodeMesh.geometry = sharedGeometry;
+    nodeMesh.children.forEach((child) => {
+      if (child.isLineSegments) {
+        child.geometry = sharedEdgesGeometry;
+      }
+    });
+  };
+
   let fadeRafId;
   let validPulseRafId;
   let bonusGlowRafId;
+  let bonusSpinRafId;
 
   const updateNodeAppearance = () => {
     if (node.isBonus) {
@@ -138,6 +165,22 @@ export const Node = (position) => {
     pulse();
   };
 
+  const stopBonusSpin = () => {
+    if (bonusSpinRafId !== undefined) {
+      cancelAnimationFrame(bonusSpinRafId);
+      bonusSpinRafId = undefined;
+    }
+  };
+
+  const startBonusSpin = () => {
+    stopBonusSpin();
+    const spin = () => {
+      nodeMesh.rotation.y += 0.005;
+      bonusSpinRafId = requestAnimationFrame(spin);
+    };
+    spin();
+  };
+
   return {
     getMesh: () => nodeMesh,
     getPosition: () => node.position,
@@ -182,6 +225,14 @@ export const Node = (position) => {
     },
     setBonus: (value) => {
       node.isBonus = value;
+      if (value) {
+        switchToBonusMesh();
+        startBonusSpin();
+      } else {
+        stopBonusSpin();
+        nodeMesh.rotation.set(0, 0, 0);
+        restoreNormalMesh();
+      }
       updateNodeAppearance();
       if (value) {
         startBonusGlow();

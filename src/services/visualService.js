@@ -239,6 +239,39 @@ export const VisualService = () => {
     }, 200);
   };
 
+  const emitBonusSpawnEffect = (position, scene) => {
+    const geo = new THREE.IcosahedronGeometry(0.65);
+    const edgesGeo = new THREE.EdgesGeometry(geo);
+    const mat = new THREE.LineBasicMaterial({
+      color: 0xffd700,
+      transparent: true,
+      opacity: 0.6,
+    });
+    const wireframe = new THREE.LineSegments(edgesGeo, mat);
+    wireframe.position.copy(position);
+    scene.add(wireframe);
+
+    const startTime = Date.now();
+    const duration = 600;
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const scale = 1 + progress * 2;
+      wireframe.scale.set(scale, scale, scale);
+      mat.opacity = 0.6 * (1 - progress);
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        scene.remove(wireframe);
+        geo.dispose();
+        edgesGeo.dispose();
+        mat.dispose();
+      }
+    };
+    animate();
+  };
+
   return {
     animateNodeRemoval,
     cancelAllAnimations,
@@ -246,5 +279,6 @@ export const VisualService = () => {
     emitParticles,
     unhideObstructingNodes,
     flashNodeInvalid,
+    emitBonusSpawnEffect,
   };
 };
