@@ -212,7 +212,9 @@ ${rows}+------+----------+---------+</span><br><br>` +
 
     if (!qualifies) {
       leaderboardService.submitScore({ name: "ANONYMOUS", ...scoreData });
-      showLeaderboardModal(() => eventBus.emit("message:show", { text: "Press &amp; hold R to restart", color: "#00ff00" }));
+      showLeaderboardModal(() => {
+        eventBus.emit("message:show", { text: "Press &amp; hold R to restart", color: "#00ff00" });
+      });
       return;
     }
 
@@ -239,7 +241,9 @@ ${rows}+------+----------+---------+</span><br><br>` +
       gameState.setProcessing(false);
       currentPlayerName = name;
       leaderboardService.submitScore({ name, ...scoreData });
-      showLeaderboardModal(() => eventBus.emit("message:show", { text: "Press &amp; hold R to restart", color: "#00ff00" }));
+      showLeaderboardModal(() => {
+        eventBus.emit("message:show", { text: "Press &amp; hold R to restart", color: "#00ff00" });
+      });
     };
 
     saveBtn.onclick = () => {

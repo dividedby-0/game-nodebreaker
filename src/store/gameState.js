@@ -18,6 +18,7 @@ export const GameState = (eventBus) => {
     gameAlreadyInitialized: false,
     isSoundEnabled: true,
     isPaused: false,
+    isGameOver: false,
     normalNodes: 0,
     breakableNodes: 0,
     breakerNodes: 0,
@@ -34,6 +35,7 @@ export const GameState = (eventBus) => {
     getGameAlreadyInitialized: () => state.gameAlreadyInitialized,
     isSoundEnabled: () => state.isSoundEnabled,
     isPaused: () => state.isPaused,
+    isGameOver: () => state.isGameOver,
 
     // State setters
     setGameAlreadyInitialized: () => {
@@ -61,6 +63,9 @@ export const GameState = (eventBus) => {
     },
     setPaused: (value) => {
       state.isPaused = value;
+    },
+    setGameOver: (value) => {
+      state.isGameOver = value;
     },
     getNormalNodes: () => state.normalNodes,
     setNormalNodes: (val) => { state.normalNodes = val; },
@@ -90,6 +95,7 @@ export const GameState = (eventBus) => {
       state.breakerCount = 0;
       state.isProcessing = false;
       state.isPaused = false;
+      state.isGameOver = false;
       state.hiddenNodes.clear();
       state.normalNodes = 0;
       state.breakableNodes = 0;

@@ -79,6 +79,7 @@ export const GameService = (
     });
 
     eventBus.emit("game:over", { reason, score, highScore: isNewHighScore ? score : highScore, isNewHighScore });
+    gameState.setGameOver(true);
   };
 
   const handleGameWin = (reason) => {
@@ -123,6 +124,7 @@ export const GameService = (
     });
 
     eventBus.emit("game:win", { reason, score, highScore: isNewHighScore ? score : highScore, isNewHighScore });
+    gameState.setGameOver(true);
   };
 
   eventBus.on("camera:focused", ({ node, camera, scene }) => {
@@ -180,7 +182,7 @@ export const GameService = (
   // Event methods
 
   const handleNodeClick = (clickedNode) => {
-    if (gameState.isProcessing()) { return; }
+    if (gameState.isProcessing() || gameState.isGameOver()) { return; }
 
     if (!isValidMove(clickedNode)) {
       visualService.flashNodeInvalid(clickedNode);
