@@ -25,9 +25,9 @@ export const LeaderboardService = () => {
   };
 
   const submitScore = async ({ name, score, normalNodes, breakableNodes, breakerNodes }) => {
-    if (!ready) { return; }
+    if (!ready) { return null; }
     try {
-      await addDoc(collection(db, "scores"), {
+      const docRef = await addDoc(collection(db, "scores"), {
         name,
         score,
         normalNodes,
@@ -35,8 +35,9 @@ export const LeaderboardService = () => {
         breakerNodes,
         timestamp: Date.now(),
       });
+      return docRef.id;
     } catch {
-      // fail silently
+      return null;
     }
   };
 
@@ -53,6 +54,7 @@ export const LeaderboardService = () => {
       snapshot.forEach((doc) => {
         const data = doc.data();
         entries.push({
+          id: doc.id,
           name: data.name || "ANONYMOUS",
           score: data.score,
           normalNodes: data.normalNodes,

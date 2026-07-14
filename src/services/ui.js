@@ -1,7 +1,7 @@
 import { GameConfig } from "../config/gameConfig.js";
 
 export const UIService = (eventBus, gameState, renderService, audioService, leaderboardService) => {
-  let currentPlayerName = null;
+  let currentEntryId = null;
 
   const hexToRgba = (hex, alpha) => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -163,12 +163,21 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
     }
   });
 
-  const showLeaderboardModal = async (onDismiss) => {
+  const showLeaderboardModal = async (onDismiss, newEntry) => {
     const entries = await leaderboardService.getLeaderboard();
     if (entries === null) {
       toggleModal(true, `<span style='color: #00ff00;'>Leaderboard unavailable at this moment.<br><br>(Tap to dismiss)</span>`, { onDismiss });
       return;
     }
+
+    if (newEntry) {
+      const filtered = entries.filter(e => e.id !== newEntry.id);
+      filtered.push(newEntry);
+      filtered.sort((a, b) => b.score - a.score);
+      entries.length = 0;
+      entries.push(...filtered.slice(0, 10));
+    }
+
     if (entries.length === 0) {
       toggleModal(true, `<span style='color: #00ff00;'>No scores yet.<br><br>(Tap to dismiss)</span>`, { onDismiss });
       return;
@@ -179,23 +188,44 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
     let rows = "";
     entries.forEach((e, i) => {
       const rank = i + 1;
-      const isYou = e.name === currentPlayerName;
+      const isYou = e.id === currentEntryId;
       const nameCell = isYou
         ? `<span style='color: #ffff00'>${padName(e.name, 8)}</span>`
         : padName(e.name, 8);
       rows += `| ${pad(rank, 4)} | ${nameCell} | ${pad(e.score, 7)} |\n`;
     });
-    currentPlayerName = null;
+    currentEntryId = null;
+
+    let spinnerInterval = null;
+    const wrappedDismiss = () => {
+      if (spinnerInterval) {
+        clearInterval(spinnerInterval);
+        spinnerInterval = null;
+      }
+      onDismiss?.();
+    };
 
     toggleModal(true,
-      `<span style='font-family: VT323, monospace; font-size: 1em; color: #00ff00; white-space: pre;'>LEADERBOARD
+      `<span style='font-family: VT323, monospace; font-size: 1em; color: #00ff00; white-space: pre;'><span id="lb-spinner-l">|</span> LEADERBOARD <span id="lb-spinner-r">|</span>
 +------+----------+---------+
 | Rank | Name     | Score   |
 +------+----------+---------+
 ${rows}+------+----------+---------+</span><br><br>` +
       `<span style='color: rgba(0, 255, 0, 0.6); font-size: 0.8em;'>(Tap to dismiss)</span>`,
-      { onDismiss },
+      { onDismiss: wrappedDismiss },
     );
+
+    const spinnerL = document.getElementById("lb-spinner-l");
+    const spinnerR = document.getElementById("lb-spinner-r");
+    if (spinnerL && spinnerR) {
+      const frames = ["|", "/", "-", "\\"];
+      let i = 0;
+      spinnerInterval = setInterval(() => {
+        i = (i + 1) % frames.length;
+        spinnerL.textContent = frames[i];
+        spinnerR.textContent = frames[i];
+      }, 200);
+    }
   };
 
   eventBus.on("leaderboardBtn:initialize", () => {
@@ -216,10 +246,10 @@ ${rows}+------+----------+---------+</span><br><br>` +
     const qualifies = entries === null || entries.length < 10 || scoreData.score > entries[entries.length - 1].score;
 
     if (!qualifies) {
-      leaderboardService.submitScore({ name: "ANONYMOUS", ...scoreData });
+      const docId = await leaderboardService.submitScore({ name: "ANON", ...scoreData });
       showLeaderboardModal(() => {
         eventBus.emit("message:show", { text: "Press &amp; hold R to restart", color: "#00ff00" });
-      });
+      }, docId ? { id: docId, name: "ANON", ...scoreData, timestamp: Date.now() } : null);
       return;
     }
 
@@ -240,15 +270,21 @@ ${rows}+------+----------+---------+</span><br><br>` +
     buttonsToDisable.forEach((b) => b?.classList.add("disabled-element"));
     setTimeout(() => input.focus(), 100);
 
-    const submit = (name) => {
+    const submit = async (name) => {
       overlay.classList.remove("active");
       buttonsToDisable.forEach((b) => b?.classList.remove("disabled-element"));
       gameState.setProcessing(false);
-      currentPlayerName = name;
-      leaderboardService.submitScore({ name, ...scoreData });
+      let docId = null;
+      try {
+        docId = await leaderboardService.submitScore({ name, ...scoreData });
+      } catch {
+        // write failed, proceed anyway
+      }
+      currentEntryId = docId;
+      const entry = docId ? { id: docId, name, ...scoreData, timestamp: Date.now() } : null;
       showLeaderboardModal(() => {
         eventBus.emit("message:show", { text: "Press &amp; hold R to restart", color: "#00ff00" });
-      });
+      }, entry);
     };
 
     saveBtn.onclick = () => {
@@ -257,7 +293,7 @@ ${rows}+------+----------+---------+</span><br><br>` +
     };
 
     skipBtn.onclick = () => {
-      submit("ANONYMOUS");
+      submit("ANON");
     };
 
     input.onkeydown = (e) => {
