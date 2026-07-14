@@ -31,6 +31,7 @@ NOTE: Netlify puts dormient sites to sleep after a certain period of inactivity,
 - **Three.js** - For 3D graphics rendering + glitch, scanlines postprocessing effects
 - **OrbitControls** - Camera control system allowing orbital movement
 - **Google Fonts** - Typography
+- **Firebase Firestore** - Global leaderboard storage
 - The entire game logic/architecture is developed using vanilla JavaScript
 
 ## 🎯 Technical Features
@@ -42,10 +43,10 @@ NOTE: Netlify puts dormient sites to sleep after a certain period of inactivity,
 - Strategic random placement of breakable nodes and breaker power-ups maintains game challenge
 - Interactive 3D environment with orbital camera controls
 - Optimized for both desktop and mobile devices
-- The game keeps track of your high score in your browser's local storage
+- The game keeps track of your high score in your browser's local storage and features a global leaderboard powered by Firebase Firestore
 
 ## 💡 Inspiration
-Inspired by all those hacking minigames found in videogames such as DeusEx, Cyberpunk, Watch Dogs, System Shock, etc.
+Inspired by all those "hacking" minigames found in videogames such as DeusEx, System Shock, etc.
 
 ## ⚡ System Requirements
 
