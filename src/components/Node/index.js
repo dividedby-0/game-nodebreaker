@@ -52,16 +52,18 @@ export const Node = (position) => {
   let validPulseRafId;
 
   const updateNodeAppearance = () => {
-    if (node.isBreakable) {
-      nodeMesh.material.color.setHex(GameConfig.colors.breakableNode);
-    } else if (node.isSelected && node.isBreaker) {
-      nodeMesh.material.color.setHex(GameConfig.colors.breakerNode);
-    } else if (node.isSelected) {
+    if (node.isSelected) {
       fadeToColor(GameConfig.colors.validNode);
-    } else if (node.isValid && node.isBreaker) {
-      nodeMesh.material.color.setHex(GameConfig.colors.breakerNode);
     } else if (node.isValid) {
-      fadeToColor(GameConfig.colors.validNode);
+      const typeColor = node.isBreakable ? GameConfig.colors.breakableNode
+                     : node.isBreaker ? GameConfig.colors.breakerNode
+                     : GameConfig.colors.normalNode;
+      const blended = new THREE.Color(typeColor).lerp(
+        new THREE.Color(GameConfig.colors.validNode), 0.3,
+      );
+      nodeMesh.material.color.setHex(blended.getHex());
+    } else if (node.isBreakable) {
+      nodeMesh.material.color.setHex(GameConfig.colors.breakableNode);
     } else if (node.isBreaker) {
       nodeMesh.material.color.setHex(GameConfig.colors.breakerNode);
     } else {
@@ -101,10 +103,10 @@ export const Node = (position) => {
 
   const startValidPulse = () => {
     stopValidPulse();
-    const baseColor = new THREE.Color(GameConfig.colors.validNode);
+    const baseColor = nodeMesh.material.color.clone();
 
     const pulse = () => {
-      const t = Math.sin(Date.now() / 400) * 0.06 + 0.94;
+      const t = Math.sin(Date.now() / 400) * 0.12 + 0.88;
       nodeMesh.material.color.copy(baseColor);
       nodeMesh.material.color.multiplyScalar(t);
       validPulseRafId = requestAnimationFrame(pulse);
@@ -134,8 +136,9 @@ export const Node = (position) => {
     },
     setValid: (value) => {
       node.isValid = value;
+      cancelAnimationFrame(fadeRafId);
       updateNodeAppearance();
-      if (value && !node.isBreaker) {
+      if (value) {
         startValidPulse();
       } else {
         stopValidPulse();
