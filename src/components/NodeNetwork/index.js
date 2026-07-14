@@ -181,6 +181,14 @@ export const NodeNetwork = () => {
 
   const getNodesArray = () => nodeNetwork.nodesArray;
 
+  const getRandomUnvisitedNormalNode = () => {
+    const unvisited = nodeNetwork.nodesArray.filter(
+      (node) => !node.isVisited() && !node.isBreakable() && !node.isBreaker() && !node.isBonus(),
+    );
+    if (unvisited.length === 0) { return null; }
+    return unvisited[Math.floor(Math.random() * unvisited.length)];
+  };
+
   const animateNodesToPosition = () => {
     const nodes = nodeNetwork.nodesArray.map((node) => ({
       node,
@@ -251,6 +259,7 @@ export const NodeNetwork = () => {
     addToScene,
     findValidNextMoves,
     getNodesArray,
+    getRandomUnvisitedNormalNode,
     animateNodesToPosition,
   };
 };

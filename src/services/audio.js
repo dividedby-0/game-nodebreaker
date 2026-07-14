@@ -171,6 +171,23 @@ export const AudioService = (eventBus, gameState) => {
     } catch (e) { /* audio not available */ }
   };
 
+  const playBonusSound = () => {
+    if (!gameState.isSoundEnabled()) { return; }
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } catch (e) { /* audio not available */ }
+  };
+
   const playSoundEffect = (effectName) => {
     if (!gameState.isSoundEnabled()) { return; }
     const soundEffect = audioState.soundEffects.get(effectName);
@@ -210,5 +227,6 @@ export const AudioService = (eventBus, gameState) => {
     toggleSound,
     playSoundEffect,
     playInvalidSound,
+    playBonusSound,
   };
 };

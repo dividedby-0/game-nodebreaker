@@ -9,6 +9,8 @@ export const GameService = (
   audioService,
 ) => {
   let pendingTraceCallback = null;
+  let bonusSpawnTimer = null;
+  let hasTriggeredFirstBonus = false;
 
   const initialize = async () => {
     gameState.setProcessing(true);
@@ -45,12 +47,40 @@ export const GameService = (
 +---------+------+</span>`;
   };
 
+  // Bonus node helpers
+
+  const clearBonusState = () => {
+    if (bonusSpawnTimer) {
+      clearTimeout(bonusSpawnTimer);
+      bonusSpawnTimer = null;
+    }
+    const current = gameState.getBonusNode();
+    if (current) {
+      current.setBonus(false);
+      gameState.setBonusNode(null);
+    }
+  };
+
+  const spawnBonusNode = () => {
+    clearBonusState();
+    const candidate = nodeNetwork.getRandomUnvisitedNormalNode();
+    if (!candidate) { return; }
+    candidate.setBonus(true);
+    gameState.setBonusNode(candidate);
+  };
+
+  const scheduleBonusSpawn = (delay) => {
+    clearBonusState();
+    bonusSpawnTimer = setTimeout(spawnBonusNode, delay);
+  };
+
   // Game-over / win (domain logic — former GameState concern)
 
   const handleGameOver = (reason) => {
     gameState.setProcessing(true);
     gameState.setTraced(false);
     pendingTraceCallback = null;
+    clearBonusState();
     eventBus.emit("trace:visuals:off");
 
     const score = gameState.getScore();
@@ -87,6 +117,7 @@ export const GameService = (
     gameState.setProcessing(true);
     gameState.setTraced(false);
     pendingTraceCallback = null;
+    clearBonusState();
     eventBus.emit("trace:visuals:off");
 
     const score = gameState.getScore();
@@ -155,6 +186,8 @@ export const GameService = (
 
   eventBus.on("game:reset", () => {
     pendingTraceCallback = null;
+    clearBonusState();
+    hasTriggeredFirstBonus = false;
     eventBus.emit("trace:visuals:off");
   });
 
@@ -186,6 +219,12 @@ export const GameService = (
   const handleNodeClick = (clickedNode) => {
     if (gameState.isProcessing() || gameState.isGameOver()) { return; }
 
+    let isBonusClick = false;
+    if (clickedNode.isBonus()) {
+      isBonusClick = true;
+      // Don't clear yet — keep isBonus true for isValidMove
+    }
+
     if (!isValidMove(clickedNode)) {
       visualService.flashNodeInvalid(clickedNode);
       audioService.playInvalidSound();
@@ -193,6 +232,18 @@ export const GameService = (
     }
 
     gameState.setProcessing(true);
+
+    // First node click — start initial bonus spawn timer
+    if (!hasTriggeredFirstBonus) {
+      hasTriggeredFirstBonus = true;
+      const { bonusInitialMinDelay, bonusInitialMaxDelay } = gameConfig.game.timing;
+      const delay = bonusInitialMinDelay + Math.random() * (bonusInitialMaxDelay - bonusInitialMinDelay);
+      scheduleBonusSpawn(delay);
+    }
+
+    if (isBonusClick) {
+      clearBonusState();
+    }
 
     const hiddenNodes = gameState.getHiddenNodes();
     hiddenNodes.forEach((node) => {
@@ -220,6 +271,16 @@ export const GameService = (
       handleBreakerNode(nodePosition);
     } else {
       handleNormalNode(nodePosition);
+    }
+
+    if (isBonusClick) {
+      const bonusScore = gameConfig.game.scoreIncrement.bonus;
+      gameState.setScore(gameState.getScore() + bonusScore);
+      audioService.playBonusSound();
+      emitScorePopup(nodePosition, bonusScore, "ffd700");
+      const { bonusRespawnMinDelay, bonusRespawnMaxDelay } = gameConfig.game.timing;
+      const delay = bonusRespawnMinDelay + Math.random() * (bonusRespawnMaxDelay - bonusRespawnMinDelay);
+      scheduleBonusSpawn(delay);
     }
 
     renderService.focusCamOnNode(clickedNode);

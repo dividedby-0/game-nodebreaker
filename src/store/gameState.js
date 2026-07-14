@@ -23,6 +23,8 @@ export const GameState = (eventBus) => {
     normalNodes: 0,
     breakableNodes: 0,
     breakerNodes: 0,
+    bonusNode: null,
+    bonusTimerId: null,
   };
 
   return {
@@ -79,6 +81,10 @@ export const GameState = (eventBus) => {
     setBreakableNodes: (val) => { state.breakableNodes = val; },
     getBreakerNodes: () => state.breakerNodes,
     setBreakerNodes: (val) => { state.breakerNodes = val; },
+    getBonusNode: () => state.bonusNode,
+    setBonusNode: (node) => { state.bonusNode = node; },
+    getBonusTimerId: () => state.bonusTimerId,
+    setBonusTimerId: (id) => { state.bonusTimerId = id; },
 
     // Node-related
     addHiddenNode: (node) => {
@@ -107,6 +113,8 @@ export const GameState = (eventBus) => {
       state.normalNodes = 0;
       state.breakableNodes = 0;
       state.breakerNodes = 0;
+      state.bonusNode = null;
+      state.bonusTimerId = null;
     },
 
     setHighScore: (score) => {

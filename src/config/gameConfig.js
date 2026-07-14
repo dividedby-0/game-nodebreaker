@@ -8,6 +8,7 @@ export const GameConfig = {
       normal: 5,
       breaker: 5,
       breakable: 10,
+      bonus: 30,
     },
     timing: {
       traceSpeed: 1000,
@@ -29,6 +30,10 @@ export const GameConfig = {
       shrinkInterval: 16,
       targetScale: 0.3,
       targetOpacity: 0.3,
+      bonusInitialMinDelay: 3000,
+      bonusInitialMaxDelay: 7000,
+      bonusRespawnMinDelay: 5000,
+      bonusRespawnMaxDelay: 10000,
     },
     camera: {
       defaultDistance: 10,
@@ -57,6 +62,7 @@ export const GameConfig = {
     normalConnection: 0x87cefa,
     traceConnection: 0xff0000,
     flashColor: 0xff0000,
+    bonusNode: 0xffd700,
     textColor: "#00ff00",
     caretColor: "#00ff00",
   },

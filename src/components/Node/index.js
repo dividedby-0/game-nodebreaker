@@ -11,6 +11,7 @@ export const Node = (position) => {
     isValid: false,
     isBreakable: false,
     isBreaker: false,
+    isBonus: false,
     connections: new Set(),
   };
 
@@ -50,9 +51,12 @@ export const Node = (position) => {
   const nodeMesh = createNodeMesh();
   let fadeRafId;
   let validPulseRafId;
+  let bonusGlowRafId;
 
   const updateNodeAppearance = () => {
-    if (node.isSelected) {
+    if (node.isBonus) {
+      nodeMesh.material.color.setHex(GameConfig.colors.bonusNode);
+    } else if (node.isSelected) {
       fadeToColor(GameConfig.colors.validNode);
     } else if (node.isValid) {
       const typeColor = node.isBreakable ? GameConfig.colors.breakableNode
@@ -101,6 +105,26 @@ export const Node = (position) => {
     }
   };
 
+  const stopBonusGlow = () => {
+    if (bonusGlowRafId !== undefined) {
+      cancelAnimationFrame(bonusGlowRafId);
+      bonusGlowRafId = undefined;
+    }
+  };
+
+  const startBonusGlow = () => {
+    stopBonusGlow();
+    const baseColor = new THREE.Color(GameConfig.colors.bonusNode);
+
+    const glow = () => {
+      const t = Math.sin(Date.now() / 300) * 0.15 + 0.85;
+      nodeMesh.material.color.copy(baseColor);
+      nodeMesh.material.color.multiplyScalar(t);
+      bonusGlowRafId = requestAnimationFrame(glow);
+    };
+    glow();
+  };
+
   const startValidPulse = () => {
     stopValidPulse();
     const baseColor = nodeMesh.material.color.clone();
@@ -139,9 +163,13 @@ export const Node = (position) => {
       cancelAnimationFrame(fadeRafId);
       updateNodeAppearance();
       if (value) {
+        stopBonusGlow();
         startValidPulse();
       } else {
         stopValidPulse();
+        if (node.isBonus) {
+          startBonusGlow();
+        }
       }
     },
     setBreakable: (value) => {
@@ -152,6 +180,16 @@ export const Node = (position) => {
       node.isBreaker = value;
       updateNodeAppearance();
     },
+    setBonus: (value) => {
+      node.isBonus = value;
+      updateNodeAppearance();
+      if (value) {
+        startBonusGlow();
+      } else {
+        stopBonusGlow();
+      }
+    },
+    isBonus: () => node.isBonus,
     setVisited: (value) => {
       node.isVisited = value;
     },
