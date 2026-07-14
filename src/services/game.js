@@ -250,11 +250,6 @@ ${timeRow}+---------+-------+--------+
   });
 
   eventBus.on("game:start", () => {
-    if (hasTriggeredFirstBonus) { return; }
-    hasTriggeredFirstBonus = true;
-    const { bonusInitialMinDelay, bonusInitialMaxDelay } = gameConfig.game.timing;
-    const delay = bonusInitialMinDelay + Math.random() * (bonusInitialMaxDelay - bonusInitialMinDelay);
-    scheduleBonusSpawn(delay);
     const timerIntervalMs = gameConfig.game.timer.displayInterval;
     timerInterval = setInterval(() => {
       const elapsed = gameState.getElapsedTime() + timerIntervalMs;
@@ -305,6 +300,14 @@ ${timeRow}+---------+-------+--------+
     }
 
     gameState.setProcessing(true);
+
+    // First node click — start bonus spawn timer
+    if (!hasTriggeredFirstBonus) {
+      hasTriggeredFirstBonus = true;
+      const { bonusInitialMinDelay, bonusInitialMaxDelay } = gameConfig.game.timing;
+      const delay = bonusInitialMinDelay + Math.random() * (bonusInitialMaxDelay - bonusInitialMinDelay);
+      scheduleBonusSpawn(delay);
+    }
 
     if (isBonusClick) {
       clearBonusState();
