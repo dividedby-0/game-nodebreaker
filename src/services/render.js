@@ -94,7 +94,7 @@ export const RenderService = (
       1000,
     ),
     renderer: new THREE.WebGLRenderer({
-      antialias: !isMobile,
+      antialias: true,
       powerPreference: isMobile ? "default" : "high-performance",
       precision: "mediump",
       alpha: !isMobile,
@@ -129,7 +129,7 @@ export const RenderService = (
     renderer.composer.addPass(renderer.glitchPass);
 
     renderer.composer.setPixelRatio(
-      isMobile ? Math.min(window.devicePixelRatio, 1.5) * 0.4 : window.devicePixelRatio * 0.5,
+      isMobile ? Math.min(window.devicePixelRatio, 1.5) * 0.55 : window.devicePixelRatio * 0.5,
     );
 
     // Event listeners
