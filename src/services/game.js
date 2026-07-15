@@ -110,7 +110,7 @@ ${timeRow}+---------+-------+--------+
     const elapsed = gameState.getElapsedTime();
     const elapsedSec = elapsed / 1000;
     const maxTime = gameConfig.game.timer.maxTime;
-    const mult = Math.max(0, Math.sqrt((maxTime - elapsedSec) / maxTime));
+    const mult = Math.sqrt(Math.max(0, (maxTime - elapsedSec) / maxTime));
     const timeBonus = Math.floor(gameState.getScore() * mult);
     gameState.setScore(gameState.getScore() + timeBonus);
 
@@ -158,7 +158,7 @@ ${timeRow}+---------+-------+--------+
     const elapsed = gameState.getElapsedTime();
     const elapsedSec = elapsed / 1000;
     const maxTime = gameConfig.game.timer.maxTime;
-    const mult = Math.max(0, Math.sqrt((maxTime - elapsedSec) / maxTime));
+    const mult = Math.sqrt(Math.max(0, (maxTime - elapsedSec) / maxTime));
     const timeBonus = Math.floor(gameState.getScore() * mult);
     gameState.setScore(gameState.getScore() + timeBonus);
 
