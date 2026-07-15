@@ -12,6 +12,7 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
 
   const htmlElements = {
     score: document.getElementById("score"),
+    best: document.getElementById("best"),
     breakers: document.getElementById("breakers"),
     message: document.getElementById("message"),
     combo: document.getElementById("combo"),
@@ -100,9 +101,10 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
 
   // Event listeners: initializers
 
-  eventBus.on("score:initialize", (score) =>
-    terminalTextAnimation("score", `Score: ${score}  Best: ${gameState.getHighScore()}`),
-  );
+  eventBus.on("score:initialize", async (score) => {
+    await terminalTextAnimation("score", `Score: ${score}`);
+    await terminalTextAnimation("best", `Best: ${gameState.getHighScore()}`);
+  });
 
   eventBus.on("breakers:initialize", (breakers) =>
     terminalTextAnimation("breakers", `Breakers: ${breakers}`),
@@ -129,6 +131,9 @@ export const UIService = (eventBus, gameState, renderService, audioService, lead
     if (comboElement) {
       comboElement.classList.remove("visible");
     }
+    htmlElements.score.innerHTML = "";
+    htmlElements.best.innerHTML = "";
+    htmlElements.breakers.innerHTML = "";
     const timerEl = htmlElements.timer;
     if (timerEl) {
       timerEl.textContent = "";
@@ -339,13 +344,14 @@ ${rows}+------+----------+---------+</span><br><br>` +
   // Event listeners: updaters
 
   eventBus.on("score:update", (score) => {
-    updateUiElement("score", `Score: ${score}  Best: ${gameState.getHighScore()}`);
-    const el = document.querySelector(".score-terminal-text");
-    if (el) {
-      el.classList.remove("pop");
-      el.offsetWidth;
-      el.classList.add("pop");
-      el.addEventListener("animationend", () => el.classList.remove("pop"), { once: true });
+    updateUiElement("score", `Score: ${score}`);
+    updateUiElement("best", `Best: ${gameState.getHighScore()}`);
+    const scoreEl = document.querySelector(".score-terminal-text");
+    if (scoreEl) {
+      scoreEl.classList.remove("pop");
+      scoreEl.offsetWidth;
+      scoreEl.classList.add("pop");
+      scoreEl.addEventListener("animationend", () => scoreEl.classList.remove("pop"), { once: true });
     }
   });
 
@@ -462,17 +468,13 @@ ${rows}+------+----------+---------+</span><br><br>` +
   });
 
   eventBus.on("trace:visuals:on", () => {
-    const container = document.getElementById("game-container");
-    if (container) {
-      container.classList.add("trace-active");
-    }
+    document.getElementById("game-container")?.classList.add("trace-active");
+    document.getElementById("traced-message")?.classList.add("active");
   });
 
   eventBus.on("trace:visuals:off", () => {
-    const container = document.getElementById("game-container");
-    if (container) {
-      container.classList.remove("trace-active");
-    }
+    document.getElementById("game-container")?.classList.remove("trace-active");
+    document.getElementById("traced-message")?.classList.remove("active");
   });
 
   // UI update methods

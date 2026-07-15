@@ -34,7 +34,9 @@ body {
 /*TEXT SCANLINES EFFECT*/
 
 .score-terminal-text,
-.breakers-terminal-text {
+.breakers-terminal-text,
+.best-terminal-text,
+.countdown-text {
   position: relative;
   overflow: hidden;
   text-shadow:
@@ -44,6 +46,8 @@ body {
 
 .score-terminal-text::after,
 .breakers-terminal-text::after,
+.best-terminal-text::after,
+.countdown-text::after,
 .reset-button::after,
 .music-button::after,
 .loading-text::after,
@@ -178,11 +182,16 @@ body {
 }
 
 #score-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  column-gap: 2ch;
+  align-items: baseline;
   position: absolute;
   top: 20px;
   left: 20px;
   font-family: "VT323", monospace;
-  font-size: clamp(3rem, 4vw, 3rem);
+  font-size: clamp(2rem, 3vw, 2.2rem);
   padding: 10px;
   opacity: 1;
 }
@@ -196,14 +205,28 @@ body {
   -ms-user-select: none;
 }
 
+#best {
+  letter-spacing: 1px;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
 /* Score-specific */
-.score-terminal-text {
+.score-terminal-text,
+.best-terminal-text {
   font-family: "VT323", monospace;
-  font-size: clamp(3rem, 4vw, 3rem);
+  font-size: clamp(2rem, 3vw, 2.2rem);
   color: var(--score-terminal-text-color);
   position: relative;
   display: inline-block;
   transition: text-shadow 0.15s ease;
+}
+
+.best-terminal-text {
+  color: var(--best-terminal-text-color);
 }
 
 @keyframes scorePop {
@@ -216,17 +239,23 @@ body {
   animation: scorePop 0.3s ease-out;
 }
 
-.breakers-terminal-text.pop {
+.breakers-terminal-text.pop,
+.best-terminal-text.pop {
   animation: scorePop 0.3s ease-out;
 }
 
-.score-terminal-caret {
+.score-terminal-caret,
+.best-terminal-caret {
   display: inline-block;
   background-color: var(--score-terminal-caret-color);
   color: #1a001a;
   position: relative;
   width: 0.6em;
   text-align: center;
+}
+
+.best-terminal-caret {
+  background-color: var(--best-terminal-caret-color);
 }
 
 /* Breakers-specific */
@@ -243,7 +272,7 @@ body {
 
 .breakers-terminal-text {
   font-family: "VT323", monospace;
-  font-size: clamp(3rem, 4vw, 3rem);
+  font-size: clamp(2rem, 3vw, 2.2rem);
   color: var(--breakers-terminal-text-color);
   position: relative;
   display: inline-block;
@@ -273,7 +302,32 @@ body {
   -webkit-user-select: none;
 }
 
+#traced-message {
+  display: none;
+  flex-direction: row;
+  gap: 0.5ch;
+  position: fixed;
+  width: 100vw;
+  bottom: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  justify-content: center;
+  align-items: baseline;
+  font-family: "VT323", monospace;
+  font-size: clamp(2.5rem, 4vw, 2.5rem);
+  color: #ff0000;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.7), 0 0 10px rgba(255, 0, 0, 0.5);
+  animation: fadeInOut 2s ease-in-out infinite;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#traced-message.active {
+  display: flex;
+}
+
 #timer {
+  flex-basis: 100%;
   font-family: "VT323", monospace;
   font-size: clamp(2rem, 3vw, 2.2rem);
   color: #00ff00;
@@ -285,16 +339,12 @@ body {
 }
 
 #combo {
-  position: fixed;
-  width: 100vw;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
+  flex-basis: 100%;
   font-family: "VT323", monospace;
   font-size: clamp(1.8rem, 3vw, 2.2rem);
   color: #ffd700;
   text-shadow: 0 0 5px rgba(255, 215, 0, 0.7), 0 0 10px rgba(255, 215, 0, 0.5);
-  text-align: center;
+  text-align: left;
   user-select: none;
   -webkit-user-select: none;
   opacity: 0;
@@ -955,6 +1005,29 @@ body {
     left: 10px;
     right: 10px;
     text-align: left;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  #timer {
+    flex-basis: auto;
+  }
+
+  #message {
+    font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+  }
+
+  .name-title {
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+  }
+
+  #traced-message {
+    flex-direction: column;
+    gap: 0;
+    font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+    align-items: center;
   }
 
   #breakers {
@@ -995,7 +1068,7 @@ body {
 /* Camera drag hint */
 .hint-text {
   position: fixed;
-  bottom: 20px;
+  bottom: 25%;
   left: 50%;
   transform: translateX(-50%);
   font-family: "VT323", monospace;
@@ -1014,7 +1087,8 @@ body {
 }
 
 @keyframes hintFadeOut {
-  0% { opacity: 0.7; }
+  0% { opacity: 0; }
+  15% { opacity: 0.7; }
   60% { opacity: 0.7; }
   100% { opacity: 0; }
 }

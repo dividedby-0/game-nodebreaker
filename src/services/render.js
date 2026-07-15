@@ -83,10 +83,12 @@ export const RenderService = (
     });
   };
 
+  const mobileFov = window.innerWidth < 768;
+
   const renderer = {
     scene: new THREE.Scene(),
     camera: new THREE.PerspectiveCamera(
-      75,
+      mobileFov ? 85 : 75,
       window.innerWidth / window.innerHeight,
       0.1,
       1000,
@@ -144,6 +146,7 @@ export const RenderService = (
 
   const onWindowResize = () => {
     renderer.camera.aspect = window.innerWidth / window.innerHeight;
+    renderer.camera.fov = window.innerWidth < 768 ? 85 : 75;
     renderer.camera.updateProjectionMatrix();
     renderer.renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.composer.setSize(window.innerWidth, window.innerHeight);

@@ -389,7 +389,6 @@ ${timeRow}+---------+-------+--------+
       gameState.setTraced(true);
       eventBus.emit("scene:flash");
       renderService.triggerGlitchEffect();
-      eventBus.emit("message:show", "RUN. YOU'RE BEING TRACED.");
       eventBus.emit("trace:visuals:on");
     }
     emitScorePopup(position, gameConfig.game.scoreIncrement.breakable * combo, "ff4500");
