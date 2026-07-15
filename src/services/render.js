@@ -34,7 +34,7 @@ export const RenderService = (
       for (let i = 0; i < 3; i++) {
         setTimeout(() => spawnDataStream(), i * 800);
       }
-      dataStreamTimer = setInterval(spawnDataStream, 2500);
+      dataStreamTimer = setInterval(spawnDataStream, isMobile ? 4000 : 2500);
     }
   };
 
@@ -83,21 +83,21 @@ export const RenderService = (
     });
   };
 
-  const mobileFov = window.innerWidth < 768;
+  const isMobile = window.innerWidth < 768;
 
   const renderer = {
     scene: new THREE.Scene(),
     camera: new THREE.PerspectiveCamera(
-      mobileFov ? 85 : 75,
+      isMobile ? 85 : 75,
       window.innerWidth / window.innerHeight,
       0.1,
       1000,
     ),
     renderer: new THREE.WebGLRenderer({
-      antialias: true,
-      powerPreference: "high-performance",
+      antialias: !isMobile,
+      powerPreference: isMobile ? "default" : "high-performance",
       precision: "mediump",
-      alpha: true,
+      alpha: !isMobile,
     }),
     controls: null,
     composer: null,
@@ -128,7 +128,9 @@ export const RenderService = (
     renderer.glitchPass.enabled = false;
     renderer.composer.addPass(renderer.glitchPass);
 
-    renderer.composer.setPixelRatio(window.devicePixelRatio * 0.5);
+    renderer.composer.setPixelRatio(
+      isMobile ? Math.min(window.devicePixelRatio, 1.5) * 0.4 : window.devicePixelRatio * 0.5,
+    );
 
     // Event listeners
     eventBus.on("scene:flash", () => {
